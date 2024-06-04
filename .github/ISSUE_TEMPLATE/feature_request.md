@@ -8,9 +8,9 @@ about: Suggest an idea for this project
 
 What new functionality do you want?
 
-# What is the value to the end user? (why is it a priority?) #
-
-How would the end user gain value from having this feature?
+# Who is the end user and what is the use case where this feature will be valuable?
+  
+Who is going to use this feature and under what circumstances?
 
 # How will we know we have a good solution? (acceptance criteria) #
 
