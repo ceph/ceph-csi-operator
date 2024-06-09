@@ -7,4 +7,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: ceph-csi-operator
 repo: github.com/ceph/ceph-csi-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: ceph.io
+  group: csi
+  kind: Driver
+  path: github.com/ceph/ceph-csi-operator/api/v1alpha1
+  version: v1alpha1
 version: "3"

@@ -1,8 +1,11 @@
----
+# permissions for end users to edit drivers.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: manager-role
+  labels:
+    app.kubernetes.io/name: ceph-csi-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: driver-editor-role
 rules:
 - apiGroups:
   - csi.ceph.io
@@ -19,14 +22,6 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - drivers/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - csi.ceph.io
-  resources:
   - drivers/status
   verbs:
   - get
-  - patch
-  - update
