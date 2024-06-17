@@ -1,0 +1,78 @@
+name: lint
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+      - release-*
+  pull_request:
+    branches:
+      - main
+      - release-*
+
+# cancel the in-progress workflow when PR is refreshed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  codespell:
+    name: codespell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: codespell
+        uses: codespell-project/actions-codespell@master
+        with:
+          skip: .git,*.sum
+          ignore_words_list:
+          check_filenames: true
+          check_hidden: true
+  misspell:
+    name: misspell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: misspell
+        uses: reviewdog/action-misspell@v1
+
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: v1.55
+
+          # Optional: golangci-lint command line arguments.
+          args: --config=.golangci.yml
+
+          # actions/setup-go already handles caching
+          skip-cache: true
+
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+         go-version-file: go.mod
+         check-latest: true
+      - name: govulncheck
+        uses: golang/govulncheck-action@v1
