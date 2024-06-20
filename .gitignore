@@ -30,3 +30,10 @@ go.work.sum
 *.orig
 *.patch
 *.rej
+
+# operator-sdk generated bundle files
+bundle.Dockerfile
+bundle
+
+# generated csv file.
+config/manifests/bases/*.clusterserviceversion.yaml

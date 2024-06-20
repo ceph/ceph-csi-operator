@@ -1,0 +1,43 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+    olm.skipRange: @SKIP_RANGE@
+  name: @PACKAGE_NAME@.v0.1.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  description: CEPH CSI operator deploys csi plugins.
+  displayName: CEPH CSI operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - storage
+  - csi
+  links:
+  - name: Github Repo
+    url: https://github.com/ceph/ceph-csi-operator
+  maintainers:
+  - email: csi-addons@redhat.com
+    name: Ceph CSI Community
+  maturity: alpha
+  provider:
+    name: Ceph CSI Community
+  version: 0.1.1
+  replaces: @REPLACES@
