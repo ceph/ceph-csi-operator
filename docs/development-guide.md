@@ -68,7 +68,7 @@ By contributing to this project you agree to the Developer Certificate of Origin
 
 Contributors sign-off that they adhere to these requirements by adding a Signed-off-by line to commit messages. For example:
 
-```
+```text
 This is my commit message
 
 More details on what this commit does
@@ -88,7 +88,7 @@ We use a [DCO bot](https://github.com/apps/dco) to enforce the DCO on each pull 
 
 We follow a rough convention for commit messages that is designed to answer two questions: what changed and why? The subject line should feature the what and the body of the commit should describe the why.
 
-```
+```text
 fix bug in configmap
 
 fix clusterID bug in the configmap where the clusterID is
@@ -99,7 +99,7 @@ Signed-off-by: Random J Developer <random@developer.example.org>
 
 The format can be described more formally as follows:
 
-```
+```text
 <subject of the change>
 <BLANK LINE>
 <paragraph(s) with reason/description>
@@ -111,19 +111,19 @@ The first line is the subject and should be no longer than 70 characters, the se
 
 Here is a short guide on how to work on a new patch. In this example, we will work on a patch called *hellopatch*:
 
-1. Make sure you Frok's main branch is up to date
+1. Make sure you Fork's main branch is up to date
 
-```console
-git fetch upstream main:main
-git checkout main
-git push
-```
+    ```console
+    git fetch upstream main:main
+    git checkout main
+    git push
+    ```
 
 2. Create a new branch for your patch:
 
-```console
-git checkout -b hellopatch
-```
+    ```console
+    git checkout -b hellopatch
+    ```
 
 Do your work here and commit.
 
