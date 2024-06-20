@@ -1,5 +1,16 @@
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMAGE_REGISTRY ?= quay.io
+REGISTRY_NAMESPACE ?= ocs-dev
+IMAGE_TAG ?= latest
+IMAGE_NAME ?= ceph-csi-operator
+BUNDLE_IMAGE_NAME ?= $(IMAGE_NAME)-bundle
+
+# IMG defines the image used for the operator.
+IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
+
+# BUNDLE_IMG defines the image used for the bundle.
+BUNDLE_IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(BUNDLE_IMAGE_NAME):$(IMAGE_TAG)
+
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.29.0
 
@@ -20,6 +31,25 @@ CONTAINER_TOOL ?= docker
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
+
+# the PACKAGE_NAME is included in the bundle/CSV and is used in catalogsources
+# for operators (like OperatorHub.io). Products that include the ceph-csi-operator
+# bundle should use a different PACKAGE_NAME to prevent conflicts.
+PACKAGE_NAME ?= ceph-csi-operator
+
+# Creating the New CatalogSource requires publishing CSVs that replace one Operator,
+# but can skip several. This can be accomplished using the skipRange annotation:
+SKIP_RANGE ?=
+
+# Each CSV has a replaces parameter that indicates which Operator it replaces.
+# This builds a graph of CSVs that can be queried by OLM, and updates can be
+# shared between channels. Channels can be thought of as entry points into
+# the graph of updates:
+REPLACES ?=
+
+# The default version of the bundle (CSV) can be found in
+# config/manifests/bases/ceph-csi-operator.clusterserviceversion.yaml
+BUNDLE_VERSION ?= 0.0.1
 
 .PHONY: all
 all: build
@@ -120,6 +150,23 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default > dist/install.yaml
 
+# generate the <package-name>.clusterserviceversion.yaml base
+gen-csv-base:
+	sed 's/@PACKAGE_NAME@/$(PACKAGE_NAME)/g;s/@SKIP_RANGE@/"$(SKIP_RANGE)"/g;s/@REPLACES@/"$(REPLACES)"/g' \
+	< config/manifests/bases/clusterserviceversion.yaml.in > config/manifests/bases/$(PACKAGE_NAME).clusterserviceversion.yaml
+
+.PHONY: bundle
+bundle: kustomize operator-sdk manifests gen-csv-base
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle --manifests --metadata --package $(PACKAGE_NAME) --version $(BUNDLE_VERSION)
+
+.PHONY: bundle-build
+bundle-build: bundle ## Build the bundle image.
+	$(CONTAINER_TOOL) build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+.PHONY: bundle-push
+bundle-push: ## Push bundle image with the manager.
+	$(CONTAINER_TOOL) push $(BUNDLE_IMG)
+
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -156,12 +203,14 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize-$(KUSTOMIZE_VERSION)
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen-$(CONTROLLER_TOOLS_VERSION)
 ENVTEST ?= $(LOCALBIN)/setup-envtest-$(ENVTEST_VERSION)
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
+OPERATOR_SDK ?= $(LOCALBIN)/operator-sdk-$(OPERATOR_SDK_VERSION)
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.3.0
 CONTROLLER_TOOLS_VERSION ?= v0.14.0
 ENVTEST_VERSION ?= release-0.17
 GOLANGCI_LINT_VERSION ?= v1.57.2
+OPERATOR_SDK_VERSION ?= 1.34.1
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
@@ -182,6 +231,16 @@ $(ENVTEST): $(LOCALBIN)
 golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,${GOLANGCI_LINT_VERSION})
+
+.PHONY: operator-sdk
+operator-sdk: ## Download operator-sdk locally.
+	@test -f $(OPERATOR_SDK) && echo "$(OPERATOR_SDK) already exists. Skipping download." && exit 0 ;\
+	echo "Downloading $(OPERATOR_SDK)" ;\
+        set -e ;\
+        mkdir -p $(dir $(OPERATOR_SDK)) ;\
+        OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
+        curl -sSLo $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/v${OPERATOR_SDK_VERSION}/operator-sdk_$${OS}_$${ARCH} ;\
+        chmod +x $(OPERATOR_SDK)
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary (ideally with version)

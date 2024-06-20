@@ -30,3 +30,6 @@ go.work.sum
 *.orig
 *.patch
 *.rej
+
+# generated csv file.
+config/manifests/bases/*.clusterserviceversion.yaml
