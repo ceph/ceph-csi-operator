@@ -1,0 +1,16 @@
+MD010: false # Hard tabs
+MD012: false # Multiple consecutive blank lines
+MD013: false # Line length
+MD019: false # Multiple spaces after hash on atx style heading
+MD021: false # Multiple spaces inside hashes on closed atx style heading
+MD022: false # Headings should be surrounded by blank lines
+MD024: false # Multiple headings with the same content
+MD025: false # Multiple top-level headings in the same document
+MD027: false # Multiple spaces after blockquote symbol
+MD030: false # Spaces after list markers
+MD031: false # Fenced code blocks should be surrounded by blank lines
+MD032: false # Lists should be surrounded by blank lines
+MD041: false # First line in a file should be a top-level heading
+MD043: false # Required heading structure
+MD045: false # Images should have alternate text (alt text)
+MD053: false # Link and image reference definitions should be needed
