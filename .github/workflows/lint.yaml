@@ -76,3 +76,11 @@ jobs:
          check-latest: true
       - name: govulncheck
         uses: golang/govulncheck-action@v1
+
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: DavidAnson/markdownlint-cli2-action@v16
+      with:
+        globs: '**/*.md'
