@@ -34,7 +34,7 @@ jobs:
       - name: codespell
         uses: codespell-project/actions-codespell@master
         with:
-          skip: .git,*.sum,vendor
+          skip: .git,*.sum,vendor,config
           ignore_words_list: AfterAll
           check_filenames: true
           check_hidden: true
