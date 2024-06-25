@@ -70,7 +70,7 @@ for CSI drivers. This CRD is a namespace-scoped CRD and a single CR named
 ceph-csi-operator-config can be created by an admin inside the operator's
 namespace.
 
-The configurations are catagorized into 2 different types
+The configurations are categorized into 2 different types
 
 - Operator configurations
 - Default configuration overwrites applied to all Ceph CSI drivers

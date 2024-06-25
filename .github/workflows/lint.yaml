@@ -1,12 +1,16 @@
 name: lint
 on:
   push:
+    paths-ignore:
+      - 'vendor/*'
     tags:
       - v*
     branches:
       - main
       - release-*
   pull_request:
+    paths-ignore:
+      - 'vendor/*'
     branches:
       - main
       - release-*
@@ -30,8 +34,8 @@ jobs:
       - name: codespell
         uses: codespell-project/actions-codespell@master
         with:
-          skip: .git,*.sum
-          ignore_words_list:
+          skip: .git,*.sum,vendor
+          ignore_words_list: AfterAll
           check_filenames: true
           check_hidden: true
   misspell:
@@ -70,9 +74,11 @@ jobs:
     name: govulncheck
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-         go-version-file: go.mod
-         check-latest: true
+          go-version-file: go.mod
       - name: govulncheck
         uses: golang/govulncheck-action@v1
