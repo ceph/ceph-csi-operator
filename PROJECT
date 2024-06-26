@@ -17,4 +17,12 @@ resources:
   kind: Driver
   path: github.com/ceph/ceph-csi-operator/api/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: OperatorConfig
+  path: github.com/ceph/ceph-csi-operator/api/v1alpha1
+  version: v1alpha1
 version: "3"
