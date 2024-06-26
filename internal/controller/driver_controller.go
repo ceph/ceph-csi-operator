@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"reflect"
@@ -37,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	"github.com/ceph/ceph-csi-operator/utils"
 )
 
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete
@@ -140,6 +142,23 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
+	// Concurrently reconcile different aspects of the clusters actual state to meet
+	// the desired state defined on the driver object
+	errChan := utils.RunConcurrently(
+		r.upsertPluginDeamonSet,
+		r.upsertProvisionerDeployment,
+		r.upsertK8sCSIDriver,
+		r.upsertLivnessService,
+	)
+
+	// Check if any reconcilatin error where raised during the concurrent execution
+	// of the reconciliation steps.
+	errList := utils.ChannelToSlice(errChan)
+	if err := errors.Join(errList...); err != nil {
+		r.log.Error(err, "Reconciliation failed")
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -186,6 +205,22 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		maps.Copy(r.images, imageSetCM.Data)
 	}
 
+	return nil
+}
+
+func (r *driverReconcile) upsertPluginDeamonSet() error {
+	return nil
+}
+
+func (r *driverReconcile) upsertProvisionerDeployment() error {
+	return nil
+}
+
+func (r *driverReconcile) upsertK8sCSIDriver() error {
+	return nil
+}
+
+func (r *driverReconcile) upsertLivnessService() error {
 	return nil
 }
 
