@@ -56,3 +56,11 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - operatorconfigs
+  verbs:
+  - get
+  - list
+  - watch
