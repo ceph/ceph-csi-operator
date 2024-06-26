@@ -19,11 +19,13 @@ package controller
 import (
 	"context"
 	"fmt"
+	"maps"
 	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -41,6 +43,7 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list
 
 // A regexp used to parse driver's prefix and type from the full name
 var nameRegExp, _ = regexp.Compile(`^(.*)\.(rbd|cephfs|nfs)\.csi\.ceph\.com$`)
@@ -60,6 +63,7 @@ type driverReconcile struct {
 	driver     csiv1a1.Driver
 	driverName string
 	driverType string
+	images     map[string]string
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -148,14 +152,14 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	r.driverName = matches[1]
 	r.driverType = strings.ToLower(matches[2])
 
-    // Load operator configuration resource
-    opConfig := csiv1a1.OperatorConfig{}
-    opConfig.Name = operatorConfigName
-    opConfig.Namespace = operatorNamespace
-    if err := r.Get(r.ctx, client.ObjectKeyFromObject(&opConfig), &opConfig); client.IgnoreNotFound(err) != nil {
-        r.log.Error(err, "Unable to load operatorconfig.csi.ceph.io", "name", client.ObjectKeyFromObject(&opConfig))
-        return err
-    }
+	// Load operator configuration resource
+	opConfig := csiv1a1.OperatorConfig{}
+	opConfig.Name = operatorConfigName
+	opConfig.Namespace = operatorNamespace
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&opConfig), &opConfig); client.IgnoreNotFound(err) != nil {
+		r.log.Error(err, "Unable to load operatorconfig.csi.ceph.io", "name", client.ObjectKeyFromObject(&opConfig))
+		return err
+	}
 
 	// Load the current desired state in the form of a ceph csi driver resource
 	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.driver), &r.driver); err != nil {
@@ -170,6 +174,19 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
 	}
 	mergeDriverSpecs(&r.driver.Spec, &driverDefaults)
+
+	r.images = maps.Clone(imageDefaults)
+	if r.driver.Spec.ImageSet != nil {
+		imageSetCM := corev1.ConfigMap{}
+		imageSetCM.Name = r.driver.Spec.ImageSet.Name
+		imageSetCM.Namespace = r.driver.Namespace
+		if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
+			r.log.Error(err, "Unable to load driver specified image set config map", "name", client.ObjectKeyFromObject(&imageSetCM))
+			return err
+		}
+
+		maps.Copy(r.images, imageSetCM.Data)
+	}
 
 	return nil
 }
