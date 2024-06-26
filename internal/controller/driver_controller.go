@@ -19,11 +19,13 @@ package controller
 import (
 	"context"
 	"fmt"
+	"maps"
 	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -61,6 +63,7 @@ type driverReconcile struct {
 	driver     csiv1a1.Driver
 	driverName string
 	driverType string
+	images     map[string]string
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -169,6 +172,19 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	r.driver.Spec = *r.driver.Spec.DeepCopy()
 	mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
 	mergeDriverSpecs(&r.driver.Spec, &driverDefaults)
+
+	r.images = maps.Clone(imageDefaults)
+	if r.driver.Spec.ImageSet != nil {
+		imageSetCM := corev1.ConfigMap{}
+		imageSetCM.Name = r.driver.Spec.ImageSet.Name
+		imageSetCM.Namespace = r.driver.Namespace
+		if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
+			r.log.Error(err, "Unable to load driver specified image set config map", "name", client.ObjectKeyFromObject(&imageSetCM))
+			return err
+		}
+
+		maps.Copy(r.images, imageSetCM.Data)
+	}
 
 	return nil
 }
