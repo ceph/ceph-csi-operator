@@ -18,14 +18,26 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"regexp"
+	"strings"
 
+	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 )
+
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
+
+// A regexp used to parse driver short name and driver type from the
+// driver's full name
+var nameRegExp, _ = regexp.Compile(`^(.*)\.(rbd|cephfs|nfs)\.csi\.ceph\.com$`)
 
 // DriverReconciler reconciles a Driver object
 type DriverReconciler struct {
@@ -33,30 +45,65 @@ type DriverReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
+// A local reconcile object tied to a single reconcile iteration
+type driverReconcile struct {
+	DriverReconciler
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Driver object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
-func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
-
-	// TODO(user): your logic here
-
-	return ctrl.Result{}, nil
+	ctx        context.Context
+	log        logr.Logger
+	driver     csiv1a1.Driver
+	driverName string
+	driverType string
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&csiv1alpha1.Driver{}).
+		For(&csiv1a1.Driver{}).
 		Complete(r)
+}
+
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
+func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	reconcileHandler := driverReconcile{}
+	reconcileHandler.DriverReconciler = *r
+	reconcileHandler.ctx = ctx
+	reconcileHandler.log = ctrllog.FromContext(ctx)
+	reconcileHandler.driver.Name = req.Name
+	reconcileHandler.driver.Namespace = req.Namespace
+
+	return reconcileHandler.reconcile()
+}
+
+func (r *driverReconcile) reconcile() (ctrl.Result, error) {
+	r.log.Info("Enter Reconcile", "req", client.ObjectKeyFromObject(&r.driver))
+
+	// Load the driver desired state based on driver resource, operator config resource and default values.
+	if err := r.LoadAndValidateDesiredState(); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *driverReconcile) LoadAndValidateDesiredState() error {
+	// Extract the driver sort name and driver type
+	matches := nameRegExp.FindStringSubmatch(r.driver.Name)
+	if len(matches) != 3 {
+		return fmt.Errorf("invalid driver name")
+	}
+	r.driverName = matches[1]
+	r.driverType = strings.ToLower(matches[2])
+
+	// Load the current desired state in the form of a ceph csi driver resource
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.driver), &r.driver); err != nil {
+		r.log.Error(err, "Unable to load driver.csi.ceph.io object", "name", client.ObjectKeyFromObject(&r.driver))
+		return client.IgnoreNotFound(err)
+	}
+
+	return nil
 }
