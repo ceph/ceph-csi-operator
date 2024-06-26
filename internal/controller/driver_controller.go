@@ -91,6 +91,15 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 }
 
 func (r *driverReconcile) LoadAndValidateDesiredState() error {
+	// Load operator configuration resource
+	opConfig := csiv1a1.OperatorConfig{}
+	opConfig.Name = operatorConfigName
+	opConfig.Namespace = operatorNamespace
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&opConfig), &opConfig); client.IgnoreNotFound(err) != nil {
+		r.log.Error(err, "Unable to load operatorconfig.csi.ceph.io", "name", client.ObjectKeyFromObject(&opConfig))
+		return err
+	}
+
 	// Extract the driver sort name and driver type
 	matches := nameRegExp.FindStringSubmatch(r.driver.Name)
 	if len(matches) != 3 {
@@ -105,5 +114,156 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		return client.IgnoreNotFound(err)
 	}
 
+	// Creating a copy of the driver spec, making sure any local changes will not effect the object residing
+	// in the client's cache
+	r.driver.Spec = *r.driver.Spec.DeepCopy()
+	mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
+	mergeDriverSpecs(&r.driver.Spec, &driverDefaults)
+
 	return nil
+}
+
+// mergeDriverSpecs will fill in any unset fields in dest with a copy of the same field in src
+func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
+	// Create a copy of the src, making sure that any value copied into dest is a not shared
+	// with the original src
+	src = src.DeepCopy()
+
+	if dest.Log == nil {
+		dest.Log = src.Log
+	}
+	if dest.ImageSet == nil {
+		dest.ImageSet = src.ImageSet
+	}
+	if dest.ClusterName == nil {
+		dest.ClusterName = src.ClusterName
+	}
+	if dest.EnableMetadata == nil {
+		dest.EnableMetadata = src.EnableMetadata
+	}
+	if dest.GRpcTimeout == 0 {
+		dest.GRpcTimeout = src.GRpcTimeout
+	}
+	if dest.SnapshotPolicy == "" {
+		dest.SnapshotPolicy = src.SnapshotPolicy
+	}
+	if dest.GenerateOMapInfo == nil {
+		dest.GenerateOMapInfo = src.GenerateOMapInfo
+	}
+	if dest.FsGroupPolicy == "" {
+		dest.FsGroupPolicy = src.FsGroupPolicy
+	}
+	if dest.Encryption == nil {
+		dest.Encryption = src.Encryption
+	}
+	if src.Plugin != nil {
+		if dest.Plugin == nil {
+			dest.Plugin = src.Plugin
+		} else {
+			dest, src := dest.Plugin, src.Plugin
+			if dest.PrioritylClassName == nil {
+				dest.PrioritylClassName = src.PrioritylClassName
+			}
+			if dest.Labels == nil {
+				dest.Labels = src.Labels
+			}
+			if dest.Annotations == nil {
+				dest.Annotations = src.Annotations
+			}
+			if dest.Affinity == nil {
+				dest.Affinity = src.Affinity
+			}
+			if dest.Tolerations == nil {
+				dest.Tolerations = src.Tolerations
+			}
+			if dest.UpdateStrategy == nil {
+				dest.UpdateStrategy = src.UpdateStrategy
+			}
+			if dest.Volumes == nil {
+				dest.Volumes = src.Volumes
+			}
+			if dest.KubeletDirPath == "" {
+				dest.KubeletDirPath = src.KubeletDirPath
+			}
+			if dest.EnableSeLinuxHostMount == nil {
+				dest.EnableSeLinuxHostMount = src.EnableSeLinuxHostMount
+			}
+			if dest.ImagePullPolicy == "" {
+				dest.ImagePullPolicy = src.ImagePullPolicy
+			}
+			if dest.Resources.Registrar == nil {
+				dest.Resources.Registrar = src.Resources.Registrar
+			}
+			if dest.Resources.Liveness == nil {
+				dest.Resources.Liveness = src.Resources.Liveness
+			}
+			if dest.Resources.Plugin == nil {
+				dest.Resources.Plugin = src.Resources.Plugin
+			}
+		}
+	}
+	if src.Provisioner != nil {
+		if dest.Provisioner == nil {
+			dest.Provisioner = src.Provisioner
+		} else {
+			dest, src := dest.Provisioner, src.Provisioner
+			if dest.PrioritylClassName == nil {
+				dest.PrioritylClassName = src.PrioritylClassName
+			}
+			if dest.Labels == nil {
+				dest.Labels = src.Labels
+			}
+			if dest.Annotations == nil {
+				dest.Annotations = src.Annotations
+			}
+			if dest.Affinity == nil {
+				dest.Affinity = src.Affinity
+			}
+			if dest.Tolerations == nil {
+				dest.Tolerations = src.Tolerations
+			}
+			if dest.Replicas == nil {
+				dest.Replicas = src.Replicas
+			}
+			if dest.Resources.Attacher == nil {
+				dest.Resources.Attacher = src.Resources.Attacher
+			}
+			if dest.Resources.Snapshotter == nil {
+				dest.Resources.Snapshotter = src.Resources.Snapshotter
+			}
+			if dest.Resources.Resizer == nil {
+				dest.Resources.Resizer = src.Resources.Resizer
+			}
+			if dest.Resources.Provisioner == nil {
+				dest.Resources.Provisioner = src.Resources.Provisioner
+			}
+			if dest.Resources.OMapGenerator == nil {
+				dest.Resources.OMapGenerator = src.Resources.OMapGenerator
+			}
+			if dest.Resources.Liveness == nil {
+				dest.Resources.Liveness = src.Resources.Liveness
+			}
+			if dest.Resources.Plugin == nil {
+				dest.Resources.Plugin = src.Resources.Plugin
+			}
+		}
+	}
+	if dest.AttachRequired == nil {
+		dest.AttachRequired = src.AttachRequired
+	}
+	if dest.Liveness == nil {
+		dest.Liveness = src.Liveness
+	}
+	if dest.LeaderElection == nil {
+		dest.LeaderElection = src.LeaderElection
+	}
+	if dest.DeployCsiAddons == nil {
+		dest.DeployCsiAddons = src.DeployCsiAddons
+	}
+	if dest.KernelMountOptions == nil {
+		dest.KernelMountOptions = src.KernelMountOptions
+	}
+	if src.CephFsClientType != "" {
+		dest.CephFsClientType = src.CephFsClientType
+	}
 }
