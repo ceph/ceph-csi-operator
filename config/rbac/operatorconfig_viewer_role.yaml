@@ -1,0 +1,23 @@
+# permissions for end users to view operatorconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: ceph-csi-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: operatorconfig-viewer-role
+rules:
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - operatorconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - operatorconfigs/status
+  verbs:
+  - get
