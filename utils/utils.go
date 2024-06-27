@@ -18,6 +18,8 @@ package utils
 
 import (
 	"sync"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func RunConcurrently(fnList ...func() error) chan error {
@@ -50,4 +52,18 @@ func ChannelToSlice[T any](c chan T) []T {
 		list = append(list, value)
 	}
 	return list
+}
+
+// AddAnnotation adds an annotation to a resource metadata, returns true if added else false
+func AddAnnotation(obj metav1.Object, key string, value string) bool {
+	annotations := obj.GetAnnotations()
+	if annotations == nil {
+		annotations = map[string]string{}
+		obj.SetAnnotations(annotations)
+	}
+	if oldValue, exist := annotations[key]; !exist || oldValue != value {
+		annotations[key] = value
+		return true
+	}
+	return false
 }

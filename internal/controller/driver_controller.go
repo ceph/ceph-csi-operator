@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -27,7 +28,9 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,6 +48,9 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
+//+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
+
+const ownerRefAnnotationKey = "csi.ceph.io/ownerref"
 
 // A regexp used to parse driver short name and driver type from the
 // driver's full name
@@ -95,8 +101,8 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		},
 	)
 
-	// Enqueue an event for all existing drivers, used to trigger a reconcile for all drivers
-	// whenever the driver default configuration changes
+	// Enqueue a reconcile request for all existing drivers, used to trigger a reconcile
+	// for all drivers  whenever the driver default configuration changes
 	enqueueAllDrivers := handler.EnqueueRequestsFromMapFunc(
 		func(ctx context.Context, obj client.Object) []reconcile.Request {
 			driverList := csiv1a1.DriverList{}
@@ -112,9 +118,29 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		},
 	)
 
+	// Enqueue a reconcile request based on an annotation marking a soft ownership
+	enqueueFromOwnerRefAnnotation := handler.EnqueueRequestsFromMapFunc(
+		func(_ context.Context, obj client.Object) []reconcile.Request {
+			ownerRef := obj.GetAnnotations()[ownerRefAnnotationKey]
+			if ownerRef == "" {
+				return nil
+			}
+
+			ownerObjKey := client.ObjectKey{}
+			if err := json.Unmarshal([]byte(ownerRef), &ownerObjKey); err != nil {
+				return nil
+			}
+
+			return []reconcile.Request{{
+				NamespacedName: ownerObjKey,
+			}}
+		},
+	)
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&csiv1a1.Driver{}).
 		Watches(&csiv1a1.OperatorConfig{}, enqueueAllDrivers, driverDefaultsPredicate).
+		Watches(&storagev1.CSIDriver{}, enqueueFromOwnerRefAnnotation).
 		Complete(r)
 }
 
@@ -145,10 +171,10 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 	// Concurrently reconcile different aspects of the clusters actual state to meet
 	// the desired state defined on the driver object
 	errChan := utils.RunConcurrently(
-		r.upsertPluginDeamonSet,
-		r.upsertProvisionerDeployment,
-		r.upsertK8sCSIDriver,
-		r.upsertLivnessService,
+		r.reconcileK8sCsiDriver,
+		r.reconcilePluginDeamonSet,
+		r.reconcileProvisionerDeployment,
+		r.reconcileLivnessService,
 	)
 
 	// Check if any reconcilatin error where raised during the concurrent execution
@@ -163,6 +189,28 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 }
 
 func (r *driverReconcile) LoadAndValidateDesiredState() error {
+	// Validate that the requested name for the CSI driver isn't already claimed by an existing CSI driver
+	// (Can happen if a driver with an identical name was created in a different namespace)
+	csiDriver := storagev1.CSIDriver{}
+	csiDriver.Name = r.driver.Name
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&csiDriver), &csiDriver); client.IgnoreNotFound(err) != nil {
+		r.log.Error(err, "Failed to query the existence of a CSI Driver")
+		return err
+	}
+	if csiDriver.UID != "" {
+		ownerObjKey := client.ObjectKey{}
+		if ownerRef := csiDriver.GetAnnotations()[ownerRefAnnotationKey]; ownerRef != "" {
+			if err := json.Unmarshal([]byte(ownerRef), &ownerObjKey); err != nil {
+				r.log.Error(err, "Failed to parse owner ref annotation on CSI Driver")
+				return err
+			}
+		}
+		if csiDriver.Namespace != r.driver.Namespace || csiDriver.Name != r.driver.Name {
+			err := fmt.Errorf("invalid driver name")
+			r.log.Error(err, "Desired name already in use by a different CSI Driver")
+		}
+	}
+
 	// Load operator configuration resource
 	opConfig := csiv1a1.OperatorConfig{}
 	opConfig.Name = operatorConfigName
@@ -208,19 +256,72 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	return nil
 }
 
-func (r *driverReconcile) upsertPluginDeamonSet() error {
+func (r *driverReconcile) reconcileK8sCsiDriver() error {
+	existingCsiDriver := &storagev1.CSIDriver{}
+	existingCsiDriver.Name = r.driver.Name
+
+	log := r.log.WithValues("driverName", existingCsiDriver.Name)
+	log.Info("Reconciling CSI Driver resource")
+
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(existingCsiDriver), existingCsiDriver); client.IgnoreNotFound(err) != nil {
+		log.Error(err, "Failed to load CSI Driver resource")
+		return err
+	}
+
+	desiredCsiDriver := existingCsiDriver.DeepCopy()
+	desiredCsiDriver.Spec = storagev1.CSIDriverSpec{
+		AttachRequired: r.driver.Spec.AttachRequired,
+		PodInfoOnMount: ptr.To(false),
+		FSGroupPolicy:  &r.driver.Spec.FsGroupPolicy,
+	}
+
+	ownerObjKey := client.ObjectKeyFromObject(&r.driver)
+	if bytes, err := json.Marshal(ownerObjKey); err != nil {
+		log.Error(
+			err,
+			"Failed to JSON marshal owner obj key for CSI driver resource",
+			"ownerObjKey",
+			ownerObjKey,
+		)
+		return err
+	} else {
+		utils.AddAnnotation(desiredCsiDriver, ownerRefAnnotationKey, string(bytes))
+	}
+
+	if existingCsiDriver.UID == "" || !reflect.DeepEqual(desiredCsiDriver, existingCsiDriver) {
+		if existingCsiDriver.UID != "" {
+			log.Info("CSI Driver resource exist but does not meet desired state")
+			if err := r.Delete(r.ctx, existingCsiDriver); err != nil {
+				log.Error(err, "Failed to delete existing CSI Driver resource")
+				return err
+			}
+			log.Info("CSI Driver resource deleted successfully")
+		} else {
+			log.Info("CSI Driver resource does not exist")
+		}
+
+		if err := r.Create(r.ctx, desiredCsiDriver); err != nil {
+			log.Error(err, "Failed to create a CSI Driver resource")
+			return err
+		}
+
+		log.Info("CSI Driver resource created successfully")
+	} else {
+		log.Info("CSI Driver resource already meets desired state")
+	}
+
 	return nil
 }
 
-func (r *driverReconcile) upsertProvisionerDeployment() error {
+func (r *driverReconcile) reconcilePluginDeamonSet() error {
 	return nil
 }
 
-func (r *driverReconcile) upsertK8sCSIDriver() error {
+func (r *driverReconcile) reconcileProvisionerDeployment() error {
 	return nil
 }
 
-func (r *driverReconcile) upsertLivnessService() error {
+func (r *driverReconcile) reconcileLivnessService() error {
 	return nil
 }
 
