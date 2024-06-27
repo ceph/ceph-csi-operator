@@ -18,14 +18,41 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"maps"
+	"reflect"
+	"regexp"
+	"strings"
 
+	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	"github.com/ceph/ceph-csi-operator/utils"
 )
+
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=update
+
+const ownerRefAnnotationKey = "csi.ceph.io/ownerref"
+
+// A regexp used to parse driver short name and driver type from the
+// driver's full name
+var nameRegExp, _ = regexp.Compile(`^(.*)\.(rbd|cephfs|nfs)\.csi\.ceph\.com$`)
 
 // DriverReconciler reconciles a Driver object
 type DriverReconciler struct {
@@ -33,30 +60,359 @@ type DriverReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
+// A local reconcile object tied to a single reconcile iteration
+type driverReconcile struct {
+	DriverReconciler
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Driver object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
-func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
-
-	// TODO(user): your logic here
-
-	return ctrl.Result{}, nil
+	ctx        context.Context
+	log        logr.Logger
+	driver     csiv1a1.Driver
+	driverName string
+	driverType string
+	images     map[string]string
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
+	enqueueFromOwnerRefAnnotation := handler.EnqueueRequestsFromMapFunc(
+		func(_ context.Context, obj client.Object) []reconcile.Request {
+			ownerRef := obj.GetAnnotations()[ownerRefAnnotationKey]
+			ownerObjKey := client.ObjectKey{}
+			if err := json.Unmarshal([]byte(ownerRef), &ownerObjKey); err != nil {
+				return nil
+			}
+
+			return []reconcile.Request{{
+				NamespacedName: types.NamespacedName{
+					Name:      ownerObjKey.Name,
+					Namespace: ownerObjKey.Namespace,
+				},
+			}}
+		},
+	)
+
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&csiv1alpha1.Driver{}).
+		For(&csiv1a1.Driver{}).
+		Watches(&storagev1.CSIDriver{}, enqueueFromOwnerRefAnnotation).
 		Complete(r)
+}
+
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
+func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	reconcileHandler := driverReconcile{}
+	reconcileHandler.DriverReconciler = *r
+	reconcileHandler.ctx = ctx
+	reconcileHandler.log = ctrllog.FromContext(ctx)
+	reconcileHandler.driver.Name = req.Name
+	reconcileHandler.driver.Namespace = req.Namespace
+
+	return reconcileHandler.reconcile()
+}
+
+func (r *driverReconcile) reconcile() (ctrl.Result, error) {
+	r.log.Info("Enter Reconcile", "req", client.ObjectKeyFromObject(&r.driver))
+
+	// Load the driver desired state based on driver resource, operator config resource and default values.
+	if err := r.LoadAndValidateDesiredState(); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Concurrently reconcile different aspects of the clusters actual state to meet
+	// the desired state defined on the driver object
+	errChan := utils.RunConcurrently(
+		r.reconcileK8sCsiDriver,
+		r.reconcilePluginDeamonSet,
+		r.reconcileProvisionerDeployment,
+		r.reconcileLivnessService,
+	)
+
+	// Check if any reconcilatin error where raised during the concurrent execution
+	// of the reconciliation steps.
+	errList := utils.ChannelToSlice(errChan)
+	if err := errors.Join(errList...); err != nil {
+		r.log.Error(err, "Reconciliation failed")
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *driverReconcile) LoadAndValidateDesiredState() error {
+	// Validate that the requested name for the CSI driver isn't already claimed by an existing CSI driver
+	// (Can happen if a driver with an identical name was created in a different namespace)
+	if err := r.Get(
+		r.ctx,
+		client.ObjectKey{Name: r.driver.Name},
+		&storagev1.CSIDriver{},
+	); client.IgnoreNotFound(err) != nil {
+		if k8sErrors.IsAlreadyExists(err) {
+			r.log.Error(err, "Desired name already in use by a different CSI Driver", "name", r.driver.Name)
+		} else {
+			r.log.Error(err, "Failed to query the existence of a CSI Driver", "name", r.driver.Name)
+		}
+		return err
+	}
+
+	// Load operator configuration resource
+	opConfig := csiv1a1.OperatorConfig{}
+	opConfig.Name = operatorConfigName
+	opConfig.Namespace = operatorNamespace
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&opConfig), &opConfig); client.IgnoreNotFound(err) != nil {
+		r.log.Error(err, "Unable to load operatorconfig.csi.ceph.io", "name", client.ObjectKeyFromObject(&opConfig))
+		return err
+	}
+
+	// Extract the driver sort name and driver type
+	matches := nameRegExp.FindStringSubmatch(r.driver.Name)
+	if len(matches) != 3 {
+		return fmt.Errorf("invalid driver name")
+	}
+	r.driverName = matches[1]
+	r.driverType = strings.ToLower(matches[2])
+
+	// Load the current desired state in the form of a ceph csi driver resource
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.driver), &r.driver); err != nil {
+		r.log.Error(err, "Unable to load driver.csi.ceph.io object", "name", client.ObjectKeyFromObject(&r.driver))
+		return client.IgnoreNotFound(err)
+	}
+
+	// Creating a copy of the driver spec, making sure any local changes will not effect the object residing
+	// in the client's cache
+	r.driver.Spec = *r.driver.Spec.DeepCopy()
+	mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
+	mergeDriverSpecs(&r.driver.Spec, &driverDefaults)
+
+	r.images = maps.Clone(imageDefaults)
+	if r.driver.Spec.ImageSet != nil {
+		imageSetCM := corev1.ConfigMap{}
+		imageSetCM.Name = r.driver.Spec.ImageSet.Name
+		imageSetCM.Namespace = r.driver.Namespace
+		if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
+			r.log.Error(err, "Unable to load driver specified image set config map", "name", client.ObjectKeyFromObject(&imageSetCM))
+			return err
+		}
+
+		maps.Copy(r.images, imageSetCM.Data)
+	}
+
+	return nil
+}
+
+func (r *driverReconcile) reconcileK8sCsiDriver() error {
+	existingCsiDriver := &storagev1.CSIDriver{}
+	existingCsiDriver.Name = r.driver.Name
+
+	log := r.log.WithValues("driverName", existingCsiDriver.Name)
+	log.Info("Reconciling CSI Driver resource")
+
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(existingCsiDriver), existingCsiDriver); client.IgnoreNotFound(err) != nil {
+		log.Error(err, "Failed to load CSI Driver resource")
+		return err
+	}
+
+	desiredCsiDriver := existingCsiDriver.DeepCopy()
+	desiredCsiDriver.Spec = storagev1.CSIDriverSpec{
+		AttachRequired: r.driver.Spec.AttachRequired,
+		PodInfoOnMount: ptr.To(false),
+		FSGroupPolicy:  &r.driver.Spec.FsGroupPolicy,
+	}
+
+	ownerObjKey := client.ObjectKeyFromObject(&r.driver)
+	if bytes, err := json.Marshal(ownerObjKey); err != nil {
+		log.Error(
+			err,
+			"Failed to JSON marshal owner obj key for CSI driver resource",
+			"ownerObjKey",
+			ownerObjKey,
+		)
+		return err
+	} else {
+		utils.AddAnnotation(desiredCsiDriver, ownerRefAnnotationKey, string(bytes))
+	}
+
+	if existingCsiDriver.UID == "" || !reflect.DeepEqual(desiredCsiDriver, existingCsiDriver) {
+		if existingCsiDriver.UID != "" {
+			log.Info("CSI Driver resource exist but does not meet desired state")
+			if err := r.Delete(r.ctx, existingCsiDriver); err != nil {
+				log.Error(err, "Failed to delete existing CSI Driver resource")
+				return err
+			}
+			log.Info("CSI Driver resource deleted successfully")
+		} else {
+			log.Info("CSI Driver resource does not exist")
+		}
+
+		if err := r.Create(r.ctx, desiredCsiDriver); err != nil {
+			log.Error(err, "Failed to create a CSI Driver resource")
+			return err
+		}
+
+		log.Info("CSI Driver resource created successfully")
+	} else {
+		log.Info("CSI Driver resource already meets desired state")
+	}
+
+	return nil
+}
+
+func (r *driverReconcile) reconcilePluginDeamonSet() error {
+	return nil
+}
+
+func (r *driverReconcile) reconcileProvisionerDeployment() error {
+	return nil
+}
+
+func (r *driverReconcile) reconcileLivnessService() error {
+	return nil
+}
+
+// mergeDriverSpecs will fill in any unset fields in dest with a copy of the same field in src
+func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
+	// Create a copy of the src, making sure that any value copied into dest is a not shared
+	// with the original src
+	src = src.DeepCopy()
+
+	if dest.Log == nil {
+		dest.Log = src.Log
+	}
+	if dest.ImageSet == nil {
+		dest.ImageSet = src.ImageSet
+	}
+	if dest.ClusterName == nil {
+		dest.ClusterName = src.ClusterName
+	}
+	if dest.EnableMetadata == nil {
+		dest.EnableMetadata = src.EnableMetadata
+	}
+	if dest.GRpcTimeout == 0 {
+		dest.GRpcTimeout = src.GRpcTimeout
+	}
+	if dest.SnapshotPolicy == "" {
+		dest.SnapshotPolicy = src.SnapshotPolicy
+	}
+	if dest.GenerateOMapInfo == nil {
+		dest.GenerateOMapInfo = src.GenerateOMapInfo
+	}
+	if dest.FsGroupPolicy == "" {
+		dest.FsGroupPolicy = src.FsGroupPolicy
+	}
+	if dest.Encryption == nil {
+		dest.Encryption = src.Encryption
+	}
+	if src.Plugin != nil {
+		if dest.Plugin == nil {
+			dest.Plugin = src.Plugin
+		} else {
+			dest, src := dest.Plugin, src.Plugin
+			if dest.PrioritylClassName == nil {
+				dest.PrioritylClassName = src.PrioritylClassName
+			}
+			if dest.Labels == nil {
+				dest.Labels = src.Labels
+			}
+			if dest.Annotations == nil {
+				dest.Annotations = src.Annotations
+			}
+			if dest.Affinity == nil {
+				dest.Affinity = src.Affinity
+			}
+			if dest.Tolerations == nil {
+				dest.Tolerations = src.Tolerations
+			}
+			if dest.UpdateStrategy == nil {
+				dest.UpdateStrategy = src.UpdateStrategy
+			}
+			if dest.Volumes == nil {
+				dest.Volumes = src.Volumes
+			}
+			if dest.KubeletDirPath == "" {
+				dest.KubeletDirPath = src.KubeletDirPath
+			}
+			if dest.EnableSeLinuxHostMount == nil {
+				dest.EnableSeLinuxHostMount = src.EnableSeLinuxHostMount
+			}
+			if dest.ImagePullPolicy == "" {
+				dest.ImagePullPolicy = src.ImagePullPolicy
+			}
+			if dest.Resources.Registrar == nil {
+				dest.Resources.Registrar = src.Resources.Registrar
+			}
+			if dest.Resources.Liveness == nil {
+				dest.Resources.Liveness = src.Resources.Liveness
+			}
+			if dest.Resources.Plugin == nil {
+				dest.Resources.Plugin = src.Resources.Plugin
+			}
+		}
+	}
+	if src.Provisioner != nil {
+		if dest.Provisioner == nil {
+			dest.Provisioner = src.Provisioner
+		} else {
+			dest, src := dest.Provisioner, src.Provisioner
+			if dest.PrioritylClassName == nil {
+				dest.PrioritylClassName = src.PrioritylClassName
+			}
+			if dest.Labels == nil {
+				dest.Labels = src.Labels
+			}
+			if dest.Annotations == nil {
+				dest.Annotations = src.Annotations
+			}
+			if dest.Affinity == nil {
+				dest.Affinity = src.Affinity
+			}
+			if dest.Tolerations == nil {
+				dest.Tolerations = src.Tolerations
+			}
+			if dest.Replicas == nil {
+				dest.Replicas = src.Replicas
+			}
+			if dest.Resources.Attacher == nil {
+				dest.Resources.Attacher = src.Resources.Attacher
+			}
+			if dest.Resources.Snapshotter == nil {
+				dest.Resources.Snapshotter = src.Resources.Snapshotter
+			}
+			if dest.Resources.Resizer == nil {
+				dest.Resources.Resizer = src.Resources.Resizer
+			}
+			if dest.Resources.Provisioner == nil {
+				dest.Resources.Provisioner = src.Resources.Provisioner
+			}
+			if dest.Resources.OMapGenerator == nil {
+				dest.Resources.OMapGenerator = src.Resources.OMapGenerator
+			}
+			if dest.Resources.Liveness == nil {
+				dest.Resources.Liveness = src.Resources.Liveness
+			}
+			if dest.Resources.Plugin == nil {
+				dest.Resources.Plugin = src.Resources.Plugin
+			}
+		}
+	}
+	if dest.AttachRequired == nil {
+		dest.AttachRequired = src.AttachRequired
+	}
+	if dest.Liveness == nil {
+		dest.Liveness = src.Liveness
+	}
+	if dest.LeaderElection == nil {
+		dest.LeaderElection = src.LeaderElection
+	}
+	if dest.DeployCsiAddons == nil {
+		dest.DeployCsiAddons = src.DeployCsiAddons
+	}
+	if dest.KernelMountOptions == nil {
+		dest.KernelMountOptions = src.KernelMountOptions
+	}
+	if src.CephFsClientType != "" {
+		dest.CephFsClientType = src.CephFsClientType
+	}
 }
