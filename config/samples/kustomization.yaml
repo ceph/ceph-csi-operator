@@ -2,4 +2,5 @@
 resources:
 - csi_v1alpha1_driver.yaml
 - csi_v1alpha1_operatorconfig.yaml
+- csi_v1alpha1_cephcluster.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
