@@ -1,13 +1,5 @@
 name: lint
 on:
-  push:
-    paths-ignore:
-      - 'vendor/*'
-    tags:
-      - v*
-    branches:
-      - main
-      - release-*
   pull_request:
     paths-ignore:
       - 'vendor/*'
@@ -30,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: codespell
         uses: codespell-project/actions-codespell@master
         with:
@@ -44,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: misspell
         uses: reviewdog/action-misspell@v1
 
@@ -54,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -76,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
