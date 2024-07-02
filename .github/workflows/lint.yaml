@@ -1,13 +1,5 @@
 name: lint
 on:
-  push:
-    paths-ignore:
-      - 'vendor/*'
-    tags:
-      - v*
-    branches:
-      - main
-      - release-*
   pull_request:
     paths-ignore:
       - 'vendor/*'
