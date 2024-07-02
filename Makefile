@@ -1,5 +1,11 @@
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMAGE_REGISTRY ?= quay.io
+REGISTRY_NAMESPACE ?= cephcsi
+IMAGE_TAG ?= latest
+IMAGE_NAME ?= ceph-csi-operator
+
+IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
+
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.29.0
 
