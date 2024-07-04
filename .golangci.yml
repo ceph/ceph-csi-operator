@@ -28,6 +28,7 @@ linters:
     - goimports
     - gosimple
     - govet
+    - gosec
     - ineffassign
     - lll
     - misspell
