@@ -16,43 +16,7 @@ limitations under the License.
 
 package utils
 
-import (
-	"sync"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-func RunConcurrently(fnList ...func() error) chan error {
-	errors := make(chan error)
-	wg := sync.WaitGroup{}
-
-	// Run all the functions concurrently
-	for _, fn := range fnList {
-		fn := fn
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			errors <- fn()
-		}()
-	}
-
-	// Close the output channel whenever all of the functions completed
-	go func() {
-		wg.Wait()
-		close(errors)
-	}()
-
-	// Read from the channel and aggregate into a slice
-	return errors
-}
-
-func ChannelToSlice[T any](c chan T) []T {
-	list := []T{}
-	for value := range c {
-		list = append(list, value)
-	}
-	return list
-}
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // AddAnnotation adds an annotation to a resource metadata, returns true if added else false
 func AddAnnotation(obj metav1.Object, key string, value string) bool {
