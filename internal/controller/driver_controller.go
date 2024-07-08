@@ -24,9 +24,11 @@ import (
 	"maps"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/go-logr/logr"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,6 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
@@ -42,7 +45,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
-	"github.com/ceph/ceph-csi-operator/utils"
+	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete
@@ -51,12 +54,26 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+
+type DriverType string
+
+const (
+	RbdDriverType    = "rbd"
+	CephFsDriverType = "cephfs"
+	NfsDriverType    = "nfs"
+)
 
 // Annotation name for ownerref information
 const ownerRefAnnotationKey = "csi.ceph.io/ownerref"
 
 // A regexp used to parse driver's prefix and type from the full name
-var nameRegExp, _ = regexp.Compile(`^(.*)\.(rbd|cephfs|nfs)\.csi\.ceph\.com$`)
+var nameRegExp, _ = regexp.Compile(fmt.Sprintf(
+	`^(?:(.+)\.)?(%s|%s|%s)\.csi\.ceph\.com$`,
+	RbdDriverType,
+	CephFsDriverType,
+	NfsDriverType,
+))
 
 // DriverReconciler reconciles a Driver object
 type DriverReconciler struct {
@@ -68,17 +85,21 @@ type DriverReconciler struct {
 type driverReconcile struct {
 	DriverReconciler
 
-	ctx        context.Context
-	log        logr.Logger
-	driver     csiv1a1.Driver
-	driverName string
-	driverType string
-	images     map[string]string
+	ctx          context.Context
+	log          logr.Logger
+	driver       csiv1a1.Driver
+	driverPrefix string
+	driverType   DriverType
+	images       map[string]string
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Define conditions for an OperatorConfig change that the require queuing of reconciliation
+	// Filter update events based on metadata.generation changes, will filter events
+	// for non-spec changes on most resource types.
+	genChangedPredicate := predicate.GenerationChangedPredicate{}
+
 	// request for drivers
 	driverDefaultsPredicate := predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
@@ -138,6 +159,10 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&csiv1a1.Driver{}).
+		Owns(
+			&appsv1.Deployment{},
+			builder.WithPredicates(genChangedPredicate),
+		).
 		Watches(
 			&csiv1a1.OperatorConfig{},
 			enqueueAllDrivers,
@@ -178,8 +203,8 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 	// the desired state defined on the driver object
 	errChan := utils.RunConcurrently(
 		r.reconcileK8sCsiDriver,
-		r.reconcilePluginDeamonSet,
-		r.reconcileProvisionerDeployment,
+		r.reconcileControllerPluginDeployment,
+		r.reconcileNodePluginDeamonSet,
 		r.reconcileLivnessService,
 	)
 
@@ -233,8 +258,8 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	if len(matches) != 3 {
 		return fmt.Errorf("invalid driver name")
 	}
-	r.driverName = matches[1]
-	r.driverType = strings.ToLower(matches[2])
+	r.driverPrefix = matches[1]
+	r.driverType = DriverType(strings.ToLower(matches[2]))
 
 	// Load operator configuration resource
 	opConfig := csiv1a1.OperatorConfig{}
@@ -253,11 +278,10 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 
 	// Creating a copy of the driver spec, making sure any local changes will not effect the object residing
 	// in the client's cache
-	r.driver.Spec = *r.driver.Spec.DeepCopy()
 	if opConfig.Spec.DriverSpecDefaults != nil {
+		r.driver.Spec = *r.driver.Spec.DeepCopy()
 		mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
 	}
-	mergeDriverSpecs(&r.driver.Spec, &driverDefaults)
 
 	r.images = maps.Clone(imageDefaults)
 	if r.driver.Spec.ImageSet != nil {
@@ -295,7 +319,7 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 		},
 	}
 
-	// There is a need to start with a copy of the existing driver sepc becuase the
+	// There is a need to start with a copy of the existing driver sepc because the
 	// spec is being edited by another party. That in turn fails the equality check
 	// unless we gureente that we started from the same point.
 	existingCsiDriver.Spec.DeepCopyInto(&desiredCsiDriver.Spec)
@@ -355,16 +379,378 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 	return nil
 }
 
-func (r *driverReconcile) reconcilePluginDeamonSet() error {
+func (r *driverReconcile) reconcileControllerPluginDeployment() error {
+	deploy := &appsv1.Deployment{}
+	deploy.Name = r.driver.Name
+	deploy.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("deploymentName", deploy.Name)
+	log.Info("Reconciling controller plugin deployment resource")
+
+	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
+		if err := ctrlutil.SetControllerReference(&r.driver, deploy, r.Scheme); err != nil {
+			log.Error(err, "Failed setting an owner reference on deployment")
+			return err
+		}
+
+		appName := fmt.Sprintf("%s-ctrlplugin", r.driver.Name)
+		appSelector := metav1.LabelSelector{
+			MatchLabels: map[string]string{"app": appName},
+		}
+
+		leaderElectionSpec := utils.FirstNonNil(r.driver.Spec.LeaderElection, &defaultLeaderElection)
+		pluginSpec := utils.FirstNonNil(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
+		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
+		grpcTimeout := utils.FirstNonZero(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
+		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
+		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
+
+		leaderElectionArgs := []string{
+			utils.LeaderElectionContainerArg,
+			utils.LeaderElectionNamespaceContainerArg(r.driver.Namespace),
+			utils.LeaderElectionLeaseDurationContainerArg(leaderElectionSpec.LeaseDuration),
+			utils.LeaderElectionRenewDeadlineContainerArg(leaderElectionSpec.RenewDeadline),
+			utils.LeaderElectionRetryPeriodContainerArg(leaderElectionSpec.RetryPeriod),
+		}
+
+		deploy.Spec = appsv1.DeploymentSpec{
+			Replicas: pluginSpec.Replicas,
+			Selector: &appSelector,
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: (func() map[string]string {
+						podLabels := map[string]string{}
+						maps.Copy(podLabels, pluginSpec.Labels)
+						podLabels["app"] = appName
+						return podLabels
+					})(),
+					Annotations: maps.Clone(pluginSpec.Annotations),
+				},
+				Spec: corev1.PodSpec{
+					PriorityClassName: ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					Affinity:          getControllerPluginPodAffinity(pluginSpec, &appSelector),
+					Tolerations:       pluginSpec.Tolerations,
+					Containers: (func() []corev1.Container {
+						containers := []corev1.Container{
+							// Plugin Container
+							{
+								Name:            fmt.Sprintf("csi-%splugin", r.driverType),
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Args: []string{
+									utils.TypeContainerArg(string(r.driverType)),
+									utils.LogLevelContainerArg(logLevel),
+									utils.EndpointContainerArg,
+									utils.NodeIdContainerArg,
+									utils.ControllerServerContainerArg,
+									utils.DriverNameContainerArg(r.driver.Name),
+									utils.PidlimitContainerArg,
+									utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
+									utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
+									utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
+									utils.If(
+										ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
+										utils.CsiAddonsEndpointContainerArg,
+										"",
+									),
+								},
+								Env: []corev1.EnvVar{
+									utils.PodIpEnvVar,
+									utils.NodeIdEnvVar,
+									utils.PodNamespaceEnvVar,
+								},
+								VolumeMounts: (func() []corev1.VolumeMount {
+									mounts := append(
+										// Add user defined volume mounts at the start to make sure they do not
+										// overwrite built in volumes mounts.
+										utils.MapSlice(
+											pluginSpec.Volumes,
+											func(v csiv1a1.VolumeSpec) corev1.VolumeMount {
+												return v.Mount
+											},
+										),
+										utils.SocketDirVolumeMount,
+										utils.HostDevVolumeMount,
+										utils.HostSysVolumeMount,
+										utils.LibModulesVolumeMount,
+										utils.KeysTmpDirVolumeMount,
+										utils.CsiConfigVolumeMount,
+									)
+									if r.driver.Spec.Encryption != nil {
+										mounts = append(mounts, utils.KmsConfigVolumeMount)
+									}
+									if r.isRdbDriver() {
+										mounts = append(mounts, utils.OidcTokenVolumeMount)
+									}
+									return mounts
+								})(),
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Plugin,
+									corev1.ResourceRequirements{},
+								),
+							},
+							// Provisioner Sidecar Container
+							{
+								Name:            "csi-provisioner",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["provisioner"],
+								Args: append(
+									slices.Clone(leaderElectionArgs),
+									utils.LogLevelContainerArg(logLevel),
+									utils.CsiAddressContainerArg,
+									utils.TimeoutContainerArg(grpcTimeout),
+									utils.RetryIntervalStartContainerArg,
+									utils.DefaultFsTypeContainerArg,
+									utils.PreventVolumeModeConversionContainerArg,
+									utils.HonorPVReclaimPolicyContainerArg,
+									utils.If(r.isRdbDriver(), utils.DefaultFsTypeContainerArg, ""),
+									utils.If(r.isRdbDriver(), utils.TopologyContainerArg, ""),
+									utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Provisioner,
+									corev1.ResourceRequirements{},
+								),
+							},
+							// Resizer Sidecar Container
+							{
+								Name:            "csi-resizer",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["resizer"],
+								Args: append(
+									slices.Clone(leaderElectionArgs),
+									utils.LogLevelContainerArg(logLevel),
+									utils.CsiAddressContainerArg,
+									utils.TimeoutContainerArg(grpcTimeout),
+									utils.HandleVolumeInuseErrorContainerArg,
+									utils.RecoverVolumeExpansionFailureContainerArg,
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Resizer,
+									corev1.ResourceRequirements{},
+								),
+							},
+							// Attacher Sidecar Container
+							{
+								Name:            "csi-attacher",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["attacher"],
+								Args: append(
+									slices.Clone(leaderElectionArgs),
+									utils.LogLevelContainerArg(logLevel),
+									utils.CsiAddressContainerArg,
+									utils.TimeoutContainerArg(grpcTimeout),
+									utils.If(r.isRdbDriver(), utils.DefaultFsTypeContainerArg, ""),
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Attacher,
+									corev1.ResourceRequirements{},
+								),
+							},
+							// Snapshotter Sidecar Container
+							{
+								Name:            "csi-snapshotter",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["snapshotter"],
+								Args: append(
+									slices.Clone(leaderElectionArgs),
+									utils.LogLevelContainerArg(logLevel),
+									utils.CsiAddressContainerArg,
+									utils.TimeoutContainerArg(grpcTimeout),
+									utils.If(r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+									utils.If(
+										r.driverType != NfsDriverType,
+										utils.EnableVolumeGroupSnapshotsContainerArg,
+										"",
+									),
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Snapshotter,
+									corev1.ResourceRequirements{},
+								),
+							},
+						}
+						// Addons Sidecar Container
+						if ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+							containers = append(containers, corev1.Container{
+								Name:            "csi-addons",
+								Image:           r.images["addons"],
+								ImagePullPolicy: imagePullPolicy,
+								Args: append(
+									slices.Clone(leaderElectionArgs),
+									utils.LogLevelContainerArg(logLevel),
+									utils.NodeIdContainerArg,
+									utils.PodContainerArg,
+									utils.PodUidContainerArg,
+									utils.CsiAddonsAddressContainerArg,
+									utils.ControllerPortContainerArg,
+									utils.NamespaceContainerArg,
+								),
+								Ports: []corev1.ContainerPort{
+									utils.CsiAddonsContainerPort,
+								},
+								Env: []corev1.EnvVar{
+									utils.NodeIdEnvVar,
+									utils.PodUidEnvVar,
+									utils.PodNameEnvVar,
+									utils.PodNamespaceEnvVar,
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Addons,
+									corev1.ResourceRequirements{},
+								),
+							})
+						}
+						// OMap Generator Sidecar Container
+						if r.isRdbDriver() && ptr.Deref(r.driver.Spec.GenerateOMapInfo, false) {
+							containers = append(containers, corev1.Container{
+								Name:            "csi-omap-generator",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Args: []string{
+									utils.LogLevelContainerArg(logLevel),
+									utils.TypeContainerArg("controller"),
+									utils.DriverNamespaceContainerArg,
+									utils.DriverNameContainerArg(r.driver.Name),
+									utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
+									utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
+								},
+								Env: []corev1.EnvVar{
+									utils.DriverNamespaceEnvVar,
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.CsiConfigVolumeMount,
+									utils.KeysTmpDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.OMapGenerator,
+									corev1.ResourceRequirements{},
+								),
+							})
+						}
+						// Liveness Sidecar Container
+						if r.driver.Spec.Liveness != nil {
+							containers = append(containers, corev1.Container{
+								Name:            "liveness-prometheus",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Args: []string{
+									utils.TypeContainerArg("liveness"),
+									utils.EndpointContainerArg,
+									utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
+									utils.MetricsPathContainerArg,
+									utils.PoolTimeContainerArg,
+									utils.TimeoutContainerArg(3),
+								},
+								Env: []corev1.EnvVar{
+									utils.PodIpEnvVar,
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Liveness,
+									corev1.ResourceRequirements{},
+								),
+							})
+						}
+
+						return containers
+					})(),
+					Volumes: (func() []corev1.Volume {
+						volumes := append(
+							// Add user defined volumes at the start to make sure they do not
+							// overwrite built in volumes.
+							utils.MapSlice(
+								pluginSpec.Volumes,
+								func(v csiv1a1.VolumeSpec) corev1.Volume {
+									return v.Volume
+								},
+							),
+							utils.HostDevVolume,
+							utils.HostSysVolume,
+							utils.LibModulesVolume,
+							utils.SocketDirVolume,
+							utils.KeysTmpDirVolume,
+							utils.OidcTokenVolume,
+							utils.CsiConfigVolume,
+						)
+						if r.driver.Spec.Encryption != nil {
+							volumes = append(
+								volumes,
+								utils.KmsConfigVolume(&r.driver.Spec.Encryption.ConfigMapRef))
+						}
+						return volumes
+					})(),
+				},
+			},
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		r.log.Error(err, "")
+	}
 	return nil
 }
 
-func (r *driverReconcile) reconcileProvisionerDeployment() error {
+func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 	return nil
 }
 
 func (r *driverReconcile) reconcileLivnessService() error {
 	return nil
+}
+
+func (r *driverReconcile) isRdbDriver() bool {
+	return r.driverType == RbdDriverType
+}
+
+func (r *driverReconcile) isCephFsDriver() bool {
+	return r.driverType == CephFsDriverType
+}
+
+func (r *driverReconcile) isNfsDriver() bool {
+	return r.driverType == NfsDriverType
+}
+
+func getControllerPluginPodAffinity(
+	pluginSpec *csiv1a1.ControllerPluginSpec,
+	selector *metav1.LabelSelector,
+) *corev1.Affinity {
+	if pluginSpec.Affinity != nil && pluginSpec.Affinity.PodAntiAffinity != nil {
+		return pluginSpec.Affinity
+	}
+
+	affinity := &corev1.Affinity{}
+	if pluginSpec.Affinity != nil {
+		pluginSpec.Affinity.DeepCopyInto(affinity)
+	}
+
+	affinity.PodAntiAffinity = &corev1.PodAntiAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{{
+			LabelSelector: selector,
+			TopologyKey:   corev1.LabelHostname,
+		}},
+	}
+
+	return affinity
 }
 
 // mergeDriverSpecs will fill in any unset fields in dest with a copy of the same field in src
@@ -420,20 +806,20 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			if dest.Tolerations == nil {
 				dest.Tolerations = src.Tolerations
 			}
-			if dest.UpdateStrategy == nil {
-				dest.UpdateStrategy = src.UpdateStrategy
-			}
 			if dest.Volumes == nil {
 				dest.Volumes = src.Volumes
+			}
+			if dest.ImagePullPolicy == "" {
+				dest.ImagePullPolicy = src.ImagePullPolicy
+			}
+			if dest.UpdateStrategy == nil {
+				dest.UpdateStrategy = src.UpdateStrategy
 			}
 			if dest.KubeletDirPath == "" {
 				dest.KubeletDirPath = src.KubeletDirPath
 			}
 			if dest.EnableSeLinuxHostMount == nil {
 				dest.EnableSeLinuxHostMount = src.EnableSeLinuxHostMount
-			}
-			if dest.ImagePullPolicy == "" {
-				dest.ImagePullPolicy = src.ImagePullPolicy
 			}
 			if dest.Resources.Registrar == nil {
 				dest.Resources.Registrar = src.Resources.Registrar
@@ -465,6 +851,12 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			}
 			if dest.Tolerations == nil {
 				dest.Tolerations = src.Tolerations
+			}
+			if dest.Volumes == nil {
+				dest.Volumes = src.Volumes
+			}
+			if dest.ImagePullPolicy == "" {
+				dest.ImagePullPolicy = src.ImagePullPolicy
 			}
 			if dest.Replicas == nil {
 				dest.Replicas = src.Replicas

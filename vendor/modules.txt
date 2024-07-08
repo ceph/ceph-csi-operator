@@ -178,6 +178,7 @@ go.uber.org/zap/internal/stacktrace
 go.uber.org/zap/zapcore
 # golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
 ## explicit; go 1.18
+golang.org/x/exp/constraints
 golang.org/x/exp/maps
 # golang.org/x/net v0.23.0
 ## explicit; go 1.18

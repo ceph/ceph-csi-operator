@@ -19,9 +19,11 @@ package utils
 import (
 	"sync"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"golang.org/x/exp/constraints"
 )
 
+// RunConcurrently runs all the of the given functions concurrently returning a channel with
+// the functions' return values (of type error) then closes the channel when all functions return.
 func RunConcurrently(fnList ...func() error) chan error {
 	errors := make(chan error)
 	wg := sync.WaitGroup{}
@@ -46,6 +48,7 @@ func RunConcurrently(fnList ...func() error) chan error {
 	return errors
 }
 
+// ChannelToSlice consumes a channel return values in a slice
 func ChannelToSlice[T any](c chan T) []T {
 	list := []T{}
 	for value := range c {
@@ -54,18 +57,13 @@ func ChannelToSlice[T any](c chan T) []T {
 	return list
 }
 
-// AddAnnotation adds an annotation to a resource metadata, returns true if added else false
-func AddAnnotation(obj metav1.Object, key string, value string) bool {
-	annotations := obj.GetAnnotations()
-	if annotations == nil {
-		annotations = map[string]string{}
-		obj.SetAnnotations(annotations)
+// If implements an if/else expression
+func If[T any](cond bool, trueVal, falseVal T) T {
+	if cond {
+		return trueVal
+	} else {
+		return falseVal
 	}
-	if oldValue, exist := annotations[key]; !exist || oldValue != value {
-		annotations[key] = value
-		return true
-	}
-	return false
 }
 
 // FirstNonNil returns the first non nil argument or nil if all arguments are nil
@@ -87,4 +85,33 @@ func FirstNonEmpty[T ~string](strings ...T) T {
 		}
 	}
 	return ""
+}
+
+func FirstNonZero[T constraints.Integer](numbers ...T) T {
+	for _, num := range numbers {
+		if num != 0 {
+			return num
+		}
+	}
+	return 0
+}
+
+// Clamp a number between min and max
+func Clamp[T constraints.Ordered](val, low, high T) T {
+	if val < low {
+		return low
+	} else if val > high {
+		return high
+	} else {
+		return val
+	}
+}
+
+// MapSlice maps the iteas of a given slice into a new slice using a mapper function
+func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
+	out := make([]K, len(in))
+	for i := range in {
+		out[i] = mapper(in[i])
+	}
+	return out
 }
