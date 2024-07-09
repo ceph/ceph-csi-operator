@@ -39,6 +39,8 @@ jobs:
           fetch-depth: 1
       - name: misspell
         uses: reviewdog/action-misspell@v1
+        with:
+          exclude: ./vendor/*
 
   golangci:
     name: golangci-lint
