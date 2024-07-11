@@ -20,6 +20,9 @@ import (
 	"os"
 
 	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/ptr"
 )
 
 var imageDefaults = map[string]string{
@@ -35,12 +38,20 @@ var imageDefaults = map[string]string{
 const (
 	defaultGRrpcTimeout   = 150
 	defaultSnapshotPolicy = csiv1a1.AutoDetectSnapshotPolicy
+	defaultKubeletDirPath = "/var/lib/kubelet"
 )
 
 var defaultLeaderElection = csiv1a1.LeaderElectionSpec{
 	LeaseDuration: 137,
 	RenewDeadline: 107,
 	RetryPeriod:   26,
+}
+
+var defautUpdateStrategy = appsv1.DaemonSetUpdateStrategy{
+	Type: appsv1.RollingUpdateDaemonSetStrategyType,
+	RollingUpdate: &appsv1.RollingUpdateDaemonSet{
+		MaxUnavailable: ptr.To(intstr.FromInt(1)),
+	},
 }
 
 var operatorNamespace = (func() string {

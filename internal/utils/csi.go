@@ -61,6 +61,14 @@ var HostSysVolume = corev1.Volume{
 		},
 	},
 }
+var HostRunMountVolume = corev1.Volume{
+	Name: "host-run-mount",
+	VolumeSource: corev1.VolumeSource{
+		HostPath: &corev1.HostPathVolumeSource{
+			Path: "/run/mount",
+		},
+	},
+}
 var LibModulesVolume = corev1.Volume{
 	Name: "lib-modules",
 	VolumeSource: corev1.VolumeSource{
@@ -93,6 +101,14 @@ var OidcTokenVolume = corev1.Volume{
 		},
 	},
 }
+var EtcSelinuxVolume = corev1.Volume{
+	Name: "etc-selinux",
+	VolumeSource: corev1.VolumeSource{
+		HostPath: &corev1.HostPathVolumeSource{
+			Path: "/etc/selinux",
+		},
+	},
+}
 
 func CsiConfigsVolume(configRef *corev1.LocalObjectReference) corev1.Volume {
 	return corev1.Volume{
@@ -119,6 +135,50 @@ func KmsConfigVolume(configRef *corev1.LocalObjectReference) corev1.Volume {
 		},
 	}
 }
+func PluginMountDirVolume(kubeletDirPath string) corev1.Volume {
+	return corev1.Volume{
+		Name: pluginMountDirVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/plugins", kubeletDirPath),
+				Type: ptr.To(corev1.HostPathDirectory),
+			},
+		},
+	}
+}
+func PluginDirVolume(kubeletDirPath string, driverNamePrefix string) corev1.Volume {
+	return corev1.Volume{
+		Name: pluginDirVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/plugins/%s", kubeletDirPath, driverNamePrefix),
+				Type: ptr.To(corev1.HostPathDirectoryOrCreate),
+			},
+		},
+	}
+}
+func RegistrationDirVolume(kubeletDirPath string) corev1.Volume {
+	return corev1.Volume{
+		Name: registrationVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/plugins_registry", kubeletDirPath),
+				Type: ptr.To(corev1.HostPathDirectory),
+			},
+		},
+	}
+}
+func PodsMountDirVolume(kubeletDirPath string) corev1.Volume {
+	return corev1.Volume{
+		Name: podsMountDirVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/pods", kubeletDirPath),
+				Type: ptr.To(corev1.HostPathDirectory),
+			},
+		},
+	}
+}
 
 // Ceph CSI common volume Mounts
 var SocketDirVolumeMount = corev1.VolumeMount{
@@ -132,6 +192,10 @@ var HostDevVolumeMount = corev1.VolumeMount{
 var HostSysVolumeMount = corev1.VolumeMount{
 	Name:      HostSysVolume.Name,
 	MountPath: "/sys",
+}
+var HostRunMountVolumeMount = corev1.VolumeMount{
+	Name:      HostRunMountVolume.Name,
+	MountPath: "/run/mount",
 }
 var LibModulesVolumeMount = corev1.VolumeMount{
 	Name:      LibModulesVolume.Name,
@@ -155,6 +219,35 @@ var KmsConfigsVolumeMount = corev1.VolumeMount{
 	Name:      kmsConfigVolumeName,
 	MountPath: "/etc/ceph-csi-encryption-kms-config/",
 	ReadOnly:  true,
+}
+var PluginDirVolumeMount = corev1.VolumeMount{
+	Name:      pluginDirVolumeName,
+	MountPath: "/csi",
+}
+var RegistrationDirVolumeMount = corev1.VolumeMount{
+	Name:      registrationVolumeName,
+	MountPath: "/registration",
+	ReadOnly:  true,
+}
+var EtcSelinuxVolumeMount = corev1.VolumeMount{
+	Name:      EtcSelinuxVolume.Name,
+	MountPath: "/etc/selinux",
+	ReadOnly:  true,
+}
+
+func PodsMountDirVolumeMount(kubletDirPath string) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:             podsMountDirVolumeName,
+		MountPath:        fmt.Sprintf("%s/pods", kubletDirPath),
+		MountPropagation: ptr.To(corev1.MountPropagationBidirectional),
+	}
+}
+func PluginMountDirVolumeMount(kubletDirPath string) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:             pluginMountDirVolumeName,
+		MountPath:        fmt.Sprintf("%s/plugins", kubletDirPath),
+		MountPropagation: ptr.To(corev1.MountPropagationBidirectional),
+	}
 }
 
 // Ceph CSI Common env var definition
@@ -221,6 +314,7 @@ var LeaderElectionContainerArg = "--leader-election=true"
 var NodeIdContainerArg = fmt.Sprintf("--nodeid=$(%s)", NodeIdEnvVar.Name)
 var PidlimitContainerArg = "--pidlimit=-1"
 var ControllerServerContainerArg = "--controllerserver=true"
+var NodeServerContainerArg = "--nodeserver=true"
 var RetryIntervalStartContainerArg = "--retry-interval-start=500ms"
 var DefaultFsTypeContainerArg = "--default-fstype=ext4"
 var HandleVolumeInuseErrorContainerArg = "--handle-volume-inuse-error=false"
@@ -276,4 +370,24 @@ func ClusterNameContainerArg(name string) string {
 }
 func MetricsPortContainerArg(port int) string {
 	return fmt.Sprintf("--metricsport=%d", port)
+}
+func KubeletRegistrationPathContainerArg(kubeletDirPath string, driverName string) string {
+	return fmt.Sprintf("--kubelet-registration-path=%s/plugins/%s/csi.sock", kubeletDirPath, driverName)
+}
+func StagingPathContainerArg(kubeletDirPath string) string {
+	return fmt.Sprintf("--stagingpath=%s/plugins/kubernetes.io/csi/", kubeletDirPath)
+}
+func KernelMountOptionsContainerArg(options map[string]string) string {
+	return If(
+		len(options) > 0,
+		fmt.Sprintf("--kernelmountoptions==%s", MapToString(options, "=", ",")),
+		"",
+	)
+}
+func FuseMountOptionsContainerArg(options map[string]string) string {
+	return If(
+		len(options) == 0,
+		fmt.Sprintf("--fusemountoptions==%s", MapToString(options, "=", ",")),
+		"",
+	)
 }

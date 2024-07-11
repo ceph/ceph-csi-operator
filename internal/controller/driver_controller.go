@@ -54,6 +54,7 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 
 type DriverType string
 
@@ -483,7 +484,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									slices.Clone(leaderElectionArgs),
 									utils.LogLevelContainerArg(logLevel),
 									utils.CsiAddressContainerArg,
-									utils.TimeoutContainerArg(grpcTimeout),
+									utils.TimeoutContainerArg(r.driver.Spec.GRpcTimeout),
 									utils.HandleVolumeInuseErrorContainerArg,
 									utils.RecoverVolumeExpansionFailureContainerArg,
 								),
@@ -672,6 +673,226 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 }
 
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
+	daemonSet := &appsv1.DaemonSet{}
+	daemonSet.Name = r.driver.Name
+	daemonSet.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("daemonSetName", daemonSet.Name)
+	log.Info("Reconciling controller plugin deployment resource")
+
+	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
+		if err := ctrlutil.SetOwnerReference(&r.driver, daemonSet, r.Scheme); err != nil {
+			log.Error(err, "Failed setting an owner reference on deployment")
+			return err
+		}
+
+		appName := fmt.Sprintf("%s-nodeplugin", r.driver.Name)
+		pluginSpec := utils.FirstNonNil(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
+		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
+		logLevel := utils.If(r.driver.Spec.Log != nil, r.driver.Spec.Log.LogLevel, 0)
+		kubeletDirPath := utils.FirstNonEmpty(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
+		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
+
+		daemonSet.Spec = appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{"app": appName},
+			},
+			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defautUpdateStrategy),
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: (func() map[string]string {
+						podLabels := map[string]string{}
+						maps.Copy(podLabels, pluginSpec.Labels)
+						podLabels["app"] = appName
+						if r.driver.Spec.Liveness != nil {
+							podLabels["contains"] = fmt.Sprintf("%s-metrics", appName)
+						}
+						return podLabels
+					})(),
+					Annotations: maps.Clone(pluginSpec.Annotations),
+				},
+				Spec: corev1.PodSpec{
+					PriorityClassName: ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					HostNetwork:       true,
+					HostPID:           r.isRdbDriver(),
+					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
+					// resolved through k8s service, set dns policy to cluster first
+					DNSPolicy: corev1.DNSClusterFirstWithHostNet,
+					Containers: (func() []corev1.Container {
+						containers := []corev1.Container{
+							// Node Plugin Container
+							{
+								Name:            fmt.Sprintf("csi-%splugin", r.driverType),
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Add:  []corev1.Capability{"SYS_ADMIN"},
+										Drop: []corev1.Capability{"All"},
+									},
+									AllowPrivilegeEscalation: ptr.To(true),
+								},
+								Args: []string{
+									utils.LogLevelContainerArg(logLevel),
+									utils.TypeContainerArg(string(r.driverType)),
+									utils.NodeServerContainerArg,
+									utils.NodeIdContainerArg,
+									utils.DriverNameContainerArg(r.driver.Name),
+									utils.EndpointContainerArg,
+									utils.PidlimitContainerArg,
+									utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
+									utils.If(ptr.Deref(r.driver.Spec.DeployCsiAddons, false), utils.CsiAddonsEndpointContainerArg, ""),
+									utils.If(r.isRdbDriver(), utils.StagingPathContainerArg(kubeletDirPath), ""),
+									utils.If(r.isCephFsDriver(), utils.KernelMountOptionsContainerArg(r.driver.Spec.KernelMountOptions), ""),
+									utils.If(r.isCephFsDriver(), utils.FuseMountOptionsContainerArg(r.driver.Spec.FuseMountOptions), ""),
+									// TODO: RBD only, add "--domainlabels={{ .CSIDomainLabels }}". not sure hot to get the info
+								},
+								Env: []corev1.EnvVar{
+									utils.PodIpEnvVar,
+									utils.NodeIdEnvVar,
+									utils.PodNamespaceEnvVar,
+								},
+								VolumeMounts: (func() []corev1.VolumeMount {
+									mounts := []corev1.VolumeMount{
+										utils.HostDevVolumeMount,
+										utils.HostSysVolumeMount,
+										utils.HostRunMountVolumeMount,
+										utils.LibModulesVolumeMount,
+										utils.KeysTmpDirVolumeMount,
+										utils.PluginDirVolumeMount,
+										utils.PluginMountDirVolumeMount(kubeletDirPath),
+										utils.PodsMountDirVolumeMount(kubeletDirPath),
+									}
+									if ptr.Deref(pluginSpec.EnableSeLinuxHostMount, false) {
+										mounts = append(mounts, utils.EtcSelinuxVolumeMount)
+									}
+									if r.driver.Spec.Encryption != nil {
+										mounts = append(mounts, utils.KmsConfigsVolumeMount)
+									}
+									if r.isRdbDriver() {
+										mounts = append(mounts, utils.OidcTokenVolumeMount)
+									}
+									return mounts
+								})(),
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Plugin,
+									corev1.ResourceRequirements{},
+								),
+							},
+							// Registrar Sidecar Container
+							{
+								Name:            "driver-registrar",
+								Image:           r.images["registrar"],
+								ImagePullPolicy: imagePullPolicy,
+								// This is necessary only for systems with SELinux, where
+								// non-privileged sidecar containers cannot access unix domain socket
+								// created by privileged CSI driver container.
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Args: []string{
+									utils.LogLevelContainerArg(logLevel),
+									utils.KubeletRegistrationPathContainerArg(kubeletDirPath, r.driver.Name),
+									utils.CsiAddressContainerArg,
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.PluginDirVolumeMount,
+									utils.RegistrationDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Registrar,
+									corev1.ResourceRequirements{},
+								),
+							},
+						}
+						// CSI Addons Sidecar Container
+						if ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+							containers = append(containers, corev1.Container{
+								Name:            "csi-addons",
+								Image:           r.images["addons"],
+								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Args: []string{
+									utils.NodeIdContainerArg,
+									utils.LogLevelContainerArg(logLevel),
+									utils.CsiAddonsAddressContainerArg,
+									utils.ControllerPortContainerArg,
+									utils.PodContainerArg,
+									utils.NamespaceContainerArg,
+									utils.PodUidContainerArg,
+									utils.StagingPathContainerArg(kubeletDirPath),
+								},
+								Ports: []corev1.ContainerPort{
+									utils.CsiAddonsContainerPort,
+								},
+								Env: []corev1.EnvVar{
+									utils.NodeIdEnvVar,
+									utils.PodNameEnvVar,
+									utils.PodNamespaceEnvVar,
+									utils.PodUidEnvVar,
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.PluginDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Addons,
+									corev1.ResourceRequirements{},
+								),
+							})
+							// Liveness Sidecar Container
+							if r.driver.Spec.Liveness != nil {
+								containers = append(containers, corev1.Container{
+									Name:            "liveness-prometheus",
+									Image:           r.images["plugin"],
+									ImagePullPolicy: imagePullPolicy,
+									SecurityContext: &corev1.SecurityContext{
+										Privileged: ptr.To(true),
+										Capabilities: &corev1.Capabilities{
+											Drop: []corev1.Capability{"All"},
+										},
+									},
+									Args: []string{
+										utils.TypeContainerArg("liveness"),
+										utils.EndpointContainerArg,
+										utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
+										utils.MetricsPathContainerArg,
+										utils.PoolTimeContainerArg,
+										utils.TimeoutContainerArg(3),
+									},
+									Env: []corev1.EnvVar{
+										utils.PodIpEnvVar,
+									},
+									VolumeMounts: []corev1.VolumeMount{
+										utils.PluginDirVolumeMount,
+									},
+									Resources: ptr.Deref(
+										pluginSpec.Resources.Liveness,
+										corev1.ResourceRequirements{},
+									),
+								})
+							}
+						}
+						return containers
+					})(),
+				},
+			},
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		r.log.Error(err, "")
+	}
 	return nil
 }
 
