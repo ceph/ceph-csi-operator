@@ -7,6 +7,32 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
+  - configs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - configs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - configs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - csi.ceph.io
+  resources:
   - drivers
   verbs:
   - create
