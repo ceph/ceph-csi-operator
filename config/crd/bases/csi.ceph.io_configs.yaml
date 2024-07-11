@@ -67,6 +67,8 @@ spec:
                   radosNamespace:
                     type: string
                 type: object
+            required:
+            - cephClusterRef
             type: object
           status:
             description: ConfigStatus defines the observed state of Config
