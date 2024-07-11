@@ -17,6 +17,7 @@ limitations under the License.
 package utils
 
 import (
+	"strings"
 	"sync"
 
 	"golang.org/x/exp/constraints"
@@ -114,4 +115,28 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 		out[i] = mapper(in[i])
 	}
 	return out
+}
+
+func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator string) string {
+	if len(m) == 0 {
+		return ""
+	}
+
+	bldr := strings.Builder{}
+	bldr.WriteString("--kernelmountoptions=")
+	for key, value := range m {
+		bldr.WriteString(string(key))
+		bldr.WriteString(keyValueSeperator)
+		bldr.WriteString(string(value))
+		bldr.WriteString(itemSeperator)
+	}
+	return bldr.String()
+}
+
+// Call calls the provided zero-argument function.
+// This util is used whenever we need to define a function and call it immediately and only once,
+// as a more readable alternative to (func() { ... })(). The common use case is "inline" func
+// invoation as part of a data staructure initializtaoin code.
+func Call[T any](fn func() T) T {
+	return fn()
 }
