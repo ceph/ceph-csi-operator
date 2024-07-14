@@ -19,10 +19,12 @@ package controller
 import (
 	"os"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
+
+	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
 var imageDefaults = map[string]string{
@@ -54,15 +56,15 @@ var defautUpdateStrategy = appsv1.DaemonSetUpdateStrategy{
 	},
 }
 
-var operatorNamespace = (func() string {
+var operatorNamespace = utils.Call(func() string {
 	namespace, _ := os.LookupEnv("OPERATOR_NAMESPACE")
 	if namespace == "" {
 		panic("Required OPERATOR_NAMESPACE environment variable is either missing or empty")
 	}
 	return namespace
-})()
+})
 
-var operatorConfigName = (func() string {
+var operatorConfigName = utils.Call(func() string {
 	name, ok := os.LookupEnv("OPERATOR_CONFIG_NAME")
 	if ok {
 		if name == "" {
@@ -71,4 +73,4 @@ var operatorConfigName = (func() string {
 		return name
 	}
 	return "ceph-csi-operator-config"
-})()
+})

@@ -117,6 +117,7 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 	return out
 }
 
+// maptostring serializes the provided map into a a string.
 func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator string) string {
 	if len(m) == 0 {
 		return ""
@@ -131,4 +132,12 @@ func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator strin
 		bldr.WriteString(itemSeperator)
 	}
 	return bldr.String()
+}
+
+// Call calls the provided zero-argument function.
+// This util is used whenever we need to define a function and call it immidatly and only once,
+// as a more readable alternative to (func() { ... })(). The common use case is "inline" func
+// invoation as part of a data staructure initializtaoin code.
+func Call[T any](fn func() T) T {
+	return fn()
 }

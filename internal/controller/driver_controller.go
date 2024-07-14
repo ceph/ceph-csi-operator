@@ -384,12 +384,12 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: (func() map[string]string {
+					Labels: utils.Call(func() map[string]string {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
 						podLabels["app"] = appName
 						return podLabels
-					})(),
+					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
 				},
 				Spec: corev1.PodSpec{
@@ -397,7 +397,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
 					Affinity:           pluginSpec.Affinity,
 					Tolerations:        pluginSpec.Tolerations,
-					Containers: (func() []corev1.Container {
+					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							// Plugin Container
 							{
@@ -426,7 +426,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.NodeIdEnvVar,
 									utils.PodNamespaceEnvVar,
 								},
-								VolumeMounts: (func() []corev1.VolumeMount {
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := append(
 										// Add user defined volume mounts at the start to make sure they do not
 										// overwrite built in volumes mounts.
@@ -450,7 +450,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
 									}
 									return mounts
-								})(),
+								}),
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Plugin,
 									corev1.ResourceRequirements{},
@@ -638,8 +638,8 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						}
 
 						return containers
-					})(),
-					Volumes: (func() []corev1.Volume {
+					}),
+					Volumes: utils.Call(func() []corev1.Volume {
 						volumes := append(
 							// Add user defined volumes at the start to make sure they do not
 							// overwrite built in volumes.
@@ -665,7 +665,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								utils.KmsConfigVolume(&r.driver.Spec.Encryption.ConfigMapRef))
 						}
 						return volumes
-					})(),
+					}),
 				},
 			},
 		}
@@ -711,7 +711,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defautUpdateStrategy),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: (func() map[string]string {
+					Labels: utils.Call(func() map[string]string {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
 						podLabels["app"] = appName
@@ -719,7 +719,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 							podLabels["contains"] = fmt.Sprintf("%s-metrics", appName)
 						}
 						return podLabels
-					})(),
+					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
 				},
 				Spec: corev1.PodSpec{
@@ -730,7 +730,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy: corev1.DNSClusterFirstWithHostNet,
-					Containers: (func() []corev1.Container {
+					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							// Node Plugin Container
 							{
@@ -765,7 +765,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									utils.NodeIdEnvVar,
 									utils.PodNamespaceEnvVar,
 								},
-								VolumeMounts: (func() []corev1.VolumeMount {
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := []corev1.VolumeMount{
 										utils.HostDevVolumeMount,
 										utils.HostSysVolumeMount,
@@ -786,7 +786,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
 									}
 									return mounts
-								})(),
+								}),
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Plugin,
 									corev1.ResourceRequirements{},
@@ -894,7 +894,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 							}
 						}
 						return containers
-					})(),
+					}),
 				},
 			},
 		}
