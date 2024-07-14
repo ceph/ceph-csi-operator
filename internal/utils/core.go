@@ -117,6 +117,7 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 	return out
 }
 
+// maptostring serializes the provided map into a a string.
 func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator string) string {
 	if len(m) == 0 {
 		return ""

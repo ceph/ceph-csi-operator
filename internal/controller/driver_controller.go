@@ -192,19 +192,26 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
 func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := ctrllog.FromContext(ctx)
+	log.Info("Starting reconcile iteration for Ceph CSI driver", "req", req)
+
 	reconcileHandler := driverReconcile{}
 	reconcileHandler.DriverReconciler = *r
 	reconcileHandler.ctx = ctx
-	reconcileHandler.log = ctrllog.FromContext(ctx)
+	reconcileHandler.log = log
 	reconcileHandler.driver.Name = req.Name
 	reconcileHandler.driver.Namespace = req.Namespace
 
-	return reconcileHandler.reconcile()
+	result, err := reconcileHandler.reconcile()
+	if err != nil {
+		log.Error(err, "CSI Driver reconciliation failed")
+	} else {
+		log.Info("CSI Driver reconciliation completed successfully")
+	}
+	return result, err
 }
 
 func (r *driverReconcile) reconcile() (ctrl.Result, error) {
-	r.log.Info("Enter Reconcile", "req", client.ObjectKeyFromObject(&r.driver))
-
 	// Load the driver desired state based on driver resource, operator config resource and default values.
 	if err := r.LoadAndValidateDesiredState(); err != nil {
 		return ctrl.Result{}, err
@@ -223,7 +230,6 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 	// of the reconciliation steps.
 	errList := utils.ChannelToSlice(errChan)
 	if err := errors.Join(errList...); err != nil {
-		r.log.Error(err, "Reconciliation failed")
 		return ctrl.Result{}, err
 	}
 
@@ -283,7 +289,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 
 	// Load the current desired state in the form of a ceph csi driver resource
 	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.driver), &r.driver); err != nil {
-		r.log.Error(err, "Unable to load driver.csi.ceph.io object", "name", client.ObjectKeyFromObject(&r.driver))
+		r.log.Error(err, "Unable to load driver.csi.ceph.io", "name", client.ObjectKeyFromObject(&r.driver))
 		return err
 	}
 
@@ -397,9 +403,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	deploy.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("deploymentName", deploy.Name)
-	log.Info("Reconciling controller plugin deployment resource")
+	log.Info("Reconciling controller plugin deployment")
 
-	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
 		if err := ctrlutil.SetControllerReference(&r.driver, deploy, r.Scheme); err != nil {
 			log.Error(err, "Failed setting an owner reference on deployment")
 			return err
@@ -434,12 +440,12 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			Selector: &appSelector,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: (func() map[string]string {
+					Labels: utils.Call(func() map[string]string {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
 						podLabels["app"] = appName
 						return podLabels
-					})(),
+					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
 				},
 				Spec: corev1.PodSpec{
@@ -447,7 +453,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
 					Affinity:           getControllerPluginPodAffinity(pluginSpec, &appSelector),
 					Tolerations:        pluginSpec.Tolerations,
-					Containers: (func() []corev1.Container {
+					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							// Plugin Container
 							{
@@ -476,7 +482,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.NodeIdEnvVar,
 									utils.PodNamespaceEnvVar,
 								},
-								VolumeMounts: (func() []corev1.VolumeMount {
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := append(
 										// Add user defined volume mounts at the start to make sure they do not
 										// overwrite built in volumes mounts.
@@ -500,7 +506,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
 									}
 									return mounts
-								})(),
+								}),
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Plugin,
 									corev1.ResourceRequirements{},
@@ -688,8 +694,8 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						}
 
 						return containers
-					})(),
-					Volumes: (func() []corev1.Volume {
+					}),
+					Volumes: utils.Call(func() []corev1.Volume {
 						volumes := append(
 							// Add user defined volumes at the start to make sure they do not
 							// overwrite built in volumes.
@@ -713,7 +719,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								utils.KmsConfigVolume(&r.driver.Spec.Encryption.ConfigMapRef))
 						}
 						return volumes
-					})(),
+					}),
 				},
 			},
 		}
@@ -721,10 +727,8 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		return nil
 	})
 
-	if err != nil {
-		r.log.Error(err, "")
-	}
-	return nil
+	logCreateOrUpdateResult(log, "controller plugin deployment", deploy, opResult, err)
+	return err
 }
 
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
@@ -735,7 +739,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 	log := r.log.WithValues("daemonSetName", daemonSet.Name)
 	log.Info("Reconciling node plugin deployment")
 
-	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
 		if err := ctrlutil.SetControllerReference(&r.driver, daemonSet, r.Scheme); err != nil {
 			log.Error(err, "Failed setting an owner reference on deployment")
 			return err
@@ -990,24 +994,22 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		return nil
 	})
 
-	if err != nil {
-		r.log.Error(err, "")
-	}
-	return nil
+	logCreateOrUpdateResult(log, "node plugin daemonset", daemonSet, opResult, err)
+	return err
 }
 
 func (r *driverReconcile) reconcileLivenessService() error {
-	service := corev1.Service{}
+	service := &corev1.Service{}
 	service.Namespace = r.driver.Namespace
 	service.Name = r.generateName("liveness")
 
 	log := r.log.WithValues("service", service.Name)
-	log.Info("Reconciling liveness service resource")
+	log.Info("Reconciling liveness service")
 
 	if r.driver.Spec.Liveness != nil {
-		_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &service, func() error {
-			if err := ctrlutil.SetControllerReference(&r.driver, &service, r.Scheme); err != nil {
-				r.log.Error(err, "Faild setting an owner reference on service")
+		opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, service, func() error {
+			if err := ctrlutil.SetControllerReference(&r.driver, service, r.Scheme); err != nil {
+				log.Error(err, "Failed setting an owner reference on service")
 				return err
 			}
 
@@ -1025,14 +1027,12 @@ func (r *driverReconcile) reconcileLivenessService() error {
 			return nil
 		})
 
-		if err != nil {
-			r.log.Error(err, "")
-		}
-		return nil
+		logCreateOrUpdateResult(log, "livness service", service, opResult, err)
+		return err
 
-		// Remove the liveness serive if livness setting removed from the driver's spec
 	} else {
-		if err := r.Delete(r.ctx, &service); client.IgnoreNotFound(err) != nil {
+		// Remove the liveness serive if livness setting removed from the driver's spec
+		if err := r.Delete(r.ctx, service); client.IgnoreNotFound(err) != nil {
 			log.Error(err, "Unable to delete liveness service")
 			return err
 		}
@@ -1077,6 +1077,29 @@ func getControllerPluginPodAffinity(
 	}
 
 	return affinity
+}
+
+func logCreateOrUpdateResult(
+	log logr.Logger,
+	subject string,
+	obj client.Object,
+	opRes ctrlutil.OperationResult,
+	err error,
+) {
+	if err != nil {
+		verb := utils.If(obj.GetUID() == "", "create", "update")
+		log.Error(err, fmt.Sprintf("Failed to %s %s", verb, subject))
+		return
+	}
+
+	switch opRes {
+	case ctrlutil.OperationResultNone:
+		log.Info(fmt.Sprintf("%s is already up to date", subject))
+	case ctrlutil.OperationResultUpdated:
+		log.Info(fmt.Sprintf("%s updated successfully", subject))
+	case ctrlutil.OperationResultCreated:
+		log.Info(fmt.Sprintf("%s created successfully", subject))
+	}
 }
 
 // mergeDriverSpecs will fill in any unset fields in dest with a copy of the same field in src
