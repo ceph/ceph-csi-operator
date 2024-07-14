@@ -33,6 +33,7 @@ import (
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -55,6 +56,7 @@ import (
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 
 type DriverType string
 
@@ -343,7 +345,7 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 
 func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	deploy := &appsv1.Deployment{}
-	deploy.Name = r.driver.Name
+	deploy.Name = r.generateName("ctrlplugin")
 	deploy.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("deploymentName", deploy.Name)
@@ -355,7 +357,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			return err
 		}
 
-		appName := fmt.Sprintf("%s-ctrlplugin", r.driver.Name)
+		appName := deploy.Name
 		leaderElectionSpec := utils.FirstNonNil(r.driver.Spec.LeaderElection, &defaultLeaderElection)
 		pluginSpec := utils.FirstNonNil(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
 		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
@@ -674,7 +676,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 	daemonSet := &appsv1.DaemonSet{}
-	daemonSet.Name = r.driver.Name
+	daemonSet.Name = r.generateName("nodeplugin")
 	daemonSet.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("daemonSetName", daemonSet.Name)
@@ -686,7 +688,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 			return err
 		}
 
-		appName := fmt.Sprintf("%s-nodeplugin", r.driver.Name)
+		appName := daemonSet.Name
 		pluginSpec := utils.FirstNonNil(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
 		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		logLevel := utils.If(r.driver.Spec.Log != nil, r.driver.Spec.Log.LogLevel, 0)
@@ -897,6 +899,40 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 }
 
 func (r *driverReconcile) reconcileLivnessService() error {
+	if r.driver.Spec.Liveness == nil {
+		return nil
+	}
+
+	service := corev1.Service{}
+	service.Namespace = r.driver.Namespace
+	service.Name = r.generateName("livness")
+
+	log := r.log.WithValues("service", service.Name)
+	log.Info("Reconciling livness service resource")
+
+	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &service, func() error {
+		if err := ctrlutil.SetOwnerReference(&r.driver, &service, r.Scheme); err != nil {
+			r.log.Error(err, "Faild setting an owner reference on service")
+			return err
+		}
+
+		service.Spec = corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "csi-http-metrics",
+					Port:       8080,
+					Protocol:   corev1.ProtocolTCP,
+					TargetPort: intstr.FromInt(r.driver.Spec.Liveness.MetricsPort),
+				},
+			},
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		r.log.Error(err, "")
+	}
 	return nil
 }
 
@@ -910,6 +946,10 @@ func (r *driverReconcile) isCephFsDriver() bool {
 
 func (r *driverReconcile) isNfsDriver() bool {
 	return r.driverType == NfsDriverType
+}
+
+func (r *driverReconcile) generateName(suffix string) string {
+	return fmt.Sprintf("%s-%s", r.driver.Name, suffix)
 }
 
 // mergeDriverSpecs will fill in any unset fields in dest with a copy of the same field in src
