@@ -33,6 +33,7 @@ import (
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -56,6 +57,7 @@ import (
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 
 type DriverType string
 
@@ -168,6 +170,10 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&appsv1.DaemonSet{},
 			builder.WithPredicates(genChangedPredicate),
 		).
+		Owns(
+			&corev1.Service{},
+			builder.WithPredicates(genChangedPredicate),
+		).
 		Watches(
 			&csiv1a1.OperatorConfig{},
 			enqueueAllDrivers,
@@ -210,7 +216,7 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 		r.reconcileK8sCsiDriver,
 		r.reconcileControllerPluginDeployment,
 		r.reconcileNodePluginDeamonSet,
-		r.reconcileLivnessService,
+		r.reconcileLivenessService,
 	)
 
 	// Check if any reconcilatin error where raised during the concurrent execution
@@ -386,7 +392,7 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 
 func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	deploy := &appsv1.Deployment{}
-	deploy.Name = r.driver.Name
+	deploy.Name = r.generateName("ctrlplugin")
 	deploy.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("deploymentName", deploy.Name)
@@ -398,7 +404,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			return err
 		}
 
-		appName := fmt.Sprintf("%s-ctrlplugin", r.driver.Name)
+		appName := deploy.Name
 		appSelector := metav1.LabelSelector{
 			MatchLabels: map[string]string{"app": appName},
 		}
@@ -979,8 +985,48 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 	return nil
 }
 
-func (r *driverReconcile) reconcileLivnessService() error {
-	return nil
+func (r *driverReconcile) reconcileLivenessService() error {
+	service := corev1.Service{}
+	service.Namespace = r.driver.Namespace
+	service.Name = r.generateName("liveness")
+
+	log := r.log.WithValues("service", service.Name)
+	log.Info("Reconciling liveness service resource")
+
+	if r.driver.Spec.Liveness != nil {
+		_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &service, func() error {
+			if err := ctrlutil.SetControllerReference(&r.driver, &service, r.Scheme); err != nil {
+				r.log.Error(err, "Faild setting an owner reference on service")
+				return err
+			}
+
+			service.Spec = corev1.ServiceSpec{
+				Ports: []corev1.ServicePort{
+					{
+						Name:       "csi-http-metrics",
+						Port:       8080,
+						Protocol:   corev1.ProtocolTCP,
+						TargetPort: intstr.FromInt(r.driver.Spec.Liveness.MetricsPort),
+					},
+				},
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			r.log.Error(err, "")
+		}
+		return nil
+
+		// Remove the liveness serive if livness setting removed from the driver's spec
+	} else {
+		if err := r.Delete(r.ctx, &service); client.IgnoreNotFound(err) != nil {
+			log.Error(err, "Unable to delete liveness service")
+			return err
+		}
+		return nil
+	}
 }
 
 func (r *driverReconcile) isRdbDriver() bool {
