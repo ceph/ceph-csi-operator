@@ -60,6 +60,9 @@ type VolumeSpec struct {
 }
 
 type PodCommonSpec struct {
+	// Service account name to be used for driver's pods
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
+
 	// Pod's user defined priority class name
 	PrioritylClassName *string `json:"priorityClassName,omitempty"`
 
