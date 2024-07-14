@@ -990,6 +990,10 @@ spec:
                           priorityClassName:
                             description: Pod's user defined priority class name
                             type: string
+                          serviceAccountName:
+                            description: Service account name to be used for driver's
+                              pods
+                            type: string
                           tolerations:
                             description: Pod's tolerations list
                             items:
@@ -4419,6 +4423,10 @@ spec:
                             type: object
                           priorityClassName:
                             description: Pod's user defined priority class name
+                            type: string
+                          serviceAccountName:
+                            description: Service account name to be used for driver's
+                              pods
                             type: string
                           tolerations:
                             description: Pod's tolerations list

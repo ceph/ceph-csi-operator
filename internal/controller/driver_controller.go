@@ -294,6 +294,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
 	}
 
+    // If provided, load an imageset from configmap to overwrite default images
 	r.images = maps.Clone(imageDefaults)
 	if r.driver.Spec.ImageSet != nil {
 		imageSetCM := corev1.ConfigMap{}
@@ -411,6 +412,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 
 		leaderElectionSpec := utils.FirstNonNil(r.driver.Spec.LeaderElection, &defaultLeaderElection)
 		pluginSpec := utils.FirstNonNil(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
+		serviceAccountName := utils.FirstNonEmpty(
+			ptr.Deref(pluginSpec.ServiceAccountName, ""),
+			fmt.Sprintf("csi-%s-ctrlplugin-sa", r.driverType),
+		)
 		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		grpcTimeout := utils.FirstNonZero(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
 		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
@@ -438,9 +443,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 					Annotations: maps.Clone(pluginSpec.Annotations),
 				},
 				Spec: corev1.PodSpec{
-					PriorityClassName: ptr.Deref(pluginSpec.PrioritylClassName, ""),
-					Affinity:          getControllerPluginPodAffinity(pluginSpec, &appSelector),
-					Tolerations:       pluginSpec.Tolerations,
+					ServiceAccountName: serviceAccountName,
+					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					Affinity:           getControllerPluginPodAffinity(pluginSpec, &appSelector),
+					Tolerations:        pluginSpec.Tolerations,
 					Containers: (func() []corev1.Container {
 						containers := []corev1.Container{
 							// Plugin Container
@@ -737,6 +743,10 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 
 		appName := daemonSet.Name
 		pluginSpec := utils.FirstNonNil(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
+		serviceAccountName := utils.FirstNonEmpty(
+			ptr.Deref(pluginSpec.ServiceAccountName, ""),
+			fmt.Sprintf("csi-%s-nodeplugin-sa", r.driverType),
+		)
 		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
 		kubeletDirPath := utils.FirstNonEmpty(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
@@ -761,9 +771,10 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 					Annotations: maps.Clone(pluginSpec.Annotations),
 				},
 				Spec: corev1.PodSpec{
-					PriorityClassName: ptr.Deref(pluginSpec.PrioritylClassName, ""),
-					HostNetwork:       true,
-					HostPID:           r.isRdbDriver(),
+					ServiceAccountName: serviceAccountName,
+					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					HostNetwork:        true,
+					HostPID:            r.isRdbDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy: corev1.DNSClusterFirstWithHostNet,
@@ -1106,6 +1117,9 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			dest.NodePlugin = src.NodePlugin
 		} else {
 			dest, src := dest.NodePlugin, src.NodePlugin
+			if dest.ServiceAccountName == nil {
+				dest.ServiceAccountName = src.ServiceAccountName
+			}
 			if dest.PrioritylClassName == nil {
 				dest.PrioritylClassName = src.PrioritylClassName
 			}
@@ -1152,6 +1166,9 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			dest.ControllerPlugin = src.ControllerPlugin
 		} else {
 			dest, src := dest.ControllerPlugin, src.ControllerPlugin
+			if dest.ServiceAccountName == nil {
+				dest.ServiceAccountName = src.ServiceAccountName
+			}
 			if dest.PrioritylClassName == nil {
 				dest.PrioritylClassName = src.PrioritylClassName
 			}
