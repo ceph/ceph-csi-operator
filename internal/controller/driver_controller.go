@@ -283,7 +283,7 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 	existingCsiDriver.Name = r.driver.Name
 
 	log := r.log.WithValues("driverName", existingCsiDriver.Name)
-	log.Info("Reconciling CSI Driver resource")
+	log.Info("Reconciling CSI Driver")
 
 	if err := r.Get(r.ctx, client.ObjectKeyFromObject(existingCsiDriver), existingCsiDriver); client.IgnoreNotFound(err) != nil {
 		log.Error(err, "Failed to load CSI Driver resource")
@@ -349,9 +349,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	deploy.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("deploymentName", deploy.Name)
-	log.Info("Reconciling controller plugin deployment resource")
+	log.Info("Reconciling controller plugin deployment")
 
-	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
+		r.log.Info("Controller plugin deployment reconciled successfully")
 		if err := ctrlutil.SetOwnerReference(&r.driver, deploy, r.Scheme); err != nil {
 			log.Error(err, "Failed setting an owner reference on deployment")
 			return err
@@ -673,9 +674,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		return nil
 	})
 
-	if err != nil {
-		r.log.Error(err, "")
-	}
+	r.logCreateOrUpdateResult(r.log, deploy, opResult, err)
 	return nil
 }
 
@@ -685,9 +684,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 	daemonSet.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("daemonSetName", daemonSet.Name)
-	log.Info("Reconciling controller plugin deployment resource")
+	log.Info("Reconciling controller plugin deployment")
 
-	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
 		if err := ctrlutil.SetOwnerReference(&r.driver, daemonSet, r.Scheme); err != nil {
 			log.Error(err, "Failed setting an owner reference on deployment")
 			return err
@@ -902,9 +901,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		return nil
 	})
 
-	if err != nil {
-		r.log.Error(err, "")
-	}
+	r.logCreateOrUpdateResult(r.log, daemonSet, opResult, err)
 	return nil
 }
 
@@ -913,15 +910,15 @@ func (r *driverReconcile) reconcileLivnessService() error {
 		return nil
 	}
 
-	service := corev1.Service{}
+	service := &corev1.Service{}
 	service.Namespace = r.driver.Namespace
 	service.Name = r.generateName("livness")
 
 	log := r.log.WithValues("service", service.Name)
-	log.Info("Reconciling livness service resource")
+	log.Info("Reconciling livness service")
 
-	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &service, func() error {
-		if err := ctrlutil.SetOwnerReference(&r.driver, &service, r.Scheme); err != nil {
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, service, func() error {
+		if err := ctrlutil.SetOwnerReference(&r.driver, service, r.Scheme); err != nil {
 			r.log.Error(err, "Faild setting an owner reference on service")
 			return err
 		}
@@ -940,10 +937,30 @@ func (r *driverReconcile) reconcileLivnessService() error {
 		return nil
 	})
 
-	if err != nil {
-		r.log.Error(err, "")
-	}
+	r.logCreateOrUpdateResult(r.log, service, opResult, err)
 	return nil
+}
+
+func (r *driverReconcile) logCreateOrUpdateResult(
+	log logr.Logger,
+	obj client.Object,
+	opRes ctrlutil.OperationResult,
+	err error,
+) {
+	if err == nil {
+		verb := utils.If(obj.GetUID() == "", "create", "update")
+		r.log.Error(err, "Failed to %s resource", verb)
+		return
+	}
+
+	switch opRes {
+	case ctrlutil.OperationResultNone:
+		r.log.Info("Resource is already up to date")
+	case ctrlutil.OperationResultUpdated:
+		r.log.Info("Resource successfully updated")
+	case ctrlutil.OperationResultCreated:
+		r.log.Info("Resource successfully created")
+	}
 }
 
 func (r *driverReconcile) isRdbDriver() bool {
