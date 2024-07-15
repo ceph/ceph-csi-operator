@@ -71,13 +71,13 @@ type PodCommonSpec struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
-type PluginResourcesSpec struct {
+type NodePluginResourcesSpec struct {
 	Registrar *corev1.ResourceRequirements `json:"registrar,omitempty"`
 	Liveness  *corev1.ResourceRequirements `json:"liveness,omitempty"`
 	Plugin    *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
 
-type PluginSpec struct {
+type NodePluginSpec struct {
 	// Embedded common pods spec
 	PodCommonSpec `json:"inline"`
 
@@ -86,7 +86,7 @@ type PluginSpec struct {
 	UpdateStrategy *appsv1.DaemonSetUpdateStrategy `json:"updateStrategy,omitempty"`
 
 	// Resource requirements for plugin's containers
-	Resources PluginResourcesSpec `json:"resources,omitempty"`
+	Resources NodePluginResourcesSpec `json:"resources,omitempty"`
 
 	Volumes []corev1.Volume `json:"volumes,omitempty"`
 
@@ -100,7 +100,7 @@ type PluginSpec struct {
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 }
 
-type ProvisionerResourcesSpec struct {
+type ControllerPluginResourcesSpec struct {
 	Attacher      *corev1.ResourceRequirements `json:"attacher,omitempty"`
 	Snapshotter   *corev1.ResourceRequirements `json:"snapshotter,omitempty"`
 	Resizer       *corev1.ResourceRequirements `json:"resizer,omitempty"`
@@ -110,15 +110,15 @@ type ProvisionerResourcesSpec struct {
 	Plugin        *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
 
-type ProvisionerSpec struct {
+type ControllerPluginSpec struct {
 	// Embedded common pods spec
 	PodCommonSpec `json:"inline"`
 
-	// Set replicas for csi provisioner deployment. Defaults to 2
-	Replicas *int32 `json:"provisionerReplicas,omitempty"`
+	// Set replicas for controller plugin's deployment. Defaults to 2
+	Replicas *int32 `json:"replicas,omitempty"`
 
-	// Resource requirements for provisioner's containers
-	Resources ProvisionerResourcesSpec `json:"resources,omitempty"`
+	// Resource requirements for controller plugin's containers
+	Resources ControllerPluginResourcesSpec `json:"resources,omitempty"`
 }
 
 type LivenessSpec struct {
@@ -173,7 +173,7 @@ type DriverSpec struct {
 
 	// OMAP generator will generate the omap mapping between the PV name and the RBD image.
 	// Need to be enabled when we are using rbd mirroring feature.
-	// By default OMAP generator sidecar is deployed with Csi provisioner pod, to disable
+	// By default OMAP generator sidecar is deployed with Csi controller plugin pod, to disable
 	// it set it to false.
 	GenerateOMapInfo *bool `json:"generateOMapInfo,omitempty"`
 
@@ -185,10 +185,10 @@ type DriverSpec struct {
 	Encryption *EncryptionSpec `json:"encryption,omitempty"`
 
 	// Driver's plugin configuration
-	Plugin *PluginSpec `json:"plugin,omitempty"`
+	NodePlugin *NodePluginSpec `json:"nodePlugin,omitempty"`
 
-	// Driver's provisioner configuration
-	Provisioner *ProvisionerSpec `json:"provisioner,omitempty"`
+	// Driver's controller plugin configuration
+	ControllerPlugin *ControllerPluginSpec `json:"controllerPlugin,omitempty"`
 
 	// Whether to skip any attach operation altogether for CephCsi PVCs.
 	// See more details [here](https://kubernetes-csi.github.io/docs/skip-attach.html#skip-attach-with-csi-driver-object).
