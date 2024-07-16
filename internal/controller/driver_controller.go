@@ -565,6 +565,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.CsiAddonsAddressContainerArg,
 									utils.ControllerPortContainerArg,
 									utils.NamespaceContainerArg,
+									fmt.Sprintf("--log_file=%s/log/%s/csi-addons.log", "/var/lib/cephcsi", deploy.Name),
 								),
 								Ports: []corev1.ContainerPort{
 									utils.CsiAddonsContainerPort,
