@@ -28,9 +28,35 @@ type LogSpec struct {
 	// Log level for driver pods,
 	// Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
 	// Default to 0
-	LogLevel   int               `json:"logLevel,omitempty"`
-	MaxFiles   int               `json:"maxFiles,omitempty"`
+	LogLevel int `json:"logLevel,omitempty"`
+	// log rotation for csi pods
+	// +optional
+	LogRotation *LogRotationSpec `json:"logRotation,omitempty"`
+}
+
+type PeriodicityType string
+
+const (
+	HourlyPeriod  PeriodicityType = "hourly"
+	DailyPeriod   PeriodicityType = "daily"
+	WeeklyPeriod  PeriodicityType = "weekly"
+	MonthlyPeriod PeriodicityType = "monthly"
+)
+
+type LogRotationSpec struct {
+	// MaxFiles is the number of logrtoate files
+	// +optional
+	MaxFiles int `json:"maxFiles,omitempty"`
+	// MaxLogSize is the maximum size of the log file per csi pods
+	// +optional
 	MaxLogSize resource.Quantity `json:"maxLogSize,omitempty"`
+	// Periodicity is the periodicity of the log rotation.
+	// +kubebuilder:validation:Enum=hourly;daily;weekly;monthly
+	// +optional
+	Periodicity PeriodicityType `json:"periodicity,omitempty"`
+	// LogHostPath is the prefix directory path for the csi log files
+	// +optional
+	LogHostPath string `json:"logHostPath,omitempty"`
 }
 
 type SnapshotPolicyType string
@@ -72,9 +98,10 @@ type PodCommonSpec struct {
 }
 
 type NodePluginResourcesSpec struct {
-	Registrar *corev1.ResourceRequirements `json:"registrar,omitempty"`
-	Liveness  *corev1.ResourceRequirements `json:"liveness,omitempty"`
-	Plugin    *corev1.ResourceRequirements `json:"plugin,omitempty"`
+	Registrar  *corev1.ResourceRequirements `json:"registrar,omitempty"`
+	Liveness   *corev1.ResourceRequirements `json:"liveness,omitempty"`
+	Plugin     *corev1.ResourceRequirements `json:"plugin,omitempty"`
+	LogRotator *corev1.ResourceRequirements `json:"logRotator,omitempty"`
 }
 
 type NodePluginSpec struct {
@@ -108,6 +135,7 @@ type ControllerPluginResourcesSpec struct {
 	OMapGenerator *corev1.ResourceRequirements `json:"omapGenerator,omitempty"`
 	Liveness      *corev1.ResourceRequirements `json:"liveness,omitempty"`
 	Plugin        *corev1.ResourceRequirements `json:"plugin,omitempty"`
+	LogRotator    *corev1.ResourceRequirements `json:"logRotator,omitempty"`
 }
 
 type ControllerPluginSpec struct {
@@ -119,6 +147,11 @@ type ControllerPluginSpec struct {
 
 	// Resource requirements for controller plugin's containers
 	Resources ControllerPluginResourcesSpec `json:"resources,omitempty"`
+
+	// To enable logrotation for csi pods,
+	// Some platforms require controller plugin to run privileged,
+	// For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
+	Privileged bool `json:"privileged,omitempty"`
 }
 
 type LivenessSpec struct {
