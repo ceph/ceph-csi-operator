@@ -17,6 +17,7 @@ limitations under the License.
 package controller
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -342,12 +343,12 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 	// unless we gureente that we started from the same point.
 	existingCsiDriver.Spec.DeepCopyInto(&desiredCsiDriver.Spec)
 	desiredCsiDriver.Spec.PodInfoOnMount = ptr.To(false)
-	desiredCsiDriver.Spec.AttachRequired = utils.FirstNonNil(
+	desiredCsiDriver.Spec.AttachRequired = cmp.Or(
 		r.driver.Spec.AttachRequired,
 		ptr.To(true),
 	)
 	desiredCsiDriver.Spec.FSGroupPolicy = ptr.To(
-		utils.FirstNonEmpty(
+		cmp.Or(
 			r.driver.Spec.FsGroupPolicy,
 			r.driver.Spec.FsGroupPolicy,
 			storagev1.FileFSGroupPolicy,
@@ -416,14 +417,14 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			MatchLabels: map[string]string{"app": appName},
 		}
 
-		leaderElectionSpec := utils.FirstNonNil(r.driver.Spec.LeaderElection, &defaultLeaderElection)
-		pluginSpec := utils.FirstNonNil(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
-		serviceAccountName := utils.FirstNonEmpty(
+		leaderElectionSpec := cmp.Or(r.driver.Spec.LeaderElection, &defaultLeaderElection)
+		pluginSpec := cmp.Or(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
+		serviceAccountName := cmp.Or(
 			ptr.Deref(pluginSpec.ServiceAccountName, ""),
 			fmt.Sprintf("csi-%s-ctrlplugin-sa", r.driverType),
 		)
-		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
-		grpcTimeout := utils.FirstNonZero(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
+		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
+		grpcTimeout := cmp.Or(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
 		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 
@@ -746,14 +747,14 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		}
 
 		appName := daemonSet.Name
-		pluginSpec := utils.FirstNonNil(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
-		serviceAccountName := utils.FirstNonEmpty(
+		pluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
+		serviceAccountName := cmp.Or(
 			ptr.Deref(pluginSpec.ServiceAccountName, ""),
 			fmt.Sprintf("csi-%s-nodeplugin-sa", r.driverType),
 		)
-		imagePullPolicy := utils.FirstNonEmpty(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
+		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
-		kubeletDirPath := utils.FirstNonEmpty(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
+		kubeletDirPath := cmp.Or(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 
 		daemonSet.Spec = appsv1.DaemonSetSpec{

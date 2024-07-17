@@ -17,10 +17,9 @@ limitations under the License.
 package utils
 
 import (
+	"cmp"
 	"strings"
 	"sync"
-
-	"golang.org/x/exp/constraints"
 )
 
 // RunConcurrently runs all the of the given functions concurrently returning a channel with
@@ -67,38 +66,8 @@ func If[T any](cond bool, trueVal, falseVal T) T {
 	}
 }
 
-// FirstNonNil returns the first non nil argument or nil if all arguments are nil
-func FirstNonNil[T any](ptrs ...*T) *T {
-	for _, ptr := range ptrs {
-		if ptr != nil {
-			return ptr
-		}
-	}
-	return nil
-}
-
-// FirstNonEmpty returns the first non empty string or an empty string if all
-// arguments are empty strings
-func FirstNonEmpty[T ~string](strings ...T) T {
-	for _, str := range strings {
-		if str != "" {
-			return str
-		}
-	}
-	return ""
-}
-
-func FirstNonZero[T constraints.Integer](numbers ...T) T {
-	for _, num := range numbers {
-		if num != 0 {
-			return num
-		}
-	}
-	return 0
-}
-
 // Clamp a number between min and max
-func Clamp[T constraints.Ordered](val, low, high T) T {
+func Clamp[T cmp.Ordered](val, low, high T) T {
 	if val < low {
 		return low
 	} else if val > high {
