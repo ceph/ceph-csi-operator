@@ -203,19 +203,19 @@ func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	reconcileHandler.driver.Name = req.Name
 	reconcileHandler.driver.Namespace = req.Namespace
 
-	result, err := reconcileHandler.reconcile()
+	err := reconcileHandler.reconcile()
 	if err != nil {
 		log.Error(err, "CSI Driver reconciliation failed")
 	} else {
 		log.Info("CSI Driver reconciliation completed successfully")
 	}
-	return result, err
+	return ctrl.Result{}, err
 }
 
-func (r *driverReconcile) reconcile() (ctrl.Result, error) {
+func (r *driverReconcile) reconcile() error {
 	// Load the driver desired state based on driver resource, operator config resource and default values.
 	if err := r.LoadAndValidateDesiredState(); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
 	// Concurrently reconcile different aspects of the clusters actual state to meet
@@ -231,10 +231,10 @@ func (r *driverReconcile) reconcile() (ctrl.Result, error) {
 	// of the reconciliation steps.
 	errList := utils.ChannelToSlice(errChan)
 	if err := errors.Join(errList...); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
-	return ctrl.Result{}, nil
+	return nil
 }
 
 func (r *driverReconcile) LoadAndValidateDesiredState() error {
