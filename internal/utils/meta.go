@@ -16,7 +16,9 @@ limitations under the License.
 
 package utils
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // AddAnnotation adds an annotation to a resource metadata, returns true if added else false
 func AddAnnotation(obj metav1.Object, key string, value string) bool {
@@ -28,6 +30,17 @@ func AddAnnotation(obj metav1.Object, key string, value string) bool {
 	if oldValue, exist := annotations[key]; !exist || oldValue != value {
 		annotations[key] = value
 		return true
+	}
+	return false
+}
+
+// IsOwnedBy returns true if the object has an owner ref for the provided owner
+func IsOwnedBy(obj, owner metav1.Object) bool {
+	ownerRefs := obj.GetOwnerReferences()
+	for i := range ownerRefs {
+		if owner.GetUID() == ownerRefs[i].UID {
+			return true
+		}
 	}
 	return false
 }

@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,13 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"slices"
+	"sync"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -30,12 +34,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=clientprofiles,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=clientprofiles/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=clientprofiles/finalizers,verbs=update
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=cephconnections,verbs=get;list;watch;update
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 
 // ClientProfileReconciler reconciles a ClientProfile object
 type ClientProfileReconciler struct {
@@ -53,6 +59,29 @@ type ClientProfileReconcile struct {
 	cephConn      csiv1a1.CephConnection
 }
 
+// csiClusterRrcordInfo represent the structure of a serialized csi record
+// in Ceph CSI's config, configmap
+type csiClusterInfoRecord struct {
+	ClusterId string   `json:"clusterID,omitempty"`
+	Monitors  []string `json:"monitors,omitempty"`
+	CephFs    struct {
+		SubvolumeGroup     string `json:"subvolumeGroup,omitempty"`
+		KernelMountOptions string `json:"kernelMountOptions"`
+		FuseMountOptions   string `json:"fuseMountOptions"`
+	} `json:"cephFS,omitempty"`
+	Rbd struct {
+		RadosNamespace string `json:"radosNamespace,omitempty"`
+		MirrorCount    int    `json:"mirrorCount,omitempty"`
+	} `json:"rbd,omitempty"`
+	Nfs          struct{} `json:"nfs,omitempty"`
+	ReadAffinity struct {
+		Enabled             bool     `json:"enabled,omitempty"`
+		CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`
+	} `json:"readAffinity,omitempty"`
+}
+
+var configMapUpdateLock = sync.Mutex{}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClientProfileReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Filter update events based on metadata.generation changes, will filter events
@@ -66,11 +95,14 @@ func (r *ClientProfileReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			builder.MatchEveryOwner,
 			builder.WithPredicates(genChangedPredicate),
 		).
+		Owns(
+			&corev1.ConfigMap{},
+			builder.MatchEveryOwner,
+			builder.WithPredicates(genChangedPredicate),
+		).
 		Complete(r)
 }
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
 func (r *ClientProfileReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrllog.FromContext(ctx)
 	log.Info("Starting reconcile iteration for ClientProfile", "req", req)
@@ -92,13 +124,38 @@ func (r *ClientProfileReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 }
 
 func (r *ClientProfileReconcile) reconcile() error {
+	if err := r.loadAndValidate(); err != nil {
+		return err
+	}
+
+	// Ensure the ceph connection resource has an owner reference (not controller reference)
+	// for the current reconciled config resource
+	if !utils.IsOwnedBy(&r.cephConn, &r.clientProfile) {
+		if err := ctrlutil.SetOwnerReference(&r.clientProfile, &r.cephConn, r.Scheme); err != nil {
+			r.log.Error(err, "Failed adding an owner reference on CephConnection")
+			return err
+		}
+		if err := r.Update(r.ctx, &r.cephConn); err != nil {
+			r.log.Error(err, "Failed to update CephConnection")
+			return err
+		}
+	}
+
+	if err := r.reconcileCephCsiClusterInfo(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ClientProfileReconcile) loadAndValidate() error {
 	// Load the ClientProfile
 	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.clientProfile), &r.clientProfile); err != nil {
 		r.log.Error(err, "Failed loading ClientProfile")
 		return err
 	}
 
-	// Validate a pointer to a ceph connection
+	// Validate a pointer to a ceph cluster resource
 	if r.clientProfile.Spec.CephConnectionRef.Name == "" {
 		err := fmt.Errorf("validation error")
 		r.log.Error(err, "Invalid ClientProfile, missing .spec.cephConnectionRef.name")
@@ -115,15 +172,15 @@ func (r *ClientProfileReconcile) reconcile() error {
 
 	// Ensure the CephConnection has an owner reference (not controller reference)
 	// for the current reconciled ClientProfile
-	connHasOwnerRef := false
+	cephConnHasOwnerRef := false
 	for i := range r.cephConn.OwnerReferences {
 		ownerRef := &r.cephConn.OwnerReferences[i]
 		if ownerRef.UID == r.clientProfile.UID {
-			connHasOwnerRef = true
+			cephConnHasOwnerRef = true
 			break
 		}
 	}
-	if !connHasOwnerRef {
+	if !cephConnHasOwnerRef {
 		if err := ctrlutil.SetOwnerReference(&r.clientProfile, &r.cephConn, r.Scheme); err != nil {
 			r.log.Error(err, "Failed adding an owner reference on CephConnection")
 			return err
@@ -136,4 +193,96 @@ func (r *ClientProfileReconcile) reconcile() error {
 	}
 
 	return nil
+}
+
+func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
+	csiConfigMap := corev1.ConfigMap{}
+	csiConfigMap.Name = utils.CsiConfigVolume.Name
+	csiConfigMap.Namespace = r.clientProfile.Namespace
+
+	log := r.log.WithValues("csiConfigMapName", csiConfigMap.Name)
+	log.Info("Reconciling Ceph CSI Cluster Info")
+
+	// Creating the desired record in advance to miimize the amount execution time
+	// the code run while serializing access to the configmap
+	record := composeCsiClusterInfoRecord(&r.clientProfile, &r.cephConn)
+
+	// Using a lock to serialized the updating of the config map.
+	// Although the code will run perfetcly fine without the lock, there will be a higher
+	// chance to fail on the create/update operation because another concurrent reconcile loop
+	// updated the config map which will result in stale representation and an update failure.
+	// The locking strategy will sync all update to the shared config file and will prevent such
+	// potential issues without a big impact on preformace as a whole
+	configMapUpdateLock.Lock()
+	defer configMapUpdateLock.Unlock()
+
+	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &csiConfigMap, func() error {
+		if err := ctrlutil.SetOwnerReference(&r.clientProfile, &csiConfigMap, r.Scheme); err != nil {
+			log.Error(err, "Failed setting an owner reference on Ceph CSI config map")
+			return err
+		}
+
+		configsAsJson := csiConfigMap.Data[utils.CsiConfigMapConfigKey]
+		clusterInfoList := []*csiClusterInfoRecord{}
+
+		// parse the json serialized list into a go array
+		if configsAsJson != "" {
+			if err := json.Unmarshal([]byte(configsAsJson), &clusterInfoList); err != nil {
+				log.Error(err, "Failed to parse cluster info list under \"config.json\" key")
+				return err
+			}
+		}
+
+		// Locate an existing entry for the same config/cluster name if exists
+		index := slices.IndexFunc(clusterInfoList, func(record *csiClusterInfoRecord) bool {
+			return record.ClusterId == r.clientProfile.Name
+		})
+
+		// overwrite an existing entry or append a new one
+		if index > -1 {
+			clusterInfoList[index] = record
+		} else {
+			clusterInfoList = append(clusterInfoList, record)
+		}
+
+		// Serialize the list and store it back into the config map
+		if bytes, err := json.Marshal(clusterInfoList); err == nil {
+			if csiConfigMap.Data == nil {
+				csiConfigMap.Data = map[string]string{}
+			}
+			csiConfigMap.Data[utils.CsiConfigMapConfigKey] = string(bytes)
+			return nil
+		} else {
+			log.Error(err, "Failed to serialize cluster info list")
+			return err
+		}
+	})
+
+	return err
+}
+
+// ComposeCsiClusterInfoRecord composes the desired csi cluster info record for
+// a given ClientProfile and CephConnection specs
+func composeCsiClusterInfoRecord(clientProfile *csiv1a1.ClientProfile, cephConn *csiv1a1.CephConnection) *csiClusterInfoRecord {
+	record := csiClusterInfoRecord{}
+	record.ClusterId = clientProfile.Name
+	record.Monitors = cephConn.Spec.Monitors
+	if cephFs := clientProfile.Spec.CephFs; cephFs != nil {
+		record.CephFs.SubvolumeGroup = cephFs.SubVolumeGroup
+		if mountOpt := cephFs.KernelMountOptions; mountOpt != nil {
+			record.CephFs.KernelMountOptions = utils.MapToString(mountOpt, "=", ",")
+		}
+		if mountOpt := cephFs.FuseMountOptions; mountOpt != nil {
+			record.CephFs.FuseMountOptions = utils.MapToString(mountOpt, "=", ",")
+		}
+	}
+	if rbd := clientProfile.Spec.Rbd; rbd != nil {
+		record.Rbd.RadosNamespace = rbd.RadosNamespace
+		record.Rbd.MirrorCount = cephConn.Spec.RbdMirrorDaemonCount
+	}
+	if readAffinity := cephConn.Spec.ReadAffinity; readAffinity != nil {
+		record.ReadAffinity.Enabled = true
+		record.ReadAffinity.CrushLocationLabels = readAffinity.CrushLocationLabels
+	}
+	return &record
 }
