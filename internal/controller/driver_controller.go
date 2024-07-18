@@ -301,7 +301,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
 	}
 
-    // If provided, load an imageset from configmap to overwrite default images
+	// If provided, load an imageset from configmap to overwrite default images
 	r.images = maps.Clone(imageDefaults)
 	if r.driver.Spec.ImageSet != nil {
 		imageSetCM := corev1.ConfigMap{}
