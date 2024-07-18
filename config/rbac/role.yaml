@@ -50,6 +50,15 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
+  - cephconnections
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
   - clientprofilemappings
   verbs:
   - create
