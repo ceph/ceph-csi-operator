@@ -85,10 +85,14 @@ metadata:
 spec:
   logLevel: 1
   driverSpecDefaults:
-    logging:
+    log:
       logLevel: 5
-      maxfiles: 5
-      maxLogSize: 10M
+        logRotation:
+          # one of: hourly, daily, weekly, monthly
+          periodicity: daily
+          maxLogSize: 500M 
+          maxFiles: 5
+          logHostPath: /var/lib/cephcsi 
     clusterName: 5c63ad7e-74fe-4724-a511-4ccdc560da56
     enableMetadata: true
     grpcTimeout: 100
@@ -159,6 +163,7 @@ spec:
       priorityClassName: system-cluster-critical
       labels:
         app: provisioner
+      privileged: true  
       annotations:
         k8s.v1.cni.cncf.io/networks: macvlan-conf-1
       provisionerReplicas: 2
@@ -272,6 +277,9 @@ spec:
       app: cephfs-plugin
     annotations:
       k8s.v1.cni.cncf.io/networks: macvlan-conf-1
+    logRotator:
+      cpu: "100m"
+      memory: "32Mi"       
   provisioner:
     labels:
       app: ceph-fs-provisioner
@@ -283,6 +291,9 @@ spec:
       renewDeadline: 100
       retryPeriod: 10
     attachRequired: true
+    logRotator:
+      cpu: "100m"
+      memory: "32Mi"     
   liveness:
     metricsPort: 8000
   deployCSIAddons: false
