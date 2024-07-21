@@ -57,6 +57,7 @@ type ClientProfileReconcile struct {
 	log           logr.Logger
 	clientProfile csiv1a1.ClientProfile
 	cephConn      csiv1a1.CephConnection
+	cleanUp       bool
 }
 
 // csiClusterRrcordInfo represent the structure of a serialized csi record
@@ -79,6 +80,10 @@ type csiClusterInfoRecord struct {
 		CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`
 	} `json:"readAffinity,omitempty"`
 }
+
+const (
+	cleanupFinalizer = "csi.ceph.com/cleanup"
+)
 
 var configMapUpdateLock = sync.Mutex{}
 
@@ -128,21 +133,27 @@ func (r *ClientProfileReconcile) reconcile() error {
 		return err
 	}
 
-	// Ensure the ceph connection resource has an owner reference (not controller reference)
-	// for the current reconciled config resource
-	if !utils.IsOwnedBy(&r.cephConn, &r.clientProfile) {
-		if err := ctrlutil.SetOwnerReference(&r.clientProfile, &r.cephConn, r.Scheme); err != nil {
-			r.log.Error(err, "Failed adding an owner reference on CephConnection")
-			return err
-		}
-		if err := r.Update(r.ctx, &r.cephConn); err != nil {
-			r.log.Error(err, "Failed to update CephConnection")
+	// Ensure a finalizer on the ClientProfile to allow proper clean up
+	if ctrlutil.AddFinalizer(&r.clientProfile, cleanupFinalizer) {
+		if err := r.Update(r.ctx, &r.clientProfile); err != nil {
+			r.log.Error(err, "Failed to add a cleanup finalizer on ClientProfile")
 			return err
 		}
 	}
 
+	if err := r.reconcileCephConnection(); err != nil {
+		return err
+	}
 	if err := r.reconcileCephCsiClusterInfo(); err != nil {
 		return err
+	}
+
+	if r.cleanUp {
+		ctrlutil.RemoveFinalizer(&r.clientProfile, cleanupFinalizer)
+		if err := r.Update(r.ctx, &r.clientProfile); err != nil {
+			r.log.Error(err, "Failed to add a cleanup finalizer on config resource")
+			return err
+		}
 	}
 
 	return nil
@@ -154,6 +165,7 @@ func (r *ClientProfileReconcile) loadAndValidate() error {
 		r.log.Error(err, "Failed loading ClientProfile")
 		return err
 	}
+	r.cleanUp = r.clientProfile.DeletionTimestamp != nil
 
 	// Validate a pointer to a ceph cluster resource
 	if r.clientProfile.Spec.CephConnectionRef.Name == "" {
@@ -195,6 +207,28 @@ func (r *ClientProfileReconcile) loadAndValidate() error {
 	return nil
 }
 
+func (r *ClientProfileReconcile) reconcileCephConnection() error {
+	log := r.log.WithValues("cephConnectionName", r.cephConn.Name)
+	log.Info("Reconciling CephConnection")
+
+	if needsUpdate, err := utils.ToggleOwnerReference(
+		!r.cleanUp,
+		&r.clientProfile,
+		&r.cephConn,
+		r.Scheme,
+	); err != nil {
+		r.log.Error(err, "Failed to toggle owner reference on CephConnection")
+		return err
+	} else if needsUpdate {
+		if err := r.Update(r.ctx, &r.cephConn); err != nil {
+			r.log.Error(err, "Failed to update CephConnection")
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 	csiConfigMap := corev1.ConfigMap{}
 	csiConfigMap.Name = utils.CsiConfigVolume.Name
@@ -202,10 +236,6 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 
 	log := r.log.WithValues("csiConfigMapName", csiConfigMap.Name)
 	log.Info("Reconciling Ceph CSI Cluster Info")
-
-	// Creating the desired record in advance to miimize the amount execution time
-	// the code run while serializing access to the configmap
-	record := composeCsiClusterInfoRecord(&r.clientProfile, &r.cephConn)
 
 	// Using a lock to serialized the updating of the config map.
 	// Although the code will run perfetcly fine without the lock, there will be a higher
@@ -217,8 +247,13 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 	defer configMapUpdateLock.Unlock()
 
 	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &csiConfigMap, func() error {
-		if err := ctrlutil.SetOwnerReference(&r.clientProfile, &csiConfigMap, r.Scheme); err != nil {
-			log.Error(err, "Failed setting an owner reference on Ceph CSI config map")
+		if _, err := utils.ToggleOwnerReference(
+			!r.cleanUp,
+			&r.clientProfile,
+			&csiConfigMap,
+			r.Scheme,
+		); err != nil {
+			log.Error(err, "Failed toggling owner reference for Ceph CSI config map")
 			return err
 		}
 
@@ -238,23 +273,32 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 			return record.ClusterId == r.clientProfile.Name
 		})
 
-		// overwrite an existing entry or append a new one
-		if index > -1 {
-			clusterInfoList[index] = record
-		} else {
-			clusterInfoList = append(clusterInfoList, record)
+		if !r.cleanUp {
+			// Overwrite an existing entry or append a new one
+			record := composeCsiClusterInfoRecord(&r.clientProfile, &r.cephConn)
+			if index > -1 {
+				clusterInfoList[index] = record
+			} else {
+				clusterInfoList = append(clusterInfoList, record)
+			}
+		} else if index > -1 {
+			// An O(1) unordered in-place delete of a record
+			// Will not shrink the capacity of the slice
+			length := len(clusterInfoList)
+			clusterInfoList[index] = clusterInfoList[length-1]
+			clusterInfoList = clusterInfoList[:length-1]
 		}
 
 		// Serialize the list and store it back into the config map
-		if bytes, err := json.Marshal(clusterInfoList); err == nil {
+		if bytes, err := json.Marshal(clusterInfoList); err != nil {
+			log.Error(err, "Failed to serialize cluster info list")
+			return err
+		} else {
 			if csiConfigMap.Data == nil {
 				csiConfigMap.Data = map[string]string{}
 			}
 			csiConfigMap.Data[utils.CsiConfigMapConfigKey] = string(bytes)
 			return nil
-		} else {
-			log.Error(err, "Failed to serialize cluster info list")
-			return err
 		}
 	})
 

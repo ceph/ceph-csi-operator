@@ -18,6 +18,8 @@ package utils
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // AddAnnotation adds an annotation to a resource metadata, returns true if added else false
@@ -43,4 +45,25 @@ func IsOwnedBy(obj, owner metav1.Object) bool {
 		}
 	}
 	return false
+}
+
+// ToggleOwnerReference adds or remove an owner reference for the given owner based on the first argument.
+// The function return true if the owner reference list had changed and false it it didn't
+func ToggleOwnerReference(on bool, obj, owner metav1.Object, scheme *runtime.Scheme) (bool, error) {
+	ownerRefExists := IsOwnedBy(obj, owner)
+
+	if on {
+		if !ownerRefExists {
+			if err := ctrlutil.SetOwnerReference(obj, owner, scheme); err != nil {
+				return false, err
+			}
+			return true, nil
+		}
+	} else if ownerRefExists {
+		if err := ctrlutil.RemoveOwnerReference(obj, owner, scheme); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, nil
 }
