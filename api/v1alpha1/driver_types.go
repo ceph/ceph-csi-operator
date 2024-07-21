@@ -24,16 +24,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type LogSpec struct {
-	// Log level for driver pods,
-	// Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
-	// Default to 0
-	LogLevel int `json:"logLevel,omitempty"`
-	// log rotation for csi pods
-	// +optional
-	LogRotation *LogRotationSpec `json:"logRotation,omitempty"`
-}
-
 type PeriodicityType string
 
 const (
@@ -47,16 +37,30 @@ type LogRotationSpec struct {
 	// MaxFiles is the number of logrtoate files
 	// +optional
 	MaxFiles int `json:"maxFiles,omitempty"`
+
 	// MaxLogSize is the maximum size of the log file per csi pods
 	// +optional
 	MaxLogSize resource.Quantity `json:"maxLogSize,omitempty"`
+
 	// Periodicity is the periodicity of the log rotation.
 	// +kubebuilder:validation:Enum=hourly;daily;weekly;monthly
 	// +optional
 	Periodicity PeriodicityType `json:"periodicity,omitempty"`
+
 	// LogHostPath is the prefix directory path for the csi log files
 	// +optional
 	LogHostPath string `json:"logHostPath,omitempty"`
+}
+
+type LogSpec struct {
+	// Log level for driver pods,
+	// Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
+	// Default to 0
+	LogLevel int `json:"logLevel,omitempty"`
+
+	// log rotation for csi pods
+	// +optional
+	Rotation *LogRotationSpec `json:"rotation,omitempty"`
 }
 
 type SnapshotPolicyType string
@@ -100,8 +104,8 @@ type PodCommonSpec struct {
 type NodePluginResourcesSpec struct {
 	Registrar  *corev1.ResourceRequirements `json:"registrar,omitempty"`
 	Liveness   *corev1.ResourceRequirements `json:"liveness,omitempty"`
-	Plugin     *corev1.ResourceRequirements `json:"plugin,omitempty"`
 	LogRotator *corev1.ResourceRequirements `json:"logRotator,omitempty"`
+	Plugin     *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
 
 type NodePluginSpec struct {
@@ -134,8 +138,8 @@ type ControllerPluginResourcesSpec struct {
 	Provisioner   *corev1.ResourceRequirements `json:"provisioner,omitempty"`
 	OMapGenerator *corev1.ResourceRequirements `json:"omapGenerator,omitempty"`
 	Liveness      *corev1.ResourceRequirements `json:"liveness,omitempty"`
-	Plugin        *corev1.ResourceRequirements `json:"plugin,omitempty"`
 	LogRotator    *corev1.ResourceRequirements `json:"logRotator,omitempty"`
+	Plugin        *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
 
 type ControllerPluginSpec struct {
