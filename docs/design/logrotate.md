@@ -15,7 +15,7 @@ spec:
     driverSpecDefaults: 
         log:
             logLevel: 5
-            logRotation:
+            rotation:
                 # one of: hourly, daily, weekly, monthly
                 periodicity: daily
                 maxLogSize: 500M 
@@ -36,7 +36,7 @@ spec:
     driverSpecDefaults: 
         log: 
             logLevel: 5
-            logRotation:
+            rotation:
                  # one of: hourly, daily, weekly, monthly
                 periodicity: daily
                 maxLogSize: 500M 

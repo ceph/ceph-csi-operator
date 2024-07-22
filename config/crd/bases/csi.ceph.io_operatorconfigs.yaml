@@ -1607,7 +1607,7 @@ spec:
                           Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
                           Default to 0
                         type: integer
-                      logRotation:
+                      rotation:
                         description: log rotation for csi pods
                         properties:
                           logHostPath:
