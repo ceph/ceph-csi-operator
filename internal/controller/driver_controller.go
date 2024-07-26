@@ -73,7 +73,7 @@ const ownerRefAnnotationKey = "csi.ceph.io/ownerref"
 
 // A regexp used to parse driver's prefix and type from the full name
 var nameRegExp, _ = regexp.Compile(fmt.Sprintf(
-	`^(?:(.+)\.)?(%s|%s|%s)\.csi\.ceph\.com$`,
+	`^(?:.+\.)?(%s|%s|%s)\.csi\.ceph\.com$`,
 	RbdDriverType,
 	CephFsDriverType,
 	NfsDriverType,
@@ -89,12 +89,11 @@ type DriverReconciler struct {
 type driverReconcile struct {
 	DriverReconciler
 
-	ctx          context.Context
-	log          logr.Logger
-	driver       csiv1a1.Driver
-	driverPrefix string
-	driverType   DriverType
-	images       map[string]string
+	ctx        context.Context
+	log        logr.Logger
+	driver     csiv1a1.Driver
+	driverType DriverType
+	images     map[string]string
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -273,11 +272,11 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 
 	// Extract the driver sort name and driver type
 	matches := nameRegExp.FindStringSubmatch(r.driver.Name)
-	if len(matches) != 3 {
-		return fmt.Errorf("invalid driver name")
+	if len(matches) != 2 {
+		return fmt.Errorf("invalid driver name %s", r.driver.Name)
 	}
-	r.driverPrefix = matches[1]
-	r.driverType = DriverType(strings.ToLower(matches[2]))
+
+	r.driverType = DriverType(strings.ToLower(matches[1]))
 
 	// Load operator configuration resource
 	opConfig := csiv1a1.OperatorConfig{}
@@ -963,10 +962,10 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 							utils.HostRunMountVolume,
 							utils.LibModulesVolume,
 							utils.KeysTmpDirVolume,
-							utils.PluginDirVolume(pluginSpec.KubeletDirPath, r.driverPrefix),
-							utils.PluginMountDirVolume(pluginSpec.KubeletDirPath),
-							utils.PodsMountDirVolume(pluginSpec.KubeletDirPath),
-							utils.RegistrationDirVolume(pluginSpec.KubeletDirPath),
+							utils.PluginDirVolume(kubeletDirPath, r.driver.Name),
+							utils.PluginMountDirVolume(kubeletDirPath),
+							utils.PodsMountDirVolume(kubeletDirPath),
+							utils.RegistrationDirVolume(kubeletDirPath),
 						)
 						if ptr.Deref(pluginSpec.EnableSeLinuxHostMount, false) {
 							volumes = append(

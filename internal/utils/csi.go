@@ -226,7 +226,6 @@ var PluginDirVolumeMount = corev1.VolumeMount{
 var RegistrationDirVolumeMount = corev1.VolumeMount{
 	Name:      registrationVolumeName,
 	MountPath: "/registration",
-	ReadOnly:  true,
 }
 var EtcSelinuxVolumeMount = corev1.VolumeMount{
 	Name:      EtcSelinuxVolume.Name,
