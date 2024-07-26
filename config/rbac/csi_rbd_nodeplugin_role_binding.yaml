@@ -1,0 +1,12 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-rbd-nodeplugin-rb
+subjects:
+  - kind: ServiceAccount
+    name: csi-rbd-nodeplugin-sa
+    namespace: system
+roleRef:
+  kind: Role
+  name: csi-rbd-nodeplugin-role
+  apiGroup: rbac.authorization.k8s.io

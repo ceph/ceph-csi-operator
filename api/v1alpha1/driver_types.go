@@ -84,7 +84,15 @@ type EncryptionSpec struct {
 	ConfigMapRef corev1.LocalObjectReference `json:"configMapName,omitempty"`
 }
 
+type VolumeSpec struct {
+	Volume corev1.Volume      `json:"volume,omitempty"`
+	Mount  corev1.VolumeMount `json:"mount,omitempty"`
+}
+
 type PodCommonSpec struct {
+	// Service account name to be used for driver's pods
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
+
 	// Pod's user defined priority class name
 	PrioritylClassName *string `json:"priorityClassName,omitempty"`
 
@@ -99,11 +107,18 @@ type PodCommonSpec struct {
 
 	// Pod's tolerations list
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+
+	// Volume and volume mount definitions to attach to the pod
+	Volumes []VolumeSpec `json:"volumes,omitempty"`
+
+	// To indicate the image pull policy to be applied to all the containers in the csi driver pods.
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 }
 
 type NodePluginResourcesSpec struct {
 	Registrar  *corev1.ResourceRequirements `json:"registrar,omitempty"`
 	Liveness   *corev1.ResourceRequirements `json:"liveness,omitempty"`
+	Addons     *corev1.ResourceRequirements `json:"addons,omitempty"`
 	LogRotator *corev1.ResourceRequirements `json:"logRotator,omitempty"`
 	Plugin     *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
@@ -119,16 +134,11 @@ type NodePluginSpec struct {
 	// Resource requirements for plugin's containers
 	Resources NodePluginResourcesSpec `json:"resources,omitempty"`
 
-	Volumes []corev1.Volume `json:"volumes,omitempty"`
-
 	// kubelet directory path, if kubelet configured to use other than /var/lib/kubelet path.
 	KubeletDirPath string `json:"kubeletDirPath,omitempty"`
 
 	// Control the host mount of /etc/selinux for csi plugin pods. Defaults to false
 	EnableSeLinuxHostMount *bool `json:"EnableSeLinuxHostMount,omitempty"`
-
-	// To indicate the image pull policy to be applied to all the containers in the csi driver pods.
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
 }
 
 type ControllerPluginResourcesSpec struct {
@@ -138,6 +148,7 @@ type ControllerPluginResourcesSpec struct {
 	Provisioner   *corev1.ResourceRequirements `json:"provisioner,omitempty"`
 	OMapGenerator *corev1.ResourceRequirements `json:"omapGenerator,omitempty"`
 	Liveness      *corev1.ResourceRequirements `json:"liveness,omitempty"`
+	Addons        *corev1.ResourceRequirements `json:"addons,omitempty"`
 	LogRotator    *corev1.ResourceRequirements `json:"logRotator,omitempty"`
 	Plugin        *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
@@ -180,8 +191,11 @@ type LeaderElectionSpec struct {
 type CephFsClientType string
 
 const (
-	KernelCephFsClient CephFsClientType = "kernel"
-	FuseCephFsClient   CephFsClientType = "fuse"
+	AutoDetectCephFsClient CephFsClientType = "autodetect"
+	KernelCephFsClient     CephFsClientType = "kernel"
+
+	// Ceph CSI does not allow us to force Fuse client at this point
+	// FuseCephFsClient       CephFsClientType = "fuse"
 )
 
 // DriverSpec defines the desired state of Driver
@@ -258,7 +272,7 @@ type DriverSpec struct {
 	KernelMountOptions map[string]string `json:"kernelMountOptions,omitempty"`
 
 	// Set mount options to use when using the Fuse client
-	FuseMountOptionss map[string]string `json:"fuseMountOptions,omitempty"`
+	FuseMountOptions map[string]string `json:"fuseMountOptions,omitempty"`
 }
 
 type DriverPhaseType string
