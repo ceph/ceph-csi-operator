@@ -26,3 +26,8 @@ jobs:
           go-version-file: go.mod
       - name: run make build
         run: make build
+      - name: Check for uncommitted changes
+        run: make check-all-committed
+      - name: Show the uncommitted "git diff"
+        if: ${{ failure() }}
+        run: git diff ; false
