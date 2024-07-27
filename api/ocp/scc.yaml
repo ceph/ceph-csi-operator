@@ -1,0 +1,38 @@
+kind: SecurityContextConstraints
+metadata:
+  name: csi-scc
+  namespace: ceph-csi-operator-system
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: false
+allowHostPID: true
+allowHostPorts: true
+allowPrivilegedContainer: true
+allowedCapabilities:
+  - SYS_ADMIN
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities: []
+fsGroup:
+  type: RunAsAny
+priority:
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+  - ALL
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+  - system:serviceaccount:ceph-csi-operator-system:csi-rbd-ctrlplugin-sa
+  - system:serviceaccount:ceph-csi-operator-system:csi-cephfs-ctrlplugin-sa
+  - system:serviceaccount:ceph-csi-operator-system:csi-nfs-ctrlplugin-sa
+  - system:serviceaccount:ceph-csi-operator-system:csi-rbd-nodeplugin-sa
+  - system:serviceaccount:ceph-csi-operator-system:csi-cephfs-nodeplugin-sa
+  - system:serviceaccount:ceph-csi-operator-system:csi-nfs-nodeplugin-sa
+volumes:
+  - configMap
+  - emptyDir
+  - hostPath
+  - projected
