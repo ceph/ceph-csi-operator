@@ -6912,6 +6912,8 @@ spec:
                 type: object
               logLevel:
                 description: Operator's log level
+                maximum: 3
+                minimum: 0
                 type: integer
             type: object
           status:
