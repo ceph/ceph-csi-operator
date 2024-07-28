@@ -30,7 +30,7 @@ resources:
     namespaced: true
   domain: ceph.io
   group: csi
-  kind: CephCluster
+  kind: CephConnection
   controller: true
   path: github.com/ceph/ceph-csi-operator/api/v1alpha1
   version: v1alpha1

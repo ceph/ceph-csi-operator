@@ -20,8 +20,8 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the Project itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
-- cephcluster_editor_role.yaml
-- cephcluster_viewer_role.yaml
+- cephconnection_editor_role.yaml
+- cephconnection_viewer_role.yaml
 - clientprofile_editor_role.yaml
 - clientprofile_viewer_role.yaml
 - operatorconfig_editor_role.yaml

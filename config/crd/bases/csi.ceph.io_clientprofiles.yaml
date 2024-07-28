@@ -42,7 +42,7 @@ spec:
               configuration for volumes and snapshots configured to use
               this profile
             properties:
-              cephClusterRef:
+              cephConnectionRef:
                 description: |-
                   LocalObjectReference contains enough information to let you locate the
                   referenced object inside the same namespace.
@@ -76,7 +76,7 @@ spec:
                     type: string
                 type: object
             required:
-            - cephClusterRef
+            - cephConnectionRef
             type: object
           status:
             description: |-

@@ -49,7 +49,7 @@ for NAMESPACE in "${NAMESPACES[@]}"; do
     # they aren't captured by 'kubectl get all'
     for CRD in $(kubectl get crds -o jsonpath='{.items[*].metadata.name}'); do
         for resource in $(kubectl -n "$NAMESPACE" get "$CRD" -o jsonpath='{.items[*].metadata.name}'); do
-            crd_main_type="${CRD%%.*}" # e.g., for cephclusters.ceph.rook.io, only use 'cephclusters'
+            crd_main_type="${CRD%%.*}" # e.g., for cephconnections.ceph.rook.io, only use 'cephconnections'
             kubectl -n "$NAMESPACE" get -o yaml "$CRD" "$resource" >"${NS_DIR}"/"$crd_main_type"-describe--"$resource".txt
         done
     done

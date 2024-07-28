@@ -42,7 +42,7 @@ type NfsConfigSpec struct {
 // this profile
 type ClientProfileSpec struct {
 	//+kubebuilder:validation:Required
-	CephClusterRef corev1.LocalObjectReference `json:"cephClusterRef"`
+	CephConnectionRef corev1.LocalObjectReference `json:"cephConnectionRef"`
 
 	//+kubebuilder:validation:Optional
 	CephFs *CephFsConfigSpec `json:"cephFs,omitempty"`
