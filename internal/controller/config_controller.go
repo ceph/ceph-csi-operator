@@ -57,6 +57,6 @@ func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 // SetupWithManager sets up the controller with the Manager.
 func (r *ConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&csiv1alpha1.Config{}).
+		For(&csiv1alpha1.ClientProfile{}).
 		Complete(r)
 }

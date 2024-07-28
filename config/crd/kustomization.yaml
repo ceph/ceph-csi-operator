@@ -5,7 +5,7 @@ resources:
 - bases/csi.ceph.io_drivers.yaml
 - bases/csi.ceph.io_operatorconfigs.yaml
 - bases/csi.ceph.io_cephclusters.yaml
-- bases/csi.ceph.io_configs.yaml
+- bases/csi.ceph.io_clientprofiles.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:
@@ -18,7 +18,7 @@ patches:
 #- path: patches/cainjection_in_drivers.yaml
 #- path: patches/cainjection_in_operatorconfigs.yaml
 #- path: patches/cainjection_in_cephclusters.yaml
-#- path: patches/cainjection_in_configs.yaml
+#- path: patches/cainjection_in_clientprofiles.yaml
 #+kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # [WEBHOOK] To enable webhook, uncomment the following section
