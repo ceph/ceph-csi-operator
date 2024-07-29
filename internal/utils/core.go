@@ -86,19 +86,28 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 	return out
 }
 
-// maptostring serializes the provided map into a a string.
+// MapToString serializes the provided map into a a string.
 func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator string) string {
 	if len(m) == 0 {
 		return ""
 	}
 
+	// An item separator is added before each item. For the first item we want
+	// the separator to be an empty string
+	itemSep := ""
 	bldr := strings.Builder{}
-	bldr.WriteString("--kernelmountoptions=")
 	for key, value := range m {
+		bldr.WriteString(itemSep)
 		bldr.WriteString(string(key))
-		bldr.WriteString(keyValueSeperator)
-		bldr.WriteString(string(value))
-		bldr.WriteString(itemSeperator)
+
+		// Skip value serialization if it evaluates to an empty string
+		valAsString := string(value)
+		if valAsString != "" {
+			bldr.WriteString(keyValueSeperator)
+			bldr.WriteString(valAsString)
+		}
+
+		itemSep = itemSeperator
 	}
 	return bldr.String()
 }
