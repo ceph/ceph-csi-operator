@@ -184,6 +184,10 @@ envtest: $(ENVTEST) ## Download setup-envtest locally if necessary.
 $(ENVTEST): $(LOCALBIN)
 	$(call go-install-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest,$(ENVTEST_VERSION))
 
+.PHONY: check-all-committed
+check-all-committed: ## Fail in case there are uncommitted changes
+	test -z "$(shell git status --short)" || (echo "files were modified: " ; git status --short ; false)
+
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
