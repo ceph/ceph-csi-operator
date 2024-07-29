@@ -63,6 +63,14 @@ spec:
               cephFs:
                 description: CephFsConfigSpec defines the desired CephFs configuration
                 properties:
+                  fuseMountOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  kernelMountOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
                   subVolumeGroup:
                     type: string
                 type: object

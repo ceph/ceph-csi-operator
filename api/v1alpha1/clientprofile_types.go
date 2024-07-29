@@ -25,6 +25,12 @@ import (
 type CephFsConfigSpec struct {
 	//+kubebuilder:validation:Optional
 	SubVolumeGroup string `json:"subVolumeGroup,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	KernelMountOptions map[string]string `json:"kernelMountOptions,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	FuseMountOptions map[string]string `json:"fuseMountOptions,omitempty"`
 }
 
 // RbdConfigSpec defines the desired RBD configuration
