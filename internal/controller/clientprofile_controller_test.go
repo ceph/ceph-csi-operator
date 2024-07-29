@@ -30,7 +30,7 @@ import (
 	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 )
 
-var _ = Describe("Config Controller", func() {
+var _ = Describe("ClientProfile Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "test-resource"
 
@@ -40,11 +40,11 @@ var _ = Describe("Config Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		config := &csiv1alpha1.ClientProfile{}
+		clientProfile := &csiv1alpha1.ClientProfile{}
 
 		BeforeEach(func() {
-			By("creating the custom resource for the Kind Config")
-			err := k8sClient.Get(ctx, typeNamespacedName, config)
+			By("creating the custom resource for the Kind ClientProfile")
+			err := k8sClient.Get(ctx, typeNamespacedName, clientProfile)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &csiv1alpha1.ClientProfile{
 					ObjectMeta: metav1.ObjectMeta{
@@ -63,12 +63,12 @@ var _ = Describe("Config Controller", func() {
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Cleanup the specific resource instance Config")
+			By("Cleanup the specific resource instance ClientProfile")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
-			controllerReconciler := &ConfigReconciler{
+			controllerReconciler := &ClientProfileReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}
