@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: configs.csi.ceph.io
+  name: clientprofiles.csi.ceph.io
 spec:
   group: csi.ceph.io
   names:
-    kind: Config
-    listKind: ConfigList
-    plural: configs
-    singular: config
+    kind: ClientProfile
+    listKind: ClientProfileList
+    plural: clientprofiles
+    singular: clientprofile
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Config is the Schema for the configs API
+        description: ClientProfile is the Schema for the clientprofiles API
         properties:
           apiVersion:
             description: |-
@@ -37,9 +37,12 @@ spec:
           metadata:
             type: object
           spec:
-            description: ConfigSpec defines the desired state of Config
+            description: |-
+              ClientProfileSpec defines the desired state of Ceph CSI
+              configuration for volumes and snapshots configured to use
+              this profile
             properties:
-              cephClusterRef:
+              cephConnectionRef:
                 description: |-
                   LocalObjectReference contains enough information to let you locate the
                   referenced object inside the same namespace.
@@ -73,10 +76,13 @@ spec:
                     type: string
                 type: object
             required:
-            - cephClusterRef
+            - cephConnectionRef
             type: object
           status:
-            description: ConfigStatus defines the observed state of Config
+            description: |-
+              ClientProfileStatus defines the observed state of Ceph CSI
+              configuration for volumes and snapshots configured to use
+              this profile
             type: object
         type: object
     served: true

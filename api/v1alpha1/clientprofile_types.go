@@ -23,11 +23,13 @@ import (
 
 // CephFsConfigSpec defines the desired CephFs configuration
 type CephFsConfigSpec struct {
+	//+kubebuilder:validation:Optional
 	SubVolumeGroup string `json:"subVolumeGroup,omitempty"`
 }
 
 // RbdConfigSpec defines the desired RBD configuration
 type RbdConfigSpec struct {
+	//+kubebuilder:validation:Optional
 	RadosNamespace string `json:"radosNamespace,omitempty"`
 }
 
@@ -35,39 +37,50 @@ type RbdConfigSpec struct {
 type NfsConfigSpec struct {
 }
 
-// ConfigSpec defines the desired state of Config
-type ConfigSpec struct {
-	CephClusterRef corev1.LocalObjectReference `json:"cephClusterRef"`
-	CephFs         *CephFsConfigSpec           `json:"cephFs,omitempty"`
-	Rbd            *RbdConfigSpec              `json:"rbd,omitempty"`
-	Nfs            *NfsConfigSpec              `json:"nfs,omitempty"`
+// ClientProfileSpec defines the desired state of Ceph CSI
+// configuration for volumes and snapshots configured to use
+// this profile
+type ClientProfileSpec struct {
+	//+kubebuilder:validation:Required
+	CephConnectionRef corev1.LocalObjectReference `json:"cephConnectionRef"`
+
+	//+kubebuilder:validation:Optional
+	CephFs *CephFsConfigSpec `json:"cephFs,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	Rbd *RbdConfigSpec `json:"rbd,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	Nfs *NfsConfigSpec `json:"nfs,omitempty"`
 }
 
-// ConfigStatus defines the observed state of Config
-type ConfigStatus struct {
+// ClientProfileStatus defines the observed state of Ceph CSI
+// configuration for volumes and snapshots configured to use
+// this profile
+type ClientProfileStatus struct {
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Config is the Schema for the configs API
-type Config struct {
+// ClientProfile is the Schema for the clientprofiles API
+type ClientProfile struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ConfigSpec   `json:"spec,omitempty"`
-	Status ConfigStatus `json:"status,omitempty"`
+	Spec   ClientProfileSpec   `json:"spec,omitempty"`
+	Status ClientProfileStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// ConfigList contains a list of Config
-type ConfigList struct {
+// ClientProfileList contains a list of ClientProfile
+type ClientProfileList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Config `json:"items"`
+	Items           []ClientProfile `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Config{}, &ConfigList{})
+	SchemeBuilder.Register(&ClientProfile{}, &ClientProfileList{})
 }

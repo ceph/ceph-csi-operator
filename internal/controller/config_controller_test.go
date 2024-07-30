@@ -40,13 +40,13 @@ var _ = Describe("Config Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		config := &csiv1alpha1.Config{}
+		config := &csiv1alpha1.ClientProfile{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind Config")
 			err := k8sClient.Get(ctx, typeNamespacedName, config)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &csiv1alpha1.Config{
+				resource := &csiv1alpha1.ClientProfile{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
@@ -59,7 +59,7 @@ var _ = Describe("Config Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &csiv1alpha1.Config{}
+			resource := &csiv1alpha1.ClientProfile{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 

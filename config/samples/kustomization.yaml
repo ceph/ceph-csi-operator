@@ -2,6 +2,6 @@
 resources:
 - csi_v1alpha1_driver.yaml
 - csi_v1alpha1_operatorconfig.yaml
-- csi_v1alpha1_cephcluster.yaml
-- csi_v1alpha1_config.yaml
+- csi_v1alpha1_cephconnection.yaml
+- csi_v1alpha1_clientprofile.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

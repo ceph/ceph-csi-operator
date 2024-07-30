@@ -1,16 +1,16 @@
-# permissions for end users to edit cephclusters.
+# permissions for end users to edit clientprofiles.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: ceph-csi-operator
     app.kubernetes.io/managed-by: kustomize
-  name: cephcluster-editor-role
+  name: clientprofiles-editor-role
 rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - cephclusters
+  - clientprofiles
   verbs:
   - create
   - delete
@@ -22,6 +22,6 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - cephclusters/status
+  - clientprofiles/status
   verbs:
   - get

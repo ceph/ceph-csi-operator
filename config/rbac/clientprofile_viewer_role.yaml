@@ -1,16 +1,16 @@
-# permissions for end users to view configs.
+# permissions for end users to view clientprofiles.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: ceph-csi-operator
     app.kubernetes.io/managed-by: kustomize
-  name: config-viewer-role
+  name: clientprofile-viewer-role
 rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - configs
+  - clientprofiles
   verbs:
   - get
   - list
@@ -18,6 +18,6 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - configs/status
+  - clientprofiles/status
   verbs:
   - get

@@ -22,41 +22,50 @@ import (
 
 // ReadAffinitySpec capture Ceph CSI read affinity settings
 type ReadAffinitySpec struct {
+	//+kubebuilder:validation:Required
+	//+kubebuilder:validation:MinItems:=1
 	CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`
 }
 
-// CephClusterSpec defines the desired state of CephCluster
-type CephClusterSpec struct {
-	Monitors             []string         `json:"monitors"`
-	ReadAffinity         ReadAffinitySpec `json:"readAffinity,omitempty"`
-	RbdMirrorDaemonCount int              `json:"rbdMirrorDaemonCount,omitempty"`
+// CephConnectionSpec defines the desired state of CephConnection
+type CephConnectionSpec struct {
+	//+kubebuilder:validation:Required
+	//+kubebuilder:validation:MinItems:=1
+	Monitors []string `json:"monitors"`
+
+	//+kubebuilder:validation:Optional
+	ReadAffinity ReadAffinitySpec `json:"readAffinity,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:Minimum:=1
+	RbdMirrorDaemonCount int `json:"rbdMirrorDaemonCount,omitempty"`
 }
 
-// CephClusterStatus defines the observed state of CephCluster
-type CephClusterStatus struct {
+// CephConnectionStatus defines the observed state of CephConnection
+type CephConnectionStatus struct {
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// CephCluster is the Schema for the cephclusters API
-type CephCluster struct {
+// CephConnection is the Schema for the cephconnections API
+type CephConnection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   CephClusterSpec   `json:"spec,omitempty"`
-	Status CephClusterStatus `json:"status,omitempty"`
+	Spec   CephConnectionSpec   `json:"spec,omitempty"`
+	Status CephConnectionStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// CephClusterList contains a list of CephCluster
-type CephClusterList struct {
+// CephConnectionList contains a list of CephConnections
+type CephConnectionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []CephCluster `json:"items"`
+	Items           []CephConnection `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&CephCluster{}, &CephClusterList{})
+	SchemeBuilder.Register(&CephConnection{}, &CephConnectionList{})
 }

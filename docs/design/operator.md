@@ -63,7 +63,7 @@ In this diagram:
 
 ## CRDs for ceph-csi-operator
 
-### CephCSIOperatorConfig CRD
+### OperatorConfig CRD
 
 Manages operator-level configurations and offers a place to overwrite settings
 for CSI drivers. This CRD is a namespace-scoped CRD and a single CR named
@@ -77,7 +77,7 @@ The configurations are categorized into 2 different types
 
 ```yaml
 ---
-kind: CephCSIOperatorConfig
+kind: OperatorConfig
 apiVersion: csi.ceph.io/v1alpha1
 metadata:
   name: ceph-csi-operator-config
@@ -87,12 +87,12 @@ spec:
   driverSpecDefaults:
     log:
       logLevel: 5
-        logRotation:
-          # one of: hourly, daily, weekly, monthly
-          periodicity: daily
-          maxLogSize: 500M 
-          maxFiles: 5
-          logHostPath: /var/lib/cephcsi 
+      rotation:
+        # one of: hourly, daily, weekly, monthly
+        periodicity: daily
+        maxLogSize: 500M 
+        maxFiles: 5
+        logHostPath: /var/lib/cephcsi 
     clusterName: 5c63ad7e-74fe-4724-a511-4ccdc560da56
     enableMetadata: true
     grpcTimeout: 100
@@ -102,7 +102,7 @@ spec:
     encryption:
       configMapRef:
         name: encryption-config-map-name
-    plugin:
+    nodePlugin:
       priorityClassName: system-node-critical
       updateStrategy:
         type: RollingUpdate
@@ -159,14 +159,14 @@ spec:
           mountPropagation: Bidirectional
       kubeletDirPath: "/var/lib/kubelet"
       imagePullPolicy: IfNotPresent
-    provisioner:
+    controllerPlugin:
       priorityClassName: system-cluster-critical
       labels:
-        app: provisioner
+        app: cephfs-ctrlplugin
       privileged: true  
       annotations:
         k8s.v1.cni.cncf.io/networks: macvlan-conf-1
-      provisionerReplicas: 2
+      replicas: 2
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -243,7 +243,7 @@ status:
   reason: operator config successfully created
 ```
 
-### CephCSIDriver CRD
+### Driver CRD
 
 Manages the installation, lifecycle management, and configuration for CephFS,
 RBD, and NFS CSI drivers within namespaces.
@@ -257,7 +257,7 @@ RBD, and NFS CSI drivers within namespaces.
 
 ```yaml
 ---
-kind: CephCSIDriver
+kind: Driver
 apiVersion: csi.ceph.io/v1alpha1
 metadata:
   name: "<prefix>.<driver_type>.csi.ceph.com"
@@ -267,25 +267,25 @@ spec:
   encryption:
     configMapRef:
       name: encryption-config-map-name
-  plugin:
+  nodePlugin:
     priorityClassName: system-node-critical
     updateStrategy:
       type: RollingUpdate
       rollingUpdate:
         maxUnavailable: 1
     labels:
-      app: cephfs-plugin
+      app: cephfs-nodeplugin
     annotations:
       k8s.v1.cni.cncf.io/networks: macvlan-conf-1
     logRotator:
       cpu: "100m"
       memory: "32Mi"       
-  provisioner:
+  controllerPlugin:
     labels:
-      app: ceph-fs-provisioner
+      app: cephfs-ctrlplugin
     annotations:
       k8s.v1.cni.cncf.io/networks: macvlan-conf-1
-    provisionerReplicas: 2
+    replicas: 2
     leaderElection:
       leaseDuration: 100
       renewDeadline: 100
@@ -299,19 +299,17 @@ spec:
   deployCSIAddons: false
   kernelClient: true
   kernelMountOptions: ms_mode=secure
-status:
-  phase: Failed
-  reason: csi driver with same name already exists in the cluster
+status: {}
 ```
 
-### CephCSICephCluster CRD
+### CephConnection CRD
 
 Stores connection and configuration details for a single Ceph cluster and
 provide the information to be used by multiple CSI drivers.
 
 ```yaml
 ---
-kind: CephCSICephCluster
+kind: CephConnection
 apiVersion: csi.ceph.io/v1alpha1
 metadata:
   name: ceph-cluster-1
@@ -327,30 +325,24 @@ spec:
     - topology.kubernetes.io/region
     - topology.kubernetes.io/zone
   rbdMirrorDaemonCount: 2
-  cephConfig:
-    global:
-      auth_cluster_required: none
-      auth_service_required: none
-      auth_client_required: none
-      rbd_validate_pool: false
 status: {}
 ```
 
-### CephCSIConfig CRD
+### ClientProfile CRD
 
 Contains details about CephFS, RBD, and NFS configuration to be used when
-communicating with Ceph. Include a reference to a CephCSICephCluster holding
+communicating with Ceph. Include a reference to a CephConnection holding
 the connection information for the target Ceph cluster.
 
 ```yaml
 ---
-kind: CephCSIConfig
+kind: ClientProfile
 apiVersion: csi.ceph.io/v1alpha1
 metadata:
   name: storage
   namespace: <operator-namespace>
 spec:
-  cephClusterRef:
+  cephConnectionRef:
     name: ceph-cluster-1
   cephFS:
     subvolumeGroup: csi
@@ -358,22 +350,20 @@ spec:
     fuseMountOptions: debug
   rbd:
     radosNamespace: rados-test
-status:
-  phase: Succeeded
-  reason: successfully linked to CephClusterRef
+status: {}
 ```
 
-### CephCSIConfigMapping
+### ClientProfileMapping
 
-The CephCSIConfigMapping CR contains a mapping between local and remote Ceph
-cluster configurations.It also provides a mapping between the
-CephCSIConfigurations. The information in this CR helps Ceph-CSI identify
-peered blockpools. This can help with the correct management and consumption of
-volumes in backup and DR scenarios
+The ClientProfileMapping CR contains a mapping between pairs of Ceph
+CSI client profiles. The information in this CR helps Ceph CSI identify
+peered configuration between different k8s cluster. This information is 
+utilized in the management and consumption of volumes in backup and 
+DR scenarios
 
 ```yaml
 ---
-kind: CephCSIConfigMapping
+kind: ClientProfileMapping
 apiVersion: csi.ceph.io/v1
 metadata:
   name: storage
@@ -381,19 +371,20 @@ metadata:
 spec:
   blockPoolMapping:
   - local:
-      cephCSIConfigName: remote1-cephCSICluster-name
+      clientPorfileName: local-clientprofile-name
       poolID: 2
     remote:
-      cephCSIConfigName: remote1-cephCSICluster-name
+      clientProfileName: remote-clientprofile-name
       poolID: 2
   - local:
-      cephCSIConfigName: remote1-cephCSICluster-name
+      clientProfileName: another-local-clientprofile-name 
       poolID: 2
     remote:
-      cephCSIConfigName: remote2-cephCSICluster-name
+      clientProfileName: different-remote-clientprofile-name 
       poolID: 3
 ```
 
 By following this design document, the Ceph CSI Operator can be effectively
 implemented, providing automated and scalable management of Ceph CSI drivers
 within Kubernetes clusters.
+

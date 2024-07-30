@@ -59,6 +59,9 @@ spec:
                       If you select a non-kernel client, your application may be disrupted during upgrade.
                       See the upgrade guide: https://rook.io/docs/rook/latest/ceph-upgrade.html
                       NOTE! cephfs quota is not supported in kernel version < 4.17
+                    enum:
+                    - autodetect
+                    - kernel
                     type: string
                   clusterName:
                     description: |-
@@ -2957,8 +2960,6 @@ spec:
                                   type: object
                               type: object
                             type: array
-                        required:
-                        - imagePullPolicy
                         type: object
                       privileged:
                         description: |-
@@ -2970,6 +2971,7 @@ spec:
                         description: Set replicas for controller plugin's deployment.
                           Defaults to 2
                         format: int32
+                        minimum: 1
                         type: integer
                       resources:
                         description: Resource requirements for controller plugin's
@@ -3545,6 +3547,7 @@ spec:
                   grpcTimeout:
                     description: Set the gRPC timeout for gRPC call issued by the
                       driver components
+                    minimum: 0
                     type: integer
                   imageSet:
                     description: |-
@@ -3578,16 +3581,19 @@ spec:
                         description: |-
                           Duration in seconds that non-leader candidates will wait to force acquire leadership.
                           Default to 137 seconds.
+                        minimum: 0
                         type: integer
                       renewDeadline:
                         description: |-
                           Deadline in seconds that the acting leader will retry refreshing leadership before giving up.
                           Defaults to 107 seconds.
+                        minimum: 0
                         type: integer
                       retryPeriod:
                         description: |-
                           Retry Period in seconds the LeaderElector clients should wait between tries of actions.
                           Defaults to 26 seconds.
+                        minimum: 0
                         type: integer
                     type: object
                   liveness:
@@ -3597,6 +3603,8 @@ spec:
                     properties:
                       metricsPort:
                         description: Port to expose liveness metrics
+                        maximum: 65535
+                        minimum: 1024
                         type: integer
                     type: object
                   log:
@@ -3607,6 +3615,8 @@ spec:
                           Log level for driver pods,
                           Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
                           Default to 0
+                        maximum: 5
+                        minimum: 0
                         type: integer
                       rotation:
                         description: log rotation for csi pods
@@ -6533,8 +6543,6 @@ spec:
                                   type: object
                               type: object
                             type: array
-                        required:
-                        - imagePullPolicy
                         type: object
                       kubeletDirPath:
                         description: kubelet directory path, if kubelet configured
@@ -6898,10 +6906,14 @@ spec:
                   snapshotPolicy:
                     description: 'Select a policy for snapshot behavior: none, autodetect,
                       snapshot, sanpshotGroup'
+                    enum:
+                    - none|autodetect|volumegroupsnapshot|volumesnapshot
                     type: string
                 type: object
               logLevel:
                 description: Operator's log level
+                maximum: 3
+                minimum: 0
                 type: integer
             type: object
           status:

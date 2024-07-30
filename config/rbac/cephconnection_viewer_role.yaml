@@ -1,16 +1,16 @@
-# permissions for end users to view cephclusters.
+# permissions for end users to view cephconnections.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: ceph-csi-operator
     app.kubernetes.io/managed-by: kustomize
-  name: cephcluster-viewer-role
+  name: cephconnection-viewer-role
 rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - cephclusters
+  - cephconnections
   verbs:
   - get
   - list
@@ -18,6 +18,6 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - cephclusters/status
+  - cephconnections/status
   verbs:
   - get

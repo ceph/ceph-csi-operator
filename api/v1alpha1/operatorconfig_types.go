@@ -23,9 +23,13 @@ import (
 // OperatorConfigSpec defines the desired state of OperatorConfig
 type OperatorConfigSpec struct {
 	// Operator's log level
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:Minimum=0
+	//+kubebuilder:validation:Maximum=3
 	LogLevel int `json:"logLevel,omitempty"`
 
 	// Allow overwrite of hardcoded defaults for any driver managed by this operator
+	//+kubebuilder:validation:Optional
 	DriverSpecDefaults *DriverSpec `json:"driverSpecDefaults,omitempty"`
 }
 
