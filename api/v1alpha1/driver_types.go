@@ -53,13 +53,13 @@ type LogRotationSpec struct {
 }
 
 type LogSpec struct {
-	// Log level for driver pods,
+	// Log verbosity level for driver pods,
 	// Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
 	// Default to 0
 	//+kubebuilder:validation:Minimum=0
 	//+kubebuilder:validation:Maximum=5
 	//+kubebuilder:validation:Optional
-	LogLevel int `json:"logLevel,omitempty"`
+	Verbosity int `json:"verbosity,omitempty"`
 
 	// log rotation for csi pods
 	//+kubebuilder:validation:Optional

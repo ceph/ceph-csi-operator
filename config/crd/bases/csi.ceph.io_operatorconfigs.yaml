@@ -3610,14 +3610,6 @@ spec:
                   log:
                     description: Logging configuration for driver's pods
                     properties:
-                      logLevel:
-                        description: |-
-                          Log level for driver pods,
-                          Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
-                          Default to 0
-                        maximum: 5
-                        minimum: 0
-                        type: integer
                       rotation:
                         description: log rotation for csi pods
                         properties:
@@ -3646,6 +3638,14 @@ spec:
                             - monthly
                             type: string
                         type: object
+                      verbosity:
+                        description: |-
+                          Log verbosity level for driver pods,
+                          Supported values from 0 to 5. 0 for general useful logs (the default), 5 for trace level verbosity.
+                          Default to 0
+                        maximum: 5
+                        minimum: 0
+                        type: integer
                     type: object
                   nodePlugin:
                     description: Driver's plugin configuration
@@ -6913,11 +6913,16 @@ spec:
                     - volumesnapshot
                     type: string
                 type: object
-              logLevel:
-                description: Operator's log level
-                maximum: 3
-                minimum: 0
-                type: integer
+              log:
+                description: OperatorLogSpec provide log related settings for the
+                  operator
+                properties:
+                  verbosity:
+                    description: Operator's log level
+                    maximum: 3
+                    minimum: 0
+                    type: integer
+                type: object
             type: object
           status:
             description: OperatorConfigStatus defines the observed state of OperatorConfig

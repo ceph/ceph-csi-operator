@@ -11,10 +11,11 @@ kind: CephCSIOperatorConfig
 apiVersion: csi.ceph.io/v1alpha1
 ….
 spec: 
-    logLevel: 1 
+    log:
+        verbosity: 1 
     driverSpecDefaults: 
         log:
-            logLevel: 5
+            verbosity: 5
             rotation:
                 # one of: hourly, daily, weekly, monthly
                 periodicity: daily
@@ -32,10 +33,11 @@ metadata:
     name: "<prefix>.<driver_type>.csi.ceph.com" 
     namespace:  <operator-namespace> 
 spec: 
-    logLevel: 1 
+    log:
+        verbosity: 1 
     driverSpecDefaults: 
         log: 
-            logLevel: 5
+            verbosity: 5
             rotation:
                  # one of: hourly, daily, weekly, monthly
                 periodicity: daily
