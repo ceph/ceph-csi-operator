@@ -426,6 +426,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		grpcTimeout := cmp.Or(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
 		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
+		snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1a1.VolumeSnapshotSnapshotPolicy)
 
 		leaderElectionArgs := []string{
 			utils.LeaderElectionContainerArg,
@@ -579,8 +580,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									corev1.ResourceRequirements{},
 								),
 							},
-							// Snapshotter Sidecar Container
-							{
+						}
+						// Snapshotter Sidecar Container
+						if snPolicy != csiv1a1.NoneSnapshotPolicy {
+							containers = append(containers, corev1.Container{
 								Name:            "csi-snapshotter",
 								ImagePullPolicy: imagePullPolicy,
 								Image:           r.images["snapshotter"],
@@ -591,7 +594,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.TimeoutContainerArg(grpcTimeout),
 									utils.If(r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 									utils.If(
-										r.driverType != NfsDriverType,
+										r.driverType != NfsDriverType && snPolicy == csiv1a1.VolumeGroupSnapshotPolicy,
 										utils.EnableVolumeGroupSnapshotsContainerArg,
 										"",
 									),
@@ -603,7 +606,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									pluginSpec.Resources.Snapshotter,
 									corev1.ResourceRequirements{},
 								),
-							},
+							})
 						}
 						// Addons Sidecar Container
 						if ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
