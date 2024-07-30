@@ -1,6 +1,7 @@
 module github.com/ceph/ceph-csi-operator
 
-go 1.22
+go 1.22.0
+
 toolchain go1.22.5
 
 require (
