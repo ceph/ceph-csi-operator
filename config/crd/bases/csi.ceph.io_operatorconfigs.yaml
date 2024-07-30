@@ -6907,7 +6907,10 @@ spec:
                     description: 'Select a policy for snapshot behavior: none, autodetect,
                       snapshot, sanpshotGroup'
                     enum:
-                    - none|autodetect|volumegroupsnapshot|volumesnapshot
+                    - none
+                    - autodetect
+                    - volumegroupsnapshot
+                    - volumesnapshot
                     type: string
                 type: object
               logLevel:

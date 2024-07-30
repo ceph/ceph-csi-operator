@@ -39,7 +39,6 @@ var imageDefaults = map[string]string{
 
 const (
 	defaultGRrpcTimeout   = 150
-	defaultSnapshotPolicy = csiv1a1.AutoDetectSnapshotPolicy
 	defaultKubeletDirPath = "/var/lib/kubelet"
 )
 

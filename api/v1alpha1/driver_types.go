@@ -287,7 +287,7 @@ type DriverSpec struct {
 
 	// Select a policy for snapshot behavior: none, autodetect, snapshot, sanpshotGroup
 	//+kubebuilder:validation:Optional
-	//+kubebuilder:validation:Enum:=none|autodetect|volumegroupsnapshot|volumesnapshot
+	//+kubebuilder:validation:Enum:=none;autodetect;volumegroupsnapshot;volumesnapshot
 	SnapshotPolicy SnapshotPolicyType `json:"snapshotPolicy,omitempty"`
 
 	// OMAP generator will generate the omap mapping between the PV name and the RBD image.
