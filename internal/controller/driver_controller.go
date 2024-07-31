@@ -424,7 +424,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		)
 		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		grpcTimeout := cmp.Or(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
-		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
+		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).Verbosity
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 
 		leaderElectionArgs := []string{
@@ -462,7 +462,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								ImagePullPolicy: imagePullPolicy,
 								Args: []string{
 									utils.TypeContainerArg(string(r.driverType)),
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.EndpointContainerArg,
 									utils.NodeIdContainerArg,
 									utils.ControllerServerContainerArg,
@@ -519,7 +519,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["provisioner"],
 								Args: append(
 									slices.Clone(leaderElectionArgs),
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.CsiAddressContainerArg,
 									utils.TimeoutContainerArg(grpcTimeout),
 									utils.RetryIntervalStartContainerArg,
@@ -545,7 +545,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["resizer"],
 								Args: append(
 									slices.Clone(leaderElectionArgs),
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.CsiAddressContainerArg,
 									utils.TimeoutContainerArg(r.driver.Spec.GRpcTimeout),
 									utils.HandleVolumeInuseErrorContainerArg,
@@ -566,7 +566,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["attacher"],
 								Args: append(
 									slices.Clone(leaderElectionArgs),
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.CsiAddressContainerArg,
 									utils.TimeoutContainerArg(grpcTimeout),
 									utils.If(r.isRdbDriver(), utils.DefaultFsTypeContainerArg, ""),
@@ -586,7 +586,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["snapshotter"],
 								Args: append(
 									slices.Clone(leaderElectionArgs),
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.CsiAddressContainerArg,
 									utils.TimeoutContainerArg(grpcTimeout),
 									utils.If(r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
@@ -613,7 +613,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								ImagePullPolicy: imagePullPolicy,
 								Args: append(
 									slices.Clone(leaderElectionArgs),
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.NodeIdContainerArg,
 									utils.PodContainerArg,
 									utils.PodUidContainerArg,
@@ -646,7 +646,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
 								Args: []string{
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.TypeContainerArg("controller"),
 									utils.DriverNamespaceContainerArg,
 									utils.DriverNameContainerArg(r.driver.Name),
@@ -752,7 +752,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 			fmt.Sprintf("csi-%s-nodeplugin-sa", r.driverType),
 		)
 		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
-		logLevel := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).LogLevel
+		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).Verbosity
 		kubeletDirPath := cmp.Or(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 
@@ -798,7 +798,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									AllowPrivilegeEscalation: ptr.To(true),
 								},
 								Args: []string{
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.TypeContainerArg(string(r.driverType)),
 									utils.NodeServerContainerArg,
 									utils.NodeIdContainerArg,
@@ -859,7 +859,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									},
 								},
 								Args: []string{
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.KubeletRegistrationPathContainerArg(kubeletDirPath, r.driver.Name),
 									utils.CsiAddressContainerArg,
 								},
@@ -887,7 +887,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 								},
 								Args: []string{
 									utils.NodeIdContainerArg,
-									utils.LogLevelContainerArg(logLevel),
+									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.CsiAddonsAddressContainerArg,
 									utils.ControllerPortContainerArg,
 									utils.PodContainerArg,

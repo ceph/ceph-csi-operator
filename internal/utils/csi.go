@@ -331,7 +331,7 @@ var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeEx
 var EnableVolumeGroupSnapshotsContainerArg = "--enable-volume-group-snapshots=true"
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
 
-func LogLevelContainerArg(level int) string {
+func LogVerbosityContainerArg(level int) string {
 	return fmt.Sprintf("--v=%d", Clamp(level, 0, 5))
 }
 func TypeContainerArg(t string) string {
