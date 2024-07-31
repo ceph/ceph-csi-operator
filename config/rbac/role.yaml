@@ -50,6 +50,32 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
+  - clientprofilemappings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilemappings/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilemappings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - csi.ceph.io
+  resources:
   - configs
   verbs:
   - create
