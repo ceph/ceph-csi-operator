@@ -72,10 +72,6 @@ const (
 	// Disables the feature and remove the snapshotter sidercar
 	NoneSnapshotPolicy SnapshotPolicyType = "none"
 
-	// Inspect the CRD's for volumesnapshot and volumegroupsnapshot and enable
-	// corresponding features (will results in deployment of a snapshotter sidecar)
-	AutoDetectSnapshotPolicy SnapshotPolicyType = "autodetect"
-
 	// Enable the volumegroupsnapshot feature (will results in deployment of a snapshotter sidecar)
 	VolumeGroupSnapshotPolicy SnapshotPolicyType = "volumeGroupSnapshot"
 
