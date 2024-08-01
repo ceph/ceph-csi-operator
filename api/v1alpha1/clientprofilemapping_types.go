@@ -42,7 +42,7 @@ type BlockPoolMappingSpec struct {
 // ClientProfileMappingSpec defines the desired state of ClientProfileMapping
 type ClientProfileMappingSpec struct {
 	//+kubebuilder:validation:Optional
-	BlockPoolMapping *BlockPoolMappingSpec `json:"blockPoolMapping,omitempty"`
+	BlockPoolMapping []BlockPoolMappingSpec `json:"blockPoolMapping,omitempty"`
 }
 
 // ClientProfileMappingStatus defines the observed state of ClientProfileMapping
