@@ -77,3 +77,17 @@ jobs:
           check-latest: true
       - name: govulncheck
         uses: golang/govulncheck-action@v1
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        severity: warning
+        check_together: 'yes'
+        ignore_paths: 'vendor'
+        disable_matcher: false
+        format: gcc
