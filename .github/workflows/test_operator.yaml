@@ -1,4 +1,4 @@
-name: setup-ceph-cluster
+name: test-ceph-csi-operator
 on:
   pull_request:
     branches:
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ceph-cluster:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -50,3 +50,6 @@ jobs:
 
       - name: create ceph cluster
         run: test/scripts/github-action-helper.sh deploy_rook
+
+      - name: test ceph-csi-operator
+        run: test/scripts/test-ceph-csi-operator.sh
