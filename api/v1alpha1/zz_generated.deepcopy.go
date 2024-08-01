@@ -305,8 +305,8 @@ func (in *ClientProfileMappingSpec) DeepCopyInto(out *ClientProfileMappingSpec) 
 	*out = *in
 	if in.BlockPoolMapping != nil {
 		in, out := &in.BlockPoolMapping, &out.BlockPoolMapping
-		*out = new(BlockPoolMappingSpec)
-		**out = **in
+		*out = make([]BlockPoolMappingSpec, len(*in))
+		copy(*out, *in)
 	}
 }
 

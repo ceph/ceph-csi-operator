@@ -41,30 +41,32 @@ spec:
             description: ClientProfileMappingSpec defines the desired state of ClientProfileMapping
             properties:
               blockPoolMapping:
-                description: BlockPoolMappingSpec define a mapiing between a local
-                  and remote block pools
-                properties:
-                  local:
-                    description: BlockPoolRefSpec identify a blockpool - client profile
-                      pair
-                    properties:
-                      clientProfileName:
-                        type: string
-                      poolId:
-                        minimum: 0
-                        type: integer
-                    type: object
-                  remote:
-                    description: BlockPoolRefSpec identify a blockpool - client profile
-                      pair
-                    properties:
-                      clientProfileName:
-                        type: string
-                      poolId:
-                        minimum: 0
-                        type: integer
-                    type: object
-                type: object
+                items:
+                  description: BlockPoolMappingSpec define a mapiing between a local
+                    and remote block pools
+                  properties:
+                    local:
+                      description: BlockPoolRefSpec identify a blockpool - client
+                        profile pair
+                      properties:
+                        clientProfileName:
+                          type: string
+                        poolId:
+                          minimum: 0
+                          type: integer
+                      type: object
+                    remote:
+                      description: BlockPoolRefSpec identify a blockpool - client
+                        profile pair
+                      properties:
+                        clientProfileName:
+                          type: string
+                        poolId:
+                          minimum: 0
+                          type: integer
+                      type: object
+                  type: object
+                type: array
             type: object
           status:
             description: ClientProfileMappingStatus defines the observed state of
