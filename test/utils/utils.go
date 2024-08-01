@@ -108,15 +108,9 @@ func InstallCertManager() error {
 	return err
 }
 
-// LoadImageToKindCluster loads a local docker image to the kind cluster
-func LoadImageToKindClusterWithName(name string) error {
-	cluster := "kind"
-	if v, ok := os.LookupEnv("KIND_CLUSTER"); ok {
-		cluster = v
-	}
-	kindOptions := []string{"load", "docker-image", name, "--name", cluster}
-	//nolint:gosec
-	cmd := exec.Command("kind", kindOptions...)
+// LoadImageToKindCluster loads a local docker image to the minikube cluster
+func LoadImageToCluster(name string) error {
+	cmd := exec.Command("minikube", "image", "load", name)
 	_, err := Run(cmd)
 	return err
 }
