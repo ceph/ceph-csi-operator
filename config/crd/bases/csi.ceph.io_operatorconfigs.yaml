@@ -3526,6 +3526,9 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
+                        x-kubernetes-validations:
+                        - message: '''.name'' cannot be empty'
+                          rule: self.name != ""
                     type: object
                   fsGroupPolicy:
                     description: |-
@@ -3567,6 +3570,9 @@ spec:
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
+                    x-kubernetes-validations:
+                    - message: '''.name'' cannot be empty'
+                      rule: self.?name.orValue("") != ""
                   kernelMountOptions:
                     additionalProperties:
                       type: string

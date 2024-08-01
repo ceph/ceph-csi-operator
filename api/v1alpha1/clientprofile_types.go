@@ -48,6 +48,7 @@ type NfsConfigSpec struct {
 // this profile
 type ClientProfileSpec struct {
 	//+kubebuilder:validation:Required
+	//+kubebuilder:validation:XValidation:rule=self.name != "",message="'.name' cannot be empty"
 	CephConnectionRef corev1.LocalObjectReference `json:"cephConnectionRef"`
 
 	//+kubebuilder:validation:Optional

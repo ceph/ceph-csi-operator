@@ -3479,6 +3479,9 @@ spec:
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
+                    x-kubernetes-validations:
+                    - message: '''.name'' cannot be empty'
+                      rule: self.name != ""
                 type: object
               fsGroupPolicy:
                 description: |-
@@ -3520,6 +3523,9 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+                x-kubernetes-validations:
+                - message: '''.name'' cannot be empty'
+                  rule: self.?name.orValue("") != ""
               kernelMountOptions:
                 additionalProperties:
                   type: string
@@ -6831,6 +6837,9 @@ spec:
             description: DriverStatus defines the observed state of Driver
             type: object
         type: object
+        x-kubernetes-validations:
+        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'''
+          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$')
     served: true
     storage: true
     subresources:
