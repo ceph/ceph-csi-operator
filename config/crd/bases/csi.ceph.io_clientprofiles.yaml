@@ -60,6 +60,9 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+                x-kubernetes-validations:
+                - message: '''.name'' cannot be empty'
+                  rule: self.name != ""
               cephFs:
                 description: CephFsConfigSpec defines the desired CephFs configuration
                 properties:

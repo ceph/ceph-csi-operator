@@ -81,6 +81,7 @@ const (
 
 type EncryptionSpec struct {
 	//+kubebuilder:validation:Required
+	//+kubebuilder:validation:XValidation:rule=self.name != "",message="'.name' cannot be empty"
 	ConfigMapRef corev1.LocalObjectReference `json:"configMapName,omitempty"`
 }
 
@@ -263,6 +264,7 @@ type DriverSpec struct {
 	// A reference to a ConfigMap resource holding image overwrite for deployed
 	// containers
 	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:XValidation:rule=self.?name.orValue("") != "",message="'.name' cannot be empty"
 	ImageSet *corev1.LocalObjectReference `json:"imageSet,omitempty"`
 
 	// Cluster name identifier to set as metadata on the CephFS subvolume and RBD images. This will be useful in cases
@@ -359,6 +361,7 @@ type DriverStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
+// +kubebuilder:validation:XValidation:rule=self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$'),message=".metadata.name must match: '[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'"
 // Driver is the Schema for the drivers API
 type Driver struct {
 	metav1.TypeMeta   `json:",inline"`
