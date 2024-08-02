@@ -8,5 +8,5 @@ subjects:
     namespace: system
 roleRef:
   kind: Role
-  name: csi-rbd-ctrlplugin-role
+  name: csi-rbd-ctrlplugin-r
   apiGroup: rbac.authorization.k8s.io

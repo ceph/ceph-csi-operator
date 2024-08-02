@@ -8,5 +8,5 @@ subjects:
     namespace: system
 roleRef:
   kind: Role
-  name: csi-rbd-nodeplugin-role
+  name: csi-rbd-nodeplugin-r
   apiGroup: rbac.authorization.k8s.io

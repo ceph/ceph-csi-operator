@@ -349,12 +349,14 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 	desiredCsiDriver.Spec.FSGroupPolicy = ptr.To(
 		cmp.Or(
 			r.driver.Spec.FsGroupPolicy,
-			r.driver.Spec.FsGroupPolicy,
 			storagev1.FileFSGroupPolicy,
 		),
 	)
 	if nodePlugin := r.driver.Spec.NodePlugin; nodePlugin != nil {
-		desiredCsiDriver.Spec.SELinuxMount = nodePlugin.EnableSeLinuxHostMount
+		desiredCsiDriver.Spec.SELinuxMount = cmp.Or(
+			nodePlugin.EnableSeLinuxHostMount,
+			desiredCsiDriver.Spec.SELinuxMount,
+		)
 	}
 
 	ownerObjKey := client.ObjectKeyFromObject(&r.driver)
@@ -828,6 +830,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										utils.LibModulesVolumeMount,
 										utils.KeysTmpDirVolumeMount,
 										utils.PluginDirVolumeMount,
+										utils.CsiConfigVolumeMount,
 										utils.PluginMountDirVolumeMount(kubeletDirPath),
 										utils.PodsMountDirVolumeMount(kubeletDirPath),
 									}
@@ -965,6 +968,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 							utils.HostRunMountVolume,
 							utils.LibModulesVolume,
 							utils.KeysTmpDirVolume,
+							utils.CsiConfigVolume,
 							utils.PluginDirVolume(kubeletDirPath, r.driver.Name),
 							utils.PluginMountDirVolume(kubeletDirPath),
 							utils.PodsMountDirVolume(kubeletDirPath),
