@@ -8,5 +8,5 @@ subjects:
     namespace: system
 roleRef:
   kind: Role
-  name: csi-cephfs-ctrlplugin-role
+  name: csi-cephfs-ctrlplugin-r
   apiGroup: rbac.authorization.k8s.io

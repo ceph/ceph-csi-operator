@@ -326,7 +326,9 @@ var PoolTimeContainerArg = "--polltime=60s"
 var ExtraCreateMetadataContainerArg = "--extra-create-metadata=true"
 var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=true"
 var HonorPVReclaimPolicyContainerArg = "--feature-gates=HonorPVReclaimPolicy=true"
-var TopologyContainerArg = "--feature-gates=Topology=true"
+
+// TODO: the value for this field should be based on "domainlabels" in RBD nodeplugin, so "false" here is temporary.
+var TopologyContainerArg = "--feature-gates=Topology=false"
 var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
 var EnableVolumeGroupSnapshotsContainerArg = "--enable-volume-group-snapshots=true"
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
