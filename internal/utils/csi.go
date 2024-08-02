@@ -33,6 +33,8 @@ const (
 	pluginDirVolumeName      = "plugin-dir"
 	podsMountDirVolumeName   = "pods-mount-dir"
 	pluginMountDirVolumeName = "plugin-mount-dir"
+
+	CsiConfigMapConfigKey = "config.json"
 )
 
 // Ceph CSI common volumes

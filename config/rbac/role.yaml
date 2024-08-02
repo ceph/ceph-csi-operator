@@ -9,8 +9,13 @@ rules:
   resources:
   - configmaps
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -50,6 +55,15 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
+  - cephconnections
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
   - clientprofilemappings
   verbs:
   - create
@@ -76,7 +90,7 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - configs
+  - clientprofiles
   verbs:
   - create
   - delete
@@ -88,13 +102,13 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
-  - configs/finalizers
+  - clientprofiles/finalizers
   verbs:
   - update
 - apiGroups:
   - csi.ceph.io
   resources:
-  - configs/status
+  - clientprofiles/status
   verbs:
   - get
   - patch

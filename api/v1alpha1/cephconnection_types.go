@@ -34,7 +34,7 @@ type CephConnectionSpec struct {
 	Monitors []string `json:"monitors"`
 
 	//+kubebuilder:validation:Optional
-	ReadAffinity ReadAffinitySpec `json:"readAffinity,omitempty"`
+	ReadAffinity *ReadAffinitySpec `json:"readAffinity,omitempty"`
 
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:validation:Minimum:=1
