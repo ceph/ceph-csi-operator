@@ -30,3 +30,6 @@ go.work.sum
 *.orig
 *.patch
 *.rej
+
+# Locally generated install files
+dist/
