@@ -32,6 +32,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -318,85 +319,80 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 }
 
 func (r *driverReconcile) reconcileK8sCsiDriver() error {
-	existingCsiDriver := &storagev1.CSIDriver{}
-	existingCsiDriver.Name = r.driver.Name
+	csiDriver := &storagev1.CSIDriver{}
+	csiDriver.Name = r.driver.Name
 
-	log := r.log.WithValues("driverName", existingCsiDriver.Name)
+	log := r.log.WithValues("driverName", csiDriver.Name)
 	log.Info("Reconciling CSI Driver")
 
-	if err := r.Get(r.ctx, client.ObjectKeyFromObject(existingCsiDriver), existingCsiDriver); client.IgnoreNotFound(err) != nil {
-		log.Error(err, "Failed to load CSI Driver resource")
-		return err
-	}
-
-	desiredCsiDriver := &storagev1.CSIDriver{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        existingCsiDriver.Name,
-			Labels:      existingCsiDriver.Labels,
-			Annotations: existingCsiDriver.Annotations,
-		},
-	}
-
-	// There is a need to start with a copy of the existing driver sepc because the
-	// spec is being edited by another party. That in turn fails the equality check
-	// unless we gureente that we started from the same point.
-	existingCsiDriver.Spec.DeepCopyInto(&desiredCsiDriver.Spec)
-	desiredCsiDriver.Spec.PodInfoOnMount = ptr.To(false)
-	desiredCsiDriver.Spec.AttachRequired = cmp.Or(
-		r.driver.Spec.AttachRequired,
-		ptr.To(true),
-	)
-	desiredCsiDriver.Spec.FSGroupPolicy = ptr.To(
-		cmp.Or(
-			r.driver.Spec.FsGroupPolicy,
-			storagev1.FileFSGroupPolicy,
-		),
-	)
-	if nodePlugin := r.driver.Spec.NodePlugin; nodePlugin != nil {
-		desiredCsiDriver.Spec.SELinuxMount = cmp.Or(
-			nodePlugin.EnableSeLinuxHostMount,
-			desiredCsiDriver.Spec.SELinuxMount,
-		)
-	}
-
-	ownerObjKey := client.ObjectKeyFromObject(&r.driver)
-	if bytes, err := json.Marshal(ownerObjKey); err == nil {
-		if utils.AddAnnotation(desiredCsiDriver, ownerRefAnnotationKey, string(bytes)) {
-			log.Info("ownerref annotation added to CSI driver resource")
-		}
-	} else {
-		log.Error(
-			err,
-			"Failed to JSON marshal owner obj key for CSI driver resource",
-			"ownerObjKey",
-			ownerObjKey,
-		)
-		return err
-	}
-
-	if !reflect.DeepEqual(desiredCsiDriver.Spec, existingCsiDriver.Spec) {
-		if existingCsiDriver.UID != "" {
-			log.Info("CSI Driver resource exist but does not meet desired state")
-			if err := r.Delete(r.ctx, existingCsiDriver); err != nil {
-				log.Error(err, "Failed to delete existing CSI Driver resource")
-				return err
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, csiDriver, func() error {
+		ownerObjKey := client.ObjectKeyFromObject(&r.driver)
+		if bytes, err := json.Marshal(ownerObjKey); err == nil {
+			if utils.AddAnnotation(csiDriver, ownerRefAnnotationKey, string(bytes)) {
+				log.Info("ownerref annotation added to CSI driver resource")
 			}
-			log.Info("CSI Driver resource deleted successfully")
 		} else {
-			log.Info("CSI Driver resource does not exist")
-		}
-
-		if err := r.Create(r.ctx, desiredCsiDriver); err != nil {
-			log.Error(err, "Failed to create a CSI Driver resource")
+			log.Error(
+				err,
+				"Failed to JSON marshal owner obj key for CSI driver resource",
+				"ownerObjKey",
+				ownerObjKey,
+			)
 			return err
 		}
 
-		log.Info("CSI Driver resource created successfully")
-	} else {
-		log.Info("CSI Driver resource already meets desired state")
-	}
+		csiDriver.Spec.PodInfoOnMount = ptr.To(false)
+		csiDriver.Spec.AttachRequired = cmp.Or(
+			r.driver.Spec.AttachRequired,
+			ptr.To(true),
+		)
+		csiDriver.Spec.FSGroupPolicy = ptr.To(
+			cmp.Or(
+				r.driver.Spec.FsGroupPolicy,
+				storagev1.FileFSGroupPolicy,
+			),
+		)
+		if nodePlugin := r.driver.Spec.NodePlugin; nodePlugin != nil {
+			csiDriver.Spec.SELinuxMount = cmp.Or(
+				nodePlugin.EnableSeLinuxHostMount,
+				csiDriver.Spec.SELinuxMount,
+			)
+		}
 
-	return nil
+		return nil
+	})
+
+	// We are expecting an Invalid operation error, on an existing CSIDriver, in the rear case
+	// where the new desired state require reconfiguration of an immutable field.
+	// For CSIDriver, ".spec.attachRequired" is an invalid field
+	if csiDriver.UID != "" && k8serrors.IsInvalid(err) {
+		r.log.Info("CSIDriver exists but cannot be updated, trying recreate instead")
+
+		if err = r.Delete(r.ctx, csiDriver); err != nil {
+			r.log.Error(err, "Failed deleting existing CSIDriver")
+			return err
+		}
+
+		csiDriver = &storagev1.CSIDriver{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        csiDriver.Name,
+				Labels:      csiDriver.Labels,
+				Annotations: csiDriver.Annotations,
+			},
+			Spec: csiDriver.Spec,
+		}
+		if err := r.Create(r.ctx, csiDriver); err != nil {
+			r.log.Error(err, "Failed recreating CSIDriver")
+			return err
+		}
+
+		log.Info("CSIDriver recreated successfully")
+		return nil
+
+	} else {
+		logCreateOrUpdateResult(log, "CSIDriver", csiDriver, opResult, err)
+		return err
+	}
 }
 
 func (r *driverReconcile) reconcileControllerPluginDeployment() error {
@@ -1094,18 +1090,16 @@ func logCreateOrUpdateResult(
 	err error,
 ) {
 	if err != nil {
-		verb := utils.If(obj.GetUID() == "", "create", "update")
-		log.Error(err, fmt.Sprintf("Failed to %s %s", verb, subject))
+		verb := utils.If(obj.GetUID() == "", "creating", "updating")
+		log.Error(err, fmt.Sprintf("Failed %s %s", verb, subject))
 		return
 	}
 
 	switch opRes {
 	case ctrlutil.OperationResultNone:
 		log.Info(fmt.Sprintf("%s is already up to date", subject))
-	case ctrlutil.OperationResultUpdated:
-		log.Info(fmt.Sprintf("%s updated successfully", subject))
-	case ctrlutil.OperationResultCreated:
-		log.Info(fmt.Sprintf("%s created successfully", subject))
+	default:
+		log.Info(fmt.Sprintf("%s %s successfully", subject, opRes))
 	}
 }
 
