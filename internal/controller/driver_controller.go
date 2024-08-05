@@ -526,7 +526,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.PreventVolumeModeConversionContainerArg,
 									utils.HonorPVReclaimPolicyContainerArg,
 									utils.If(r.isRdbDriver(), utils.DefaultFsTypeContainerArg, ""),
-									utils.If(r.isRdbDriver(), utils.TopologyContainerArg, ""),
+									utils.If(r.isRdbDriver(), utils.ImmediateTopologyContainerArg, ""),
 									utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -757,6 +757,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		kubeletDirPath := cmp.Or(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 
+		topology := r.isRdbDriver() && r.driver.Spec.NodePlugin.Topology != nil
+		domainLabels := ptr.Deref(pluginSpec.Topology, csiv1a1.TopologySpec{}).DomainLabels
+
 		daemonSet.Spec = appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{"app": appName},
@@ -811,7 +814,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									utils.If(r.isRdbDriver(), utils.StagingPathContainerArg(kubeletDirPath), ""),
 									utils.If(r.isCephFsDriver(), utils.KernelMountOptionsContainerArg(r.driver.Spec.KernelMountOptions), ""),
 									utils.If(r.isCephFsDriver(), utils.FuseMountOptionsContainerArg(r.driver.Spec.FuseMountOptions), ""),
-									// TODO: RBD only, add "--domainlabels={{ .CSIDomainLabels }}". not sure hot to get the info
+									utils.If(topology, utils.DomainLabelsContainerArg(domainLabels), ""),
 								},
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
