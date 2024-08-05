@@ -18,6 +18,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
@@ -328,9 +329,7 @@ var PoolTimeContainerArg = "--polltime=60s"
 var ExtraCreateMetadataContainerArg = "--extra-create-metadata=true"
 var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=true"
 var HonorPVReclaimPolicyContainerArg = "--feature-gates=HonorPVReclaimPolicy=true"
-
-// TODO: the value for this field should be based on "domainlabels" in RBD nodeplugin, so "false" here is temporary.
-var TopologyContainerArg = "--feature-gates=Topology=false"
+var ImmediateTopologyContainerArg = "--immediate-topology=false"
 var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
 var EnableVolumeGroupSnapshotsContainerArg = "--enable-volume-group-snapshots=true"
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
@@ -390,6 +389,13 @@ func FuseMountOptionsContainerArg(options map[string]string) string {
 	return If(
 		len(options) == 0,
 		fmt.Sprintf("--fusemountoptions==%s", MapToString(options, "=", ",")),
+		"",
+	)
+}
+func DomainLabelsContainerArg(options []string) string {
+	return If(
+		len(options) > 0,
+		fmt.Sprintf("--domainlabels=%s", strings.Join(options, ",")),
 		"",
 	)
 }

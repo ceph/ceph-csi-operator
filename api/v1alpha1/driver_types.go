@@ -146,6 +146,12 @@ type NodePluginResourcesSpec struct {
 	Plugin *corev1.ResourceRequirements `json:"plugin,omitempty"`
 }
 
+// TopologySpec defines the topology settings for the plugin pods
+type TopologySpec struct {
+	// Domain labels define which node labels to use as domains for CSI nodeplugins to advertise their domains
+	//+kubebuilder:validation:Required
+	DomainLabels []string `json:"domainLabels,omitempty"`
+}
 type NodePluginSpec struct {
 	// Embedded common pods spec
 	PodCommonSpec `json:",inline"`
@@ -166,6 +172,9 @@ type NodePluginSpec struct {
 	// Control the host mount of /etc/selinux for csi plugin pods. Defaults to false
 	//+kubebuilder:validation:Optional
 	EnableSeLinuxHostMount *bool `json:"EnableSeLinuxHostMount,omitempty"`
+	// Topology settings for the plugin pods
+	//+kubebuilder:validation:Optional
+	Topology *TopologySpec `json:"topology,omitempty"`
 }
 
 type ControllerPluginResourcesSpec struct {

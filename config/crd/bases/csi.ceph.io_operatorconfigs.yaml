@@ -4906,6 +4906,17 @@ spec:
                               type: string
                           type: object
                         type: array
+                      topology:
+                        description: Topology settings for the plugin pods
+                        properties:
+                          domainLabels:
+                            description: Domain labels define which node labels to
+                              use as domains for CSI nodeplugins to advertise their
+                              domains
+                            items:
+                              type: string
+                            type: array
+                        type: object
                       updateStrategy:
                         description: |-
                           Driver's plugin daemonset update strategy, supported values are OnDelete and RollingUpdate.
