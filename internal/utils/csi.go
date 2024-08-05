@@ -26,7 +26,7 @@ import (
 const (
 	SocketDir         = "/csi"
 	csiEndpoint       = "unix://" + SocketDir + "/csi.sock"
-	csiAddonsEndpoint = "unix://" + SocketDir + "/csi-addons.sock.sock"
+	csiAddonsEndpoint = "unix://" + SocketDir + "/csi-addons.sock"
 
 	kmsConfigVolumeName      = "ceph-csi-kms-config"
 	registrationVolumeName   = "registration-dir"
@@ -308,8 +308,9 @@ var CsiAddonsContainerPort = corev1.ContainerPort{
 // Ceph CSI common container arguments
 var CsiAddressContainerArg = fmt.Sprintf("--csi-address=%s", csiEndpoint)
 var EndpointContainerArg = fmt.Sprintf("--endpoint=%s", csiEndpoint)
-var CsiAddonsEndpointContainerArg = fmt.Sprintf("--csi-addons-endpoint=(%s)", csiAddonsEndpoint)
-var CsiAddonsAddressContainerArg = fmt.Sprintf("--csi-addons-address=(%s)", csiAddonsEndpoint)
+var CsiAddonsEndpointContainerArg = fmt.Sprintf("--csi-addons-endpoint=%s", csiAddonsEndpoint)
+var CsiAddonsAddressContainerArg = fmt.Sprintf("--csi-addons-address=%s", csiAddonsEndpoint)
+var CsiAddonsNodeIdContainerArg = fmt.Sprintf("--node-id=$(%s)", NodeIdEnvVar.Name)
 var LeaderElectionContainerArg = "--leader-election=true"
 var NodeIdContainerArg = fmt.Sprintf("--nodeid=$(%s)", NodeIdEnvVar.Name)
 var PidlimitContainerArg = "--pidlimit=-1"
@@ -320,7 +321,7 @@ var DefaultFsTypeContainerArg = "--default-fstype=ext4"
 var HandleVolumeInuseErrorContainerArg = "--handle-volume-inuse-error=false"
 var PodUidContainerArg = fmt.Sprintf("--pod-uid=$(%s)", PodUidEnvVar.Name)
 var PodContainerArg = fmt.Sprintf("--pod=$(%s)", PodNameEnvVar.Name)
-var NamespaceContainerArg = fmt.Sprintf("--namespace=(%s)", PodNamespaceEnvVar.Name)
+var NamespaceContainerArg = fmt.Sprintf("--namespace=$(%s)", PodNamespaceEnvVar.Name)
 var ControllerPortContainerArg = fmt.Sprintf("--controller-port=%d", CsiAddonsContainerPort.ContainerPort)
 var DriverNamespaceContainerArg = fmt.Sprintf("--drivernamespace=$(%s)", DriverNamespaceEnvVar.Name)
 var MetricsPathContainerArg = "--metricspath=/metrics"
