@@ -148,7 +148,7 @@ type NodePluginResourcesSpec struct {
 
 type NodePluginSpec struct {
 	// Embedded common pods spec
-	PodCommonSpec `json:"inline"`
+	PodCommonSpec `json:",inline"`
 
 	// Driver's plugin daemonset update strategy, supported values are OnDelete and RollingUpdate.
 	// Default value is RollingUpdate with MaxAvailabile set to 1
@@ -199,7 +199,7 @@ type ControllerPluginResourcesSpec struct {
 
 type ControllerPluginSpec struct {
 	// Embedded common pods spec
-	PodCommonSpec `json:"inline"`
+	PodCommonSpec `json:",inline"`
 
 	// Set replicas for controller plugin's deployment. Defaults to 2
 	//+kubebuilder:validation:Optional
