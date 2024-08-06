@@ -33,3 +33,6 @@ go.work.sum
 
 # Locally generated install files
 dist/
+
+# Locally generated dockerfile for multi-arch
+Dockerfile.cross
