@@ -5,6 +5,7 @@ go 1.22.0
 toolchain go1.22.5
 
 require (
+	github.com/ceph/ceph-csi-operator/api v0.0.0-00010101000000-000000000000
 	github.com/go-logr/logr v1.4.2
 	github.com/onsi/ginkgo/v2 v2.19.1
 	github.com/onsi/gomega v1.34.1
@@ -72,3 +73,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace github.com/ceph/ceph-csi-operator/api => ./api
