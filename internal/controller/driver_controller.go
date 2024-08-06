@@ -266,7 +266,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		// we assume there is another driver CR with an identical name on some other namespace
 		if r.driver.Namespace != ownerObjKey.Namespace || r.driver.Name != ownerObjKey.Name {
 			err := fmt.Errorf("invalid driver name")
-			r.log.Error(err, "Desired name already in use by a different CSI Driver")
+			r.log.Error(err, "Desired name already in use by a different CSI Driver", "current owner", ownerObjKey)
 			return err
 		}
 	}
