@@ -213,8 +213,8 @@ func (r *ClientProfileReconcile) reconcileCephConnection() error {
 
 	if needsUpdate, err := utils.ToggleOwnerReference(
 		!r.cleanUp,
-		&r.clientProfile,
 		&r.cephConn,
+		&r.clientProfile,
 		r.Scheme,
 	); err != nil {
 		r.log.Error(err, "Failed to toggle owner reference on CephConnection")
@@ -249,8 +249,8 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &csiConfigMap, func() error {
 		if _, err := utils.ToggleOwnerReference(
 			!r.cleanUp,
-			&r.clientProfile,
 			&csiConfigMap,
+			&r.clientProfile,
 			r.Scheme,
 		); err != nil {
 			log.Error(err, "Failed toggling owner reference for Ceph CSI config map")
