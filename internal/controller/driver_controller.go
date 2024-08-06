@@ -612,16 +612,20 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Name:            "csi-addons",
 								Image:           r.images["addons"],
 								ImagePullPolicy: imagePullPolicy,
-								Args: append(
-									slices.Clone(leaderElectionArgs),
+								Args: []string{
+									// csiaddons does not require utils.LeaderElectionContainerArg as its enabled by default and no option to disable it
+									utils.LeaderElectionNamespaceContainerArg(r.driver.Namespace),
+									utils.LeaderElectionLeaseDurationContainerArg(leaderElectionSpec.LeaseDuration),
+									utils.LeaderElectionRenewDeadlineContainerArg(leaderElectionSpec.RenewDeadline),
+									utils.LeaderElectionRetryPeriodContainerArg(leaderElectionSpec.RetryPeriod),
 									utils.LogVerbosityContainerArg(logVerbosity),
-									utils.NodeIdContainerArg,
+									utils.CsiAddonsNodeIdContainerArg,
 									utils.PodContainerArg,
 									utils.PodUidContainerArg,
 									utils.CsiAddonsAddressContainerArg,
 									utils.ControllerPortContainerArg,
 									utils.NamespaceContainerArg,
-								),
+								},
 								Ports: []corev1.ContainerPort{
 									utils.CsiAddonsContainerPort,
 								},
@@ -891,7 +895,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									},
 								},
 								Args: []string{
-									utils.NodeIdContainerArg,
+									utils.CsiAddonsNodeIdContainerArg,
 									utils.LogVerbosityContainerArg(logVerbosity),
 									utils.CsiAddonsAddressContainerArg,
 									utils.ControllerPortContainerArg,
