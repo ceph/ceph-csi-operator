@@ -371,6 +371,7 @@ type DriverStatus struct {
 //+kubebuilder:subresource:status
 
 // +kubebuilder:validation:XValidation:rule=self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$'),message=".metadata.name must match: '[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'"
+// +kubebuilder:validation:XValidation:rule="self.metadata.name.size() <= 54",message=".metadata.name must be no more than 54 characters"
 // Driver is the Schema for the drivers API
 type Driver struct {
 	metav1.TypeMeta   `json:",inline"`

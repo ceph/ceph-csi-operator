@@ -6788,6 +6788,8 @@ spec:
         x-kubernetes-validations:
         - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'''
           rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$')
+        - message: .metadata.name must be no more than 54 characters
+          rule: self.metadata.name.size() <= 54
     served: true
     storage: true
     subresources:
