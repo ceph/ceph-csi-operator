@@ -18,6 +18,7 @@ package utils
 
 import (
 	"cmp"
+	"slices"
 	"strings"
 	"sync"
 )
@@ -118,4 +119,13 @@ func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator strin
 // invoation as part of a data staructure initializtaoin code.
 func Call[T any](fn func() T) T {
 	return fn()
+}
+
+// RemoveZeroValues return a new slice form the provided slice where all zero-valued
+// items are removed
+func DeleteZeroValues[T comparable](slice []T) []T {
+	var zero T
+	return slices.DeleteFunc(slice, func(value T) bool {
+		return value == zero
+	})
 }
