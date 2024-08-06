@@ -206,3 +206,7 @@ GOBIN=$(LOCALBIN) go install $${package} ;\
 mv "$$(echo "$(1)" | sed "s/-$(3)$$//")" $(1) ;\
 }
 endef
+
+.PHONY: test-e2e
+test-e2e:
+	go test ./test/e2e -v -ginkgo.v
