@@ -3494,7 +3494,7 @@ spec:
                 x-kubernetes-map-type: atomic
                 x-kubernetes-validations:
                 - message: '''.name'' cannot be empty'
-                  rule: self.?name.orValue("") != ""
+                  rule: self.name != ""
               kernelMountOptions:
                 additionalProperties:
                   type: string

@@ -273,7 +273,7 @@ type DriverSpec struct {
 	// A reference to a ConfigMap resource holding image overwrite for deployed
 	// containers
 	//+kubebuilder:validation:Optional
-	//+kubebuilder:validation:XValidation:rule=self.?name.orValue("") != "",message="'.name' cannot be empty"
+	//+kubebuilder:validation:XValidation:rule=self.name != "",message="'.name' cannot be empty"
 	ImageSet *corev1.LocalObjectReference `json:"imageSet,omitempty"`
 
 	// Cluster name identifier to set as metadata on the CephFS subvolume and RBD images. This will be useful in cases
