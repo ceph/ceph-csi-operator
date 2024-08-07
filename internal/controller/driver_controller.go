@@ -776,8 +776,8 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		kubeletDirPath := cmp.Or(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 
-		topology := r.isRdbDriver() && r.driver.Spec.NodePlugin.Topology != nil
-		domainLabels := ptr.Deref(pluginSpec.Topology, csiv1a1.TopologySpec{}).DomainLabels
+		topology := r.isRdbDriver() && pluginSpec.Topology != nil
+		domainLabels := cmp.Or(pluginSpec.Topology, &csiv1a1.TopologySpec{}).DomainLabels
 
 		daemonSet.Spec = appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
