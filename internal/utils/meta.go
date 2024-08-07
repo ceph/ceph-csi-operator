@@ -51,19 +51,14 @@ func IsOwnedBy(obj, owner metav1.Object) bool {
 // The function return true if the owner reference list had changed and false it it didn't
 func ToggleOwnerReference(on bool, obj, owner metav1.Object, scheme *runtime.Scheme) (bool, error) {
 	ownerRefExists := IsOwnedBy(obj, owner)
-
 	if on {
 		if !ownerRefExists {
-			if err := ctrlutil.SetOwnerReference(obj, owner, scheme); err != nil {
-				return false, err
-			}
-			return true, nil
+			err := ctrlutil.SetOwnerReference(owner, obj, scheme)
+			return err == nil, err
 		}
 	} else if ownerRefExists {
-		if err := ctrlutil.RemoveOwnerReference(obj, owner, scheme); err != nil {
-			return false, err
-		}
-		return true, nil
+		err := ctrlutil.RemoveOwnerReference(owner, obj, scheme)
+		return err == nil, err
 	}
 	return false, nil
 }

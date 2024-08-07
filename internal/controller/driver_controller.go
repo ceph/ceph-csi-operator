@@ -55,7 +55,7 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
-//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
@@ -175,6 +175,14 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&corev1.Service{},
 			builder.WithPredicates(genChangedPredicate),
 		).
+		Owns(
+			&corev1.ConfigMap{},
+			builder.MatchEveryOwner,
+			builder.WithPredicates(
+				utils.NamePredicate(utils.CsiConfigVolume.Name),
+				utils.EventTypePredicate(false, false, true, false),
+			),
+		).
 		Watches(
 			&csiv1a1.OperatorConfig{},
 			enqueueAllDrivers,
@@ -221,6 +229,7 @@ func (r *driverReconcile) reconcile() error {
 	// Concurrently reconcile different aspects of the clusters actual state to meet
 	// the desired state defined on the driver object
 	errChan := utils.RunConcurrently(
+		r.reconcileCsiConfigMap,
 		r.reconcileK8sCsiDriver,
 		r.reconcileControllerPluginDeployment,
 		r.reconcileNodePluginDeamonSet,
@@ -316,6 +325,26 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	}
 
 	return nil
+}
+
+func (r *driverReconcile) reconcileCsiConfigMap() error {
+	csiConfigMap := &corev1.ConfigMap{}
+	csiConfigMap.Name = utils.CsiConfigVolume.Name
+	csiConfigMap.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("csiConfigMap", csiConfigMap.Name)
+	log.Info("Reconciling CSI Config Map")
+
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, csiConfigMap, func() error {
+		if _, err := utils.ToggleOwnerReference(true, csiConfigMap, &r.driver, r.Scheme); err != nil {
+			log.Error(err, "Failed adding an owner referce on Ceph CSI config map")
+			return err
+		}
+		return nil
+	})
+
+	logCreateOrUpdateResult(log, "CSI Config Map", csiConfigMap, opResult, err)
+	return err
 }
 
 func (r *driverReconcile) reconcileK8sCsiDriver() error {
