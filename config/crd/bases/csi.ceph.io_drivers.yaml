@@ -6776,9 +6776,8 @@ spec:
                   snapshot, sanpshotGroup'
                 enum:
                 - none
-                - autodetect
-                - volumegroupsnapshot
-                - volumesnapshot
+                - volumeGroupSnapshot
+                - volumeSnapshot
                 type: string
             type: object
           status:
