@@ -87,7 +87,3 @@ type ClientProfileList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ClientProfile `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&ClientProfile{}, &ClientProfileList{})
-}
