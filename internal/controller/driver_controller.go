@@ -1083,7 +1083,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 func (r *driverReconcile) reconcileLivenessService() error {
 	service := &corev1.Service{}
 	service.Namespace = r.driver.Namespace
-	service.Name = r.generateName("liveness")
+	service.Name = r.generateServiceName("liveness")
 
 	log := r.log.WithValues("service", service.Name)
 	log.Info("Reconciling liveness service")
@@ -1136,6 +1136,17 @@ func (r *driverReconcile) isNfsDriver() bool {
 
 func (r *driverReconcile) generateName(suffix string) string {
 	return fmt.Sprintf("%s-%s", r.driver.Name, suffix)
+}
+
+// generateServiceName generates a service name by replacing all special characters with a hyphen
+// as required by Kubernetes for service name, This assumes that the name
+// from the generateName is RFC 1123 compliant.
+func (r *driverReconcile) generateServiceName(suffix string) string {
+	name := r.generateName(suffix)
+	// Define a regex pattern to match all special characters except hyphen
+	re := regexp.MustCompile(`[^a-z0-9-]`)
+	// Replace all special characters with a hyphen
+	return re.ReplaceAllString(name, "-")
 }
 
 func getControllerPluginPodAffinity(
