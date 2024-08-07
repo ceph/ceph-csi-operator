@@ -63,7 +63,3 @@ type OperatorConfigList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []OperatorConfig `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&OperatorConfig{}, &OperatorConfigList{})
-}
