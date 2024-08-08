@@ -1,0 +1,21 @@
+resources:
+# CSI operands have their own set of RBAC that need to be installed
+# on the cluster.
+- cephfs_ctrlplugin_service_account.yaml
+- cephfs_ctrlplugin_cluster_role.yaml
+- cephfs_ctrlplugin_cluster_role_binding.yaml
+- cephfs_ctrlplugin_role.yaml
+- cephfs_ctrlplugin_role_binding.yaml
+- cephfs_nodeplugin_service_account.yaml
+- cephfs_nodeplugin_cluster_role.yaml
+- cephfs_nodeplugin_cluster_role_binding.yaml
+- rbd_ctrlplugin_service_account.yaml
+- rbd_ctrlplugin_cluster_role.yaml
+- rbd_ctrlplugin_cluster_role_binding.yaml
+- rbd_ctrlplugin_role.yaml
+- rbd_ctrlplugin_role_binding.yaml
+- rbd_nodeplugin_service_account.yaml
+- rbd_nodeplugin_cluster_role.yaml
+- rbd_nodeplugin_cluster_role_binding.yaml
+- rbd_nodeplugin_role.yaml
+- rbd_nodeplugin_role_binding.yaml
