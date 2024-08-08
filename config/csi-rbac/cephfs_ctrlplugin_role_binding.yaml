@@ -1,12 +1,12 @@
-kind: ClusterRoleBinding
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-cephfs-ctrlplugin-crb
+  name: cephfs-ctrlplugin-rb
 subjects:
   - kind: ServiceAccount
-    name: csi-cephfs-ctrlplugin-sa
+    name: cephfs-ctrlplugin-sa
     namespace: system
 roleRef:
-  kind: ClusterRole
-  name: csi-cephfs-ctrlplugin-cr
+  kind: Role
+  name: cephfs-ctrlplugin-r
   apiGroup: rbac.authorization.k8s.io

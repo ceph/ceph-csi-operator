@@ -1,12 +1,11 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: csi-rbd-nodeplugin-crb
+  name: nfs-nodeplugin-crb
 subjects:
   - kind: ServiceAccount
-    name: csi-rbd-nodeplugin-sa
+    name: nfs-nodeplugin-sa
     namespace: system
 roleRef:
   kind: ClusterRole
-  name: csi-rbd-nodeplugin-cr
-  apiGroup: rbac.authorization.k8s.io
+  name: nfs-nodeplugin-cr

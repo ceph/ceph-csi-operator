@@ -4,6 +4,10 @@ REGISTRY_NAMESPACE ?= cephcsi
 IMAGE_TAG ?= latest
 IMAGE_NAME ?= ceph-csi-operator
 
+# Use different name prefix and namespace prefix for csi rbac kustomize
+CSI_RBAC_NAME_PREFIX ?= ceph-csi-operator-
+CSI_RBAC_NAMESPACE ?= $(CSI_RBAC_NAME_PREFIX)system
+
 IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
@@ -126,6 +130,11 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default > dist/install.yaml
 
+.PHONY: build-csi-rbac
+build-csi-rbac:
+	cd config/csi-rbac && $(KUSTOMIZE) edit set nameprefix $(CSI_RBAC_NAME_PREFIX)
+	cd config/csi-rbac && $(KUSTOMIZE) edit set namespace $(CSI_RBAC_NAMESPACE)
+	$(KUSTOMIZE) build config/csi-rbac > dist/csi-rbac.yaml
 ##@ Deployment
 
 ifndef ignore-not-found
