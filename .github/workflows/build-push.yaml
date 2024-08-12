@@ -16,7 +16,7 @@ jobs:
     if: github.repository == 'ceph/ceph-csi-operator'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
