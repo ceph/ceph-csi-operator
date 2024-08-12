@@ -65,7 +65,3 @@ type CephConnectionList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CephConnection `json:"items"`
 }
-
-func init() {
-	SchemeBuilder.Register(&CephConnection{}, &CephConnectionList{})
-}
