@@ -273,7 +273,7 @@ type DriverSpec struct {
 	// A reference to a ConfigMap resource holding image overwrite for deployed
 	// containers
 	//+kubebuilder:validation:Optional
-	//+kubebuilder:validation:XValidation:rule=self.?name.orValue("") != "",message="'.name' cannot be empty"
+	//+kubebuilder:validation:XValidation:rule=self.name != "",message="'.name' cannot be empty"
 	ImageSet *corev1.LocalObjectReference `json:"imageSet,omitempty"`
 
 	// Cluster name identifier to set as metadata on the CephFS subvolume and RBD images. This will be useful in cases
@@ -294,7 +294,7 @@ type DriverSpec struct {
 
 	// Select a policy for snapshot behavior: none, autodetect, snapshot, sanpshotGroup
 	//+kubebuilder:validation:Optional
-	//+kubebuilder:validation:Enum:=none;autodetect;volumegroupsnapshot;volumesnapshot
+	//+kubebuilder:validation:Enum:=none;volumeGroupSnapshot;volumeSnapshot
 	SnapshotPolicy SnapshotPolicyType `json:"snapshotPolicy,omitempty"`
 
 	// OMAP generator will generate the omap mapping between the PV name and the RBD image.
@@ -387,8 +387,4 @@ type DriverList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Driver `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&Driver{}, &DriverList{})
 }
