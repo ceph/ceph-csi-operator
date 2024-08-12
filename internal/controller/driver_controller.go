@@ -581,7 +581,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.LeaderElectionContainerArg,
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddressContainerArg,
-										utils.TimeoutContainerArg(r.driver.Spec.GRpcTimeout),
+										utils.TimeoutContainerArg(grpcTimeout),
 										utils.HandleVolumeInuseErrorContainerArg,
 										utils.RecoverVolumeExpansionFailureContainerArg,
 									),
