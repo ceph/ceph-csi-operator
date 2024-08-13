@@ -447,7 +447,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		pluginSpec := cmp.Or(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
 		serviceAccountName := cmp.Or(
 			ptr.Deref(pluginSpec.ServiceAccountName, ""),
-			fmt.Sprintf("csi-%s-ctrlplugin-sa", r.driverType),
+			fmt.Sprintf("%s%s-ctrlplugin-sa", serviceAccountPrefix, r.driverType),
 		)
 		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		grpcTimeout := cmp.Or(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
@@ -798,7 +798,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		pluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
 		serviceAccountName := cmp.Or(
 			ptr.Deref(pluginSpec.ServiceAccountName, ""),
-			fmt.Sprintf("csi-%s-nodeplugin-sa", r.driverType),
+			fmt.Sprintf("%s%s-nodeplugin-sa", serviceAccountPrefix, r.driverType),
 		)
 		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).Verbosity

@@ -4,9 +4,9 @@ REGISTRY_NAMESPACE ?= cephcsi
 IMAGE_TAG ?= latest
 IMAGE_NAME ?= ceph-csi-operator
 
-# Use different name prefix and namespace prefix for csi rbac kustomize
-CSI_RBAC_NAME_PREFIX ?= ceph-csi-operator-
-CSI_RBAC_NAMESPACE ?= $(CSI_RBAC_NAME_PREFIX)system
+# Allow customization of the name prefix and/or namespace
+NAME_PREFIX ?= ceph-csi-operator-
+NAMESPACE ?= $(NAME_PREFIX)system
 
 IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
 
@@ -30,6 +30,44 @@ CONTAINER_TOOL ?= docker
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
+
+# Define the content of the temporary top-most kustomize overlay for the
+# build-installer and deploy targets
+define BUILD_INSTALLER_OVERLAY
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: $(NAMESPACE)
+namePrefix: $(NAME_PREFIX)
+patches:
+- patch: |-
+    - op: add
+      path: /spec/template/spec/containers/1/env/-
+      value:
+        name: CSI_SERVICE_ACCOUNT_PREFIX
+        value: $(NAME_PREFIX)
+  target:
+    kind: Deployment
+    name: controller-manager
+images:
+- name: controller
+  newName: ${IMG}
+resources:
+- ../config/default
+endef
+export BUILD_INSTALLER_OVERLAY
+
+
+# Define the content of the temporary top-most kustomize overlay for the
+# build-csi-rbac target
+define BUILD_CSI_RBAC_OVERLAY
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: $(NAMESPACE)
+namePrefix: $(NAME_PREFIX)
+resources:
+- ../config/csi-rbac
+endef
+export BUILD_CSI_RBAC_OVERLAY
 
 .PHONY: all
 all: build
@@ -126,15 +164,17 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 
 .PHONY: build-installer
 build-installer: manifests generate kustomize ## Generate a consolidated YAML with CRDs and deployment.
-	mkdir -p dist
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default > dist/install.yaml
+	mkdir -p build dist
+	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
+	$(KUSTOMIZE) build build > dist/install.yaml
+	rm -rf build
 
 .PHONY: build-csi-rbac
 build-csi-rbac:
-	cd config/csi-rbac && $(KUSTOMIZE) edit set nameprefix $(CSI_RBAC_NAME_PREFIX)
-	cd config/csi-rbac && $(KUSTOMIZE) edit set namespace $(CSI_RBAC_NAMESPACE)
-	$(KUSTOMIZE) build config/csi-rbac > dist/csi-rbac.yaml
+	mkdir -p build dist
+	cd build && echo "$$BUILD_CSI_RBAC_OVERLAY" > kustomization.yaml
+	$(KUSTOMIZE) build build > dist/csi-rbac.yaml
+	rm -rf build
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -151,8 +191,10 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | $(KUBECTL) apply -f -
+	mkdir -p build
+	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
+	$(KUSTOMIZE) build build | $(KUBECTL) apply -f -
+	rm -rf build
 
 .PHONY: undeploy
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.

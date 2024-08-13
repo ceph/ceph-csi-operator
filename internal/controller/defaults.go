@@ -73,3 +73,7 @@ var operatorConfigName = utils.Call(func() string {
 	}
 	return "ceph-csi-operator-config"
 })
+
+var serviceAccountPrefix = utils.Call(func() string {
+	return os.Getenv("CSI_SERVICE_ACCOUNT_PREFIX")
+})
