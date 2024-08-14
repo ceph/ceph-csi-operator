@@ -4,10 +4,10 @@ Log rotation involves managing log files by controlling their size. This feature
 
 Logroate configuration, 
 
-`CephCSIOperatorConfig CRD`:
+`OperatorConfig CRD`:
 
 ```yaml
-kind: CephCSIOperatorConfig 
+kind: OperatorConfig 
 apiVersion: csi.ceph.io/v1alpha1
 ….
 spec: 
@@ -24,10 +24,10 @@ spec:
                 logHostPath: /var/lib/cephcsi 
 ```
 
-Similar settings will be overridden by `CephCSIDriver CRD`:
+Similar settings will be overridden by `Driver CRD`:
 
 ```yaml
-kind: CephCSIDriver 
+kind: Driver 
 apiVersion: csi.ceph.io/v1alpha1 
 metadata: 
     name: "<prefix>.<driver_type>.csi.ceph.com" 
@@ -48,7 +48,7 @@ spec:
 
 Logrotator sidecar container cpu and memory usage can configured by,
 
-`CephCSIOperatorConfig CRD`:
+`OperatorConfig CRD`:
 ```yaml
 spec:
     provisioner:
@@ -62,7 +62,7 @@ spec:
 ```
 
 For systems where SELinux is enabled (e.g. OpenShift),start plugin-controller as privileged that mount a host path.
-`CephCSIOperatorConfig CRD`:
+`OperatorConfig CRD`:
 ```yaml
 spec:
     provisioner:
