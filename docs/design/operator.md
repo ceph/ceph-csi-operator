@@ -370,19 +370,16 @@ metadata:
   name: storage
   namespace: <operator-namespace>
 spec:
-  blockPoolMapping:
-  - local:
-      clientPorfileName: local-clientprofile-name
-      poolID: 2
-    remote:
-      clientProfileName: remote-clientprofile-name
-      poolID: 2
-  - local:
-      clientProfileName: another-local-clientprofile-name 
-      poolID: 2
-    remote:
-      clientProfileName: different-remote-clientprofile-name 
-      poolID: 3
+  mappings:
+  - localClientProfile: local-clientprofile-1
+    remoteClientProfile: remote-clientprofile-1
+    blockPoolIdMapping: 
+    - [1, 2]
+    - [2, 2]
+  - localClientProfile: local-clientprofile-2
+    remoteClientProfile: remote-clientprofile-2
+    blockPoolIdMapping:
+    - [2, 1]
 ```
 
 By following this design document, the Ceph CSI Operator can be effectively
