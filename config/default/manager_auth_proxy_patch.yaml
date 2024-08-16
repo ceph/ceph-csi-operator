@@ -12,6 +12,7 @@ spec:
       - name: kube-rbac-proxy
         securityContext:
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           capabilities:
             drop:
             - "ALL"
