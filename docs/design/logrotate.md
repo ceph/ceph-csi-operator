@@ -13,14 +13,14 @@ apiVersion: csi.ceph.io/v1alpha1
 spec: 
     log:
         verbosity: 1 
-    driverSpecDefaults: 
+    driverSpecDefaults:
         log:
             verbosity: 5
             rotation:
                 # one of: hourly, daily, weekly, monthly
                 periodicity: daily
                 maxLogSize: 500M 
-                maxFiles: 5
+                maxFiles: 7
                 logHostPath: /var/lib/cephcsi 
 ```
 
@@ -35,14 +35,14 @@ metadata:
 spec: 
     log:
         verbosity: 1 
-    driverSpecDefaults: 
+    driverSpecDefaults:
         log: 
             verbosity: 5
             rotation:
                  # one of: hourly, daily, weekly, monthly
                 periodicity: daily
                 maxLogSize: 500M 
-                maxFiles: 5
+                maxFiles: 7
                 logHostPath: /var/lib/cephcsi 
 ```
 
@@ -51,20 +51,24 @@ Logrotator sidecar container cpu and memory usage can configured by,
 `OperatorConfig CRD`:
 ```yaml
 spec:
-    provisioner:
-        logRotator:
-            cpu: "100m"
-            memory: "32Mi"
-    plugin:
-        logRotator:
-            cpu: "100m"
-            memory: "32Mi"         
+    driverSpecDefaults:
+        controllerPlugin:
+            resources:
+                logRotator:
+                    cpu: "100m"
+                    memory: "32Mi"
+        nodePlugin:
+            resources:
+                logRotator:
+                    cpu: "100m"
+                    memory: "32Mi"                          
 ```
 
-For systems where SELinux is enabled (e.g. OpenShift),start plugin-controller as privileged that mount a host path.
+For systems where SELinux is enabled (e.g. OpenShift), start plugin-controller as privileged that mount a host path.
 `OperatorConfig CRD`:
 ```yaml
 spec:
-    provisioner:
-        privileged: true
+    driverSpecDefaults:
+        controllerPlugin:
+            privileged: true
 ```
