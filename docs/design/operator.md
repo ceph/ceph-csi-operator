@@ -92,7 +92,7 @@ spec:
         # one of: hourly, daily, weekly, monthly
         periodicity: daily
         maxLogSize: 500M 
-        maxFiles: 5
+        maxFiles: 7
         logHostPath: /var/lib/cephcsi 
     clusterName: 5c63ad7e-74fe-4724-a511-4ccdc560da56
     enableMetadata: true

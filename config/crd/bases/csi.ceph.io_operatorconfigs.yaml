@@ -3581,11 +3581,14 @@ spec:
                         description: log rotation for csi pods
                         properties:
                           logHostPath:
-                            description: LogHostPath is the prefix directory path
-                              for the csi log files
+                            description: |-
+                              LogHostPath is the prefix directory path for the csi log files
+                              Default to /var/lib/cephcsi
                             type: string
                           maxFiles:
-                            description: MaxFiles is the number of logrtoate files
+                            description: |-
+                              MaxFiles is the number of logrtoate files
+                              Default to 7
                             type: integer
                           maxLogSize:
                             anyOf:
@@ -3605,6 +3608,9 @@ spec:
                             - monthly
                             type: string
                         type: object
+                        x-kubernetes-validations:
+                        - message: Either maxLogSize or periodicity must be set
+                          rule: (has(self.maxLogSize)) || (has(self.periodicity))
                       verbosity:
                         description: |-
                           Log verbosity level for driver pods,

@@ -69,8 +69,11 @@ const (
 	NfsDriverType    = "nfs"
 )
 
-// Annotation name for ownerref information
-const ownerRefAnnotationKey = "csi.ceph.io/ownerref"
+const (
+	// Annotation name for ownerref information
+	ownerRefAnnotationKey = "csi.ceph.io/ownerref"
+	logRotateCmd          = `while true; do logrotate --verbose /logrotate-config/csi; sleep 15m; done`
+)
 
 // A regexp used to parse driver's prefix and type from the full name
 var nameRegExp, _ = regexp.Compile(fmt.Sprintf(
@@ -230,6 +233,7 @@ func (r *driverReconcile) reconcile() error {
 	// the desired state defined on the driver object
 	errChan := utils.RunConcurrently(
 		r.reconcileCsiConfigMap,
+		r.reconcileLogRotateConfigMap,
 		r.reconcileK8sCsiDriver,
 		r.reconcileControllerPluginDeployment,
 		r.reconcileNodePluginDeamonSet,
@@ -325,6 +329,63 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	}
 
 	return nil
+}
+
+func (r *driverReconcile) reconcileLogRotateConfigMap() error {
+	logRotateConfigmap := &corev1.ConfigMap{}
+	logRotateConfigmap.Name = utils.LogRotateConfigMapName(r.driver.Name)
+	logRotateConfigmap.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("logRotateConfigMap", logRotateConfigmap.Name)
+	log.Info("Reconciling logRotate configmap")
+
+	logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1a1.LogSpec{}).Rotation
+	if logRotationSpec != nil {
+		opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, logRotateConfigmap, func() error {
+			if _, err := utils.ToggleOwnerReference(true, logRotateConfigmap, &r.driver, r.Scheme); err != nil {
+				log.Error(err, "Failed adding an owner reference on the LogRotate config map")
+				return err
+			}
+			if logRotationSpec.Periodicity != "" && logRotationSpec.MaxLogSize.IsZero() {
+				err := fmt.Errorf("invalid Log.Rotation spec")
+				log.Error(err, "Either \"maxLogSize\" or \"periodicity\" fields must be set")
+				return err
+			}
+			maxFiles := cmp.Or(logRotationSpec.MaxFiles, defaultLogRotateMaxFiles)
+			cronLogRotateSettings := []string{
+				"\tmissingok",
+				"\tcompress",
+				"\tcopytruncate",
+				"\tnotifempty",
+				fmt.Sprintf("\trotate %d", maxFiles),
+			}
+			if logRotationSpec.Periodicity != "" {
+				periodicity := "\t" + string(logRotationSpec.Periodicity)
+				cronLogRotateSettings = append(cronLogRotateSettings, periodicity)
+			}
+			if logRotationSpec.MaxLogSize.String() != "0" {
+				maxSize := fmt.Sprintf("\tmaxsize %s", logRotationSpec.MaxLogSize.String())
+				cronLogRotateSettings = append(cronLogRotateSettings, maxSize)
+			}
+			logRotateConfigmap.Data = map[string]string{
+				"csi": fmt.Sprintf(
+					"/csi-logs/*.log {\n%s\n}\n",
+					strings.Join(cronLogRotateSettings, "\n"),
+				),
+			}
+			return nil
+		})
+
+		logCreateOrUpdateResult(log, "LogRotateConfigMap", logRotateConfigmap, opResult, err)
+		return err
+	} else {
+		// Remove the logrotate configmap if logrotate setting is removed from the driver's spec
+		if err := r.Delete(r.ctx, logRotateConfigmap); client.IgnoreNotFound(err) != nil {
+			log.Error(err, "Unable to delete LogRotate configmap")
+			return err
+		}
+		return nil
+	}
 }
 
 func (r *driverReconcile) reconcileCsiConfigMap() error {
@@ -454,6 +515,18 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).Verbosity
 		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
 		snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1a1.VolumeSnapshotSnapshotPolicy)
+		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1a1.LogSpec{}).Rotation
+		logRotationEnabled := logRotationSpec != nil
+		logRotateSecurityContext := utils.If(
+			pluginSpec.Privileged != nil && logRotationEnabled,
+			&corev1.SecurityContext{
+				Privileged: pluginSpec.Privileged,
+				Capabilities: &corev1.Capabilities{
+					Drop: []corev1.Capability{"All"},
+				},
+			},
+			nil,
+		)
 
 		leaderElectionSettingsArg := []string{
 			utils.LeaderElectionNamespaceContainerArg(r.driver.Namespace),
@@ -487,6 +560,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Name:            fmt.Sprintf("csi-%splugin", r.driverType),
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: logRotateSecurityContext,
 								Args: utils.DeleteZeroValues(
 									[]string{
 										utils.TypeContainerArg(string(r.driverType)),
@@ -502,6 +576,13 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.If(
 											ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
 											utils.CsiAddonsEndpointContainerArg,
+											"",
+										),
+										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+										utils.If(
+											logRotationEnabled,
+											utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
 											"",
 										),
 									},
@@ -533,6 +614,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									}
 									if r.isRdbDriver() {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
+									}
+									if logRotationEnabled {
+										mounts = append(mounts, utils.LogsDirVolumeMount)
 									}
 									return mounts
 								}),
@@ -654,6 +738,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Name:            "csi-addons",
 								Image:           r.images["addons"],
 								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: logRotateSecurityContext,
 								Args: utils.DeleteZeroValues(
 									append(
 										slices.Clone(leaderElectionSettingsArg),
@@ -664,6 +749,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.CsiAddonsAddressContainerArg,
 										utils.ControllerPortContainerArg,
 										utils.NamespaceContainerArg,
+										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
 									),
 								),
 								Ports: []corev1.ContainerPort{
@@ -675,9 +763,15 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.PodNameEnvVar,
 									utils.PodNamespaceEnvVar,
 								},
-								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
-								},
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
+									mounts := []corev1.VolumeMount{
+										utils.SocketDirVolumeMount,
+									}
+									if logRotationEnabled {
+										mounts = append(mounts, utils.LogsDirVolumeMount)
+									}
+									return mounts
+								}),
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Addons,
 									corev1.ResourceRequirements{},
@@ -741,7 +835,22 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								),
 							})
 						}
-
+						// CSI LogRotate Container
+						if logRotationEnabled {
+							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
+							containers = append(containers, corev1.Container{
+								Name:            "log-rotator",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Resources:       resources,
+								SecurityContext: logRotateSecurityContext,
+								Command:         []string{"/bin/bash", "-c", logRotateCmd},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.LogsDirVolumeMount,
+									utils.LogRotateDirVolumeMount,
+								},
+							})
+						}
 						return containers
 					}),
 					Volumes: utils.Call(func() []corev1.Volume {
@@ -766,6 +875,14 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							volumes = append(
 								volumes,
 								utils.KmsConfigVolume(&r.driver.Spec.Encryption.ConfigMapRef))
+						}
+						if logRotationEnabled {
+							logHostPath := cmp.Or(logRotationSpec.LogHostPath, defaultLogHostPath)
+							volumes = append(
+								volumes,
+								utils.LogsDirVolume(logHostPath, deploy.Name),
+								utils.LogRotateDirVolumeName(r.driver.Name),
+							)
 						}
 						return volumes
 					}),
@@ -807,6 +924,8 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 
 		topology := r.isRdbDriver() && pluginSpec.Topology != nil
 		domainLabels := cmp.Or(pluginSpec.Topology, &csiv1a1.TopologySpec{}).DomainLabels
+		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1a1.LogSpec{}).Rotation
+		logRotationEnabled := logRotationSpec != nil
 
 		daemonSet.Spec = appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
@@ -884,6 +1003,13 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 											utils.DomainLabelsContainerArg(domainLabels),
 											"",
 										),
+										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+										utils.If(
+											logRotationEnabled,
+											utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
+											"",
+										),
 									},
 								),
 								Env: []corev1.EnvVar{
@@ -911,6 +1037,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									}
 									if r.isRdbDriver() {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
+									}
+									if logRotationEnabled {
+										mounts = append(mounts, utils.LogsDirVolumeMount)
 									}
 									return mounts
 								}),
@@ -965,6 +1094,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 								Args: utils.DeleteZeroValues(
 									[]string{
 										utils.CsiAddonsNodeIdContainerArg,
+										utils.NodeIdContainerArg,
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddonsAddressContainerArg,
 										utils.ControllerPortContainerArg,
@@ -972,6 +1102,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										utils.NamespaceContainerArg,
 										utils.PodUidContainerArg,
 										utils.StagingPathContainerArg(kubeletDirPath),
+										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
 									},
 								),
 								Ports: []corev1.ContainerPort{
@@ -983,9 +1116,15 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									utils.PodNamespaceEnvVar,
 									utils.PodUidEnvVar,
 								},
-								VolumeMounts: []corev1.VolumeMount{
-									utils.PluginDirVolumeMount,
-								},
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
+									mounts := []corev1.VolumeMount{
+										utils.PluginDirVolumeMount,
+									}
+									if logRotationEnabled {
+										mounts = append(mounts, utils.LogsDirVolumeMount)
+									}
+									return mounts
+								}),
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Addons,
 									corev1.ResourceRequirements{},
@@ -1026,6 +1165,27 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 								})
 							}
 						}
+						// CSI LogRotate Container
+						if logRotationEnabled {
+							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
+							containers = append(containers, corev1.Container{
+								Name:            "log-rotator",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Resources:       resources,
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Command: []string{"/bin/bash", "-c", logRotateCmd},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.LogsDirVolumeMount,
+									utils.LogRotateDirVolumeMount,
+								},
+							})
+						}
 						return containers
 					}),
 					Volumes: utils.Call(func() []corev1.Volume {
@@ -1065,6 +1225,14 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 							volumes = append(
 								volumes,
 								utils.OidcTokenVolume,
+							)
+						}
+						if logRotationEnabled {
+							logHostPath := cmp.Or(logRotationSpec.LogHostPath, defaultLogHostPath)
+							volumes = append(
+								volumes,
+								utils.LogsDirVolume(logHostPath, daemonSet.Name),
+								utils.LogRotateDirVolumeName(r.driver.Name),
 							)
 						}
 						return volumes
@@ -1273,6 +1441,9 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			if dest.Resources.Plugin == nil {
 				dest.Resources.Plugin = src.Resources.Plugin
 			}
+			if dest.Resources.LogRotator == nil {
+				dest.Resources.LogRotator = src.Resources.LogRotator
+			}
 		}
 	}
 	if src.ControllerPlugin != nil {
@@ -1307,6 +1478,9 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			if dest.Replicas == nil {
 				dest.Replicas = src.Replicas
 			}
+			if dest.Privileged == nil {
+				dest.Privileged = src.Privileged
+			}
 			if dest.Resources.Attacher == nil {
 				dest.Resources.Attacher = src.Resources.Attacher
 			}
@@ -1327,6 +1501,9 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 			}
 			if dest.Resources.Plugin == nil {
 				dest.Resources.Plugin = src.Resources.Plugin
+			}
+			if dest.Resources.LogRotator == nil {
+				dest.Resources.LogRotator = src.Resources.LogRotator
 			}
 		}
 	}

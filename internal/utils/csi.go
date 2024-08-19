@@ -37,6 +37,9 @@ const (
 
 	CsiConfigMapConfigKey  = "config.json"
 	CsiConfigMapMappingKey = "cluster-mapping.json"
+
+	logsDirVolumeName      = "logs-dir"
+	logRotateDirVolumeName = "log-rotate-dir"
 )
 
 // Ceph CSI common volumes
@@ -182,6 +185,29 @@ func PodsMountDirVolume(kubeletDirPath string) corev1.Volume {
 		},
 	}
 }
+func LogsDirVolume(logHostPath, pluginName string) corev1.Volume {
+	return corev1.Volume{
+		Name: logsDirVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/%s", logHostPath, pluginName),
+				Type: ptr.To(corev1.HostPathDirectoryOrCreate),
+			},
+		},
+	}
+}
+func LogRotateDirVolumeName(driverName string) corev1.Volume {
+	return corev1.Volume{
+		Name: logRotateDirVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: LogRotateConfigMapName(driverName),
+				},
+			},
+		},
+	}
+}
 
 // Ceph CSI common volume Mounts
 var SocketDirVolumeMount = corev1.VolumeMount{
@@ -235,6 +261,14 @@ var EtcSelinuxVolumeMount = corev1.VolumeMount{
 	Name:      EtcSelinuxVolume.Name,
 	MountPath: "/etc/selinux",
 	ReadOnly:  true,
+}
+var LogsDirVolumeMount = corev1.VolumeMount{
+	Name:      logsDirVolumeName,
+	MountPath: "/csi-logs",
+}
+var LogRotateDirVolumeMount = corev1.VolumeMount{
+	Name:      logRotateDirVolumeName,
+	MountPath: "/logrotate-config",
 }
 
 func PodsMountDirVolumeMount(kubletDirPath string) corev1.VolumeMount {
@@ -335,9 +369,14 @@ var ImmediateTopologyContainerArg = "--immediate-topology=false"
 var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
 var EnableVolumeGroupSnapshotsContainerArg = "--enable-volume-group-snapshots=true"
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
+var LogToStdErrContainerArg = "--logtostderr=false"
+var AlsoLogToStdErrContainerArg = "--alsologtostderr=true"
 
 func LogVerbosityContainerArg(level int) string {
 	return fmt.Sprintf("--v=%d", Clamp(level, 0, 5))
+}
+func LogFileContainerArg(containerName string) string {
+	return fmt.Sprintf("--log_file=csi-logs/%s.log", containerName)
 }
 func TypeContainerArg(t string) string {
 	switch t {
@@ -379,6 +418,9 @@ func KubeletRegistrationPathContainerArg(kubeletDirPath string, driverName strin
 }
 func StagingPathContainerArg(kubeletDirPath string) string {
 	return fmt.Sprintf("--stagingpath=%s/plugins/kubernetes.io/csi/", kubeletDirPath)
+}
+func LogRotateConfigMapName(driverName string) string {
+	return fmt.Sprintf("%s-logrotate-config", driverName)
 }
 func KernelMountOptionsContainerArg(options map[string]string) string {
 	return If(
