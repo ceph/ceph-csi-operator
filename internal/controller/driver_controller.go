@@ -316,15 +316,37 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 
 	// If provided, load an imageset from configmap to overwrite default images
 	r.images = maps.Clone(imageDefaults)
-	if r.driver.Spec.ImageSet != nil {
+	imageSetSpec := opConfig.Spec.DriverSpecDefaults.ImageSet
+	if imageSetSpec != nil && imageSetSpec.Name != "" {
 		imageSetCM := corev1.ConfigMap{}
-		imageSetCM.Name = r.driver.Spec.ImageSet.Name
-		imageSetCM.Namespace = r.driver.Namespace
+		imageSetCM.Name = imageSetSpec.Name
+		imageSetCM.Namespace = operatorNamespace
 		if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
-			r.log.Error(err, "Unable to load driver specified image set config map", "name", client.ObjectKeyFromObject(&imageSetCM))
+			r.log.Error(
+				err,
+				"Unable to load operator config specified image set config map",
+				"name",
+				client.ObjectKeyFromObject(&imageSetCM),
+			)
 			return err
 		}
-
+		maps.Copy(r.images, imageSetCM.Data)
+	}
+	// If provided, load an imageset from driver spec overwrite default images
+	imageSetSpec = r.driver.Spec.ImageSet
+	if imageSetSpec != nil && imageSetSpec.Name != "" {
+		imageSetCM := corev1.ConfigMap{}
+		imageSetCM.Name = imageSetSpec.Name
+		imageSetCM.Namespace = r.driver.Namespace
+		if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
+			r.log.Error(
+				err,
+				"Unable to load driver specified image set config map",
+				"name",
+				client.ObjectKeyFromObject(&imageSetCM),
+			)
+			return err
+		}
 		maps.Copy(r.images, imageSetCM.Data)
 	}
 
@@ -1369,9 +1391,6 @@ func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
 
 	if dest.Log == nil {
 		dest.Log = src.Log
-	}
-	if dest.ImageSet == nil {
-		dest.ImageSet = src.ImageSet
 	}
 	if dest.ClusterName == nil {
 		dest.ClusterName = src.ClusterName
