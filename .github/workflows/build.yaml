@@ -26,6 +26,10 @@ jobs:
           go-version-file: go.mod
       - name: run make build
         run: make build
+      - name: make build installer
+        run: make build-installer
+      - name: run build multifile installer
+        run: make build-multifile-installer
       - name: Check for uncommitted changes
         run: make check-all-committed
       - name: Show the uncommitted "git diff"
