@@ -1,3 +1,4 @@
+# This file was originally located in config/default, but it has been moved here to Kustomize exclusively for deployment.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
