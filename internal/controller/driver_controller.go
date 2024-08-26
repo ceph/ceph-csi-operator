@@ -1094,7 +1094,6 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 								Args: utils.DeleteZeroValues(
 									[]string{
 										utils.CsiAddonsNodeIdContainerArg,
-										utils.NodeIdContainerArg,
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddonsAddressContainerArg,
 										utils.ControllerPortContainerArg,
