@@ -7,7 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/ceph/ceph-csi-operator/api v0.0.0-00010101000000-000000000000
 	github.com/go-logr/logr v1.4.2
-	github.com/onsi/ginkgo/v2 v2.20.0
+	github.com/onsi/ginkgo/v2 v2.20.1
 	github.com/onsi/gomega v1.34.1
 	k8s.io/api v0.31.0
 	k8s.io/apimachinery v0.31.0
