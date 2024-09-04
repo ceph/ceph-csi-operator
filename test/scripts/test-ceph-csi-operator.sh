@@ -34,12 +34,12 @@ function log_errors() {
 
 function install_operator() {
     make build-installer
-    kubectl_retry create -f dist/install.yaml
+    kubectl_retry create -f deploy/all-in-one/install.yaml
 }
 
 function cleanup() {
     echo "Uninstalling the operator..."
-    kubectl_retry delete -f dist/install.yaml
+    kubectl_retry delete -f deploy/all-in-one/install.yaml
 }
 
 function check_operator_health() {

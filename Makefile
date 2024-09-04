@@ -34,7 +34,7 @@ SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
 # Define the content of the temporary top-most kustomize overlay for the
-# build-installer and deploy targets
+# build-installer, build-multifile-installer and deploy targets
 define BUILD_INSTALLER_OVERLAY
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -55,8 +55,6 @@ images:
   newName: ${IMG}
 - name: kube-rbac-proxy
   newName: ${KUBE_RBAC_PROXY_IMG}
-resources:
-- ../config/default
 endef
 export BUILD_INSTALLER_OVERLAY
 
@@ -168,17 +166,28 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 
 .PHONY: build-installer
 build-installer: manifests generate kustomize ## Generate a consolidated YAML with CRDs and deployment.
-	mkdir -p build dist
+	mkdir -p build deploy/all-in-one
 	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
-	$(KUSTOMIZE) build build > dist/install.yaml
+	cd build && $(KUSTOMIZE) edit add resource ../config/default/
+	$(KUSTOMIZE) build build > deploy/all-in-one/install.yaml
+	rm -rf build
+
+.PHONY: build-multifile-installer
+build-multifile-installer: build-csi-rbac manifests generate kustomize
+	mkdir -p build deploy/multifile
+	$(KUSTOMIZE) build config/crd > deploy/multifile/crd.yaml
+	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
+	cd build && $(KUSTOMIZE) edit add resource ../config/rbac ../config/manager
+	$(KUSTOMIZE) build build > deploy/multifile/operator.yaml
 	rm -rf build
 
 .PHONY: build-csi-rbac
 build-csi-rbac:
-	mkdir -p build dist
+	mkdir -p build deploy/multifile
 	cd build && echo "$$BUILD_CSI_RBAC_OVERLAY" > kustomization.yaml
-	$(KUSTOMIZE) build build > dist/csi-rbac.yaml
+	$(KUSTOMIZE) build build > deploy/multifile/csi-rbac.yaml
 	rm -rf build
+
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -197,6 +206,7 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	mkdir -p build
 	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
+	cd build && $(KUSTOMIZE) edit add resource ../config/default/
 	$(KUSTOMIZE) build build | $(KUBECTL) apply -f -
 	rm -rf build
 
