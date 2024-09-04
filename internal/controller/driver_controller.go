@@ -307,33 +307,37 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 		return err
 	}
 
-	// Creating a copy of the driver spec, making sure any local changes will not effect the object residing
-	// in the client's cache
+	// Cloning default images as the base images before
+	// merging any user provided images
+	r.images = maps.Clone(imageDefaults)
+
 	if opConfig.Spec.DriverSpecDefaults != nil {
+		// Creating a copy of the driver spec, making sure any local changes will not effect the object residing
+		// in the client's cache
 		r.driver.Spec = *r.driver.Spec.DeepCopy()
 		mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
+
+		// If provided, load an imageset from configmap to overwrite default images
+		imageSetSpec := opConfig.Spec.DriverSpecDefaults.ImageSet
+		if imageSetSpec != nil && imageSetSpec.Name != "" {
+			imageSetCM := corev1.ConfigMap{}
+			imageSetCM.Name = imageSetSpec.Name
+			imageSetCM.Namespace = operatorNamespace
+			if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
+				r.log.Error(
+					err,
+					"Unable to load operator config specified image set config map",
+					"name",
+					client.ObjectKeyFromObject(&imageSetCM),
+				)
+				return err
+			}
+			maps.Copy(r.images, imageSetCM.Data)
+		}
 	}
 
-	// If provided, load an imageset from configmap to overwrite default images
-	r.images = maps.Clone(imageDefaults)
-	imageSetSpec := opConfig.Spec.DriverSpecDefaults.ImageSet
-	if imageSetSpec != nil && imageSetSpec.Name != "" {
-		imageSetCM := corev1.ConfigMap{}
-		imageSetCM.Name = imageSetSpec.Name
-		imageSetCM.Namespace = operatorNamespace
-		if err := r.Get(r.ctx, client.ObjectKeyFromObject(&imageSetCM), &imageSetCM); err != nil {
-			r.log.Error(
-				err,
-				"Unable to load operator config specified image set config map",
-				"name",
-				client.ObjectKeyFromObject(&imageSetCM),
-			)
-			return err
-		}
-		maps.Copy(r.images, imageSetCM.Data)
-	}
 	// If provided, load an imageset from driver spec overwrite default images
-	imageSetSpec = r.driver.Spec.ImageSet
+	imageSetSpec := r.driver.Spec.ImageSet
 	if imageSetSpec != nil && imageSetSpec.Name != "" {
 		imageSetCM := corev1.ConfigMap{}
 		imageSetCM.Name = imageSetSpec.Name
