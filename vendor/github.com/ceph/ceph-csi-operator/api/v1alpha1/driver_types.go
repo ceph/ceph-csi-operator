@@ -302,8 +302,8 @@ type DriverSpec struct {
 
 	// OMAP generator will generate the omap mapping between the PV name and the RBD image.
 	// Need to be enabled when we are using rbd mirroring feature.
-	// By default OMAP generator sidecar is deployed with Csi controller plugin pod, to disable
-	// it set it to false.
+	// By default OMAP generator sidecar is not deployed with Csi controller plugin pod, to enable
+	// it set it to true.
 	//+kubebuilder:validation:Optional
 	GenerateOMapInfo *bool `json:"generateOMapInfo,omitempty"`
 
