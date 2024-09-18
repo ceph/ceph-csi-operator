@@ -118,6 +118,7 @@ rules:
   - create
   - delete
   - patch
+  - update
 - apiGroups:
   - ""
   resources:
@@ -405,6 +406,7 @@ rules:
   - create
   - delete
   - patch
+  - update
 - apiGroups:
   - ""
   resources:
