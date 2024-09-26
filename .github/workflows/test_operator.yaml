@@ -42,7 +42,6 @@ jobs:
 
       - name: print k8s cluster status
         run: |
-            minikube status
             kubectl get nodes
 
       - name: use local disk
