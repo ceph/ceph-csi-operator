@@ -128,6 +128,7 @@ var EtcSelinuxVolume = corev1.Volume{
 
 func KmsConfigVolume(configRef *corev1.LocalObjectReference) corev1.Volume {
 	return corev1.Volume{
+		Name: kmsConfigVolumeName,
 		VolumeSource: corev1.VolumeSource{
 			ConfigMap: &corev1.ConfigMapVolumeSource{
 				LocalObjectReference: *configRef,
