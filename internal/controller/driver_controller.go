@@ -226,6 +226,10 @@ func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 func (r *driverReconcile) reconcile() error {
 	// Load the driver desired state based on driver resource, operator config resource and default values.
 	if err := r.LoadAndValidateDesiredState(); err != nil {
+		if k8serrors.IsNotFound(err) {
+			r.log.Info("Driver resource does not exist anymore, skipping reconcile")
+			return nil
+		}
 		return err
 	}
 
@@ -255,7 +259,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	// (Can happen if a driver with an identical name was created in a different namespace)
 	csiDriver := storagev1.CSIDriver{}
 	csiDriver.Name = r.driver.Name
-	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&csiDriver), &csiDriver); client.IgnoreNotFound(err) != nil {
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&csiDriver), &csiDriver); err != nil {
 		r.log.Error(err, "Failed to query the existence of a CSI Driver")
 		return err
 	}
