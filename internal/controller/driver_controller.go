@@ -978,7 +978,8 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 					HostPID:            r.isRdbDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
-					DNSPolicy: corev1.DNSClusterFirstWithHostNet,
+					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
+					Tolerations: pluginSpec.Tolerations,
 					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							// Node Plugin Container
