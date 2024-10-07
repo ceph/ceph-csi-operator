@@ -78,6 +78,18 @@ jobs:
       - name: govulncheck
         uses: golang/govulncheck-action@v1
 
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+    - uses: DavidAnson/markdownlint-cli2-action@v16
+      with:
+        config: .markdownlint.yaml
+        globs: 'docs/*.md'
+
   shellcheck:
     name: Shellcheck
     runs-on: ubuntu-latest
