@@ -25,6 +25,7 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -130,6 +131,10 @@ func (r *ClientProfileReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 func (r *ClientProfileReconcile) reconcile() error {
 	if err := r.loadAndValidate(); err != nil {
+		if k8serrors.IsNotFound(err) {
+			r.log.Info("Client profile resource does not exists anymore, skipping reconcile")
+			return nil
+		}
 		return err
 	}
 
