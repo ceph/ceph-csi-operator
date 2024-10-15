@@ -50,10 +50,18 @@ var defaultLeaderElection = csiv1a1.LeaderElectionSpec{
 	RetryPeriod:   26,
 }
 
-var defautUpdateStrategy = appsv1.DaemonSetUpdateStrategy{
+var defaultDaemonSetUpdateStrategy = appsv1.DaemonSetUpdateStrategy{
 	Type: appsv1.RollingUpdateDaemonSetStrategyType,
 	RollingUpdate: &appsv1.RollingUpdateDaemonSet{
 		MaxUnavailable: ptr.To(intstr.FromInt(1)),
+	},
+}
+
+var defaultDeploymentStrategy = appsv1.DeploymentStrategy{
+	Type: appsv1.RollingUpdateDeploymentStrategyType,
+	RollingUpdate: &appsv1.RollingUpdateDeployment{
+		MaxSurge:       ptr.To(intstr.FromString("25%")),
+		MaxUnavailable: ptr.To(intstr.FromString("25%")),
 	},
 }
 

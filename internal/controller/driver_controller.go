@@ -564,6 +564,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		deploy.Spec = appsv1.DeploymentSpec{
 			Replicas: pluginSpec.Replicas,
 			Selector: &appSelector,
+			Strategy: ptr.Deref(pluginSpec.DeploymentStrategy, defaultDeploymentStrategy),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: utils.Call(func() map[string]string {
@@ -957,7 +958,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{"app": appName},
 			},
-			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defautUpdateStrategy),
+			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defaultDaemonSetUpdateStrategy),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: utils.Call(func() map[string]string {
