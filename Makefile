@@ -12,8 +12,6 @@ WATCH_NAMESPACE ?= ""
 
 IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
 
-KUBE_RBAC_PROXY_IMG ?= gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
-
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.29.0
 
@@ -45,12 +43,12 @@ namePrefix: $(NAME_PREFIX)
 patches:
 - patch: |-
     - op: add
-      path: /spec/template/spec/containers/1/env/-
+      path: /spec/template/spec/containers/0/env/-
       value:
         name: CSI_SERVICE_ACCOUNT_PREFIX
         value: $(NAME_PREFIX)
     - op: add
-      path: /spec/template/spec/containers/1/env/-
+      path: /spec/template/spec/containers/0/env/-
       value:
         name: WATCH_NAMESPACE
         value: $(WATCH_NAMESPACE)
@@ -60,8 +58,6 @@ patches:
 images:
 - name: controller
   newName: ${IMG}
-- name: kube-rbac-proxy
-  newName: ${KUBE_RBAC_PROXY_IMG}
 endef
 export BUILD_INSTALLER_OVERLAY
 
