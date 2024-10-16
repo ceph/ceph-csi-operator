@@ -18,7 +18,7 @@ Here's a list of some more specific conventions that are often followed in the c
 
 We use the following convention for specifying imports:
 
-```
+```text
 <import standard library packages>
 
 <import ceph-csi-operator packages>
