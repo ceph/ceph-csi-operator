@@ -103,3 +103,16 @@ jobs:
         ignore_paths: 'vendor'
         disable_matcher: false
         format: gcc
+
+  modcheck:
+    name: modcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: run mod check
+        run: make mod.check

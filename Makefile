@@ -109,6 +109,14 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
+.PHONY: mod.check
+mod.check:#check go module dependencies
+	@echo 'running "go mod verify"'
+	@go mod verify
+	@echo 'checking for modified files.'
+        # fail in case there are uncommitted changes
+	@ git diff --quiet || (echo "files were modified: " ; git status --porcelain ; false)
+
 .PHONY: test
 test: manifests generate fmt vet envtest ## Run tests.
 	OPERATOR_NAMESPACE="$${OPERATOR_NAMESPACE:=$(NAMESPACE)}" KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test $$(go list ./... | grep -v /e2e) -coverprofile cover.out
