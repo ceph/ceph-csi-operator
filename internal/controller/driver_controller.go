@@ -741,7 +741,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddressContainerArg,
 										utils.TimeoutContainerArg(grpcTimeout),
-										utils.If(r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 										utils.If(
 											r.driverType != NfsDriverType && snPolicy == csiv1a1.VolumeGroupSnapshotPolicy,
 											utils.EnableVolumeGroupSnapshotsContainerArg,
