@@ -32,9 +32,9 @@ var imageDefaults = map[string]string{
 	"attacher":    "registry.k8s.io/sig-storage/csi-attacher:v4.6.1",
 	"resizer":     "registry.k8s.io/sig-storage/csi-resizer:v1.11.1",
 	"snapshotter": "registry.k8s.io/sig-storage/csi-snapshotter:v8.0.1",
-	"registrar":   "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.1",
-	"plugin":      "quay.io/cephcsi/cephcsi:v3.11.0",
-	"addons":      "quay.io/csiaddons/k8s-sidecar:v0.8.0",
+	"registrar":   "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.11.1",
+	"plugin":      "quay.io/cephcsi/cephcsi:v3.12.2",
+	"addons":      "quay.io/csiaddons/k8s-sidecar:v0.10.0",
 }
 
 const (
