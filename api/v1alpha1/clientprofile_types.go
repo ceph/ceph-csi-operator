@@ -39,6 +39,7 @@ type CephFsConfigSpec struct {
 
 // RbdConfigSpec defines the desired RBD configuration
 type RbdConfigSpec struct {
+	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
 	//+kubebuilder:validation:Optional
 	RadosNamespace string `json:"radosNamespace,omitempty"`
 }
