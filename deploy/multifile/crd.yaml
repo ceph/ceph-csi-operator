@@ -229,6 +229,9 @@ spec:
                 properties:
                   radosNamespace:
                     type: string
+                    x-kubernetes-validations:
+                    - message: radosNamespace is immutable
+                      rule: self == oldSelf
                 type: object
             required:
             - cephConnectionRef
