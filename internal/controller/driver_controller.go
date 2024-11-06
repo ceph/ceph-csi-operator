@@ -312,9 +312,6 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	r.images = maps.Clone(imageDefaults)
 
 	if opConfig.Spec.DriverSpecDefaults != nil {
-		// Creating a copy of the driver spec, making sure any local changes will not effect the object residing
-		// in the client's cache
-		r.driver.Spec = *r.driver.Spec.DeepCopy()
 		mergeDriverSpecs(&r.driver.Spec, opConfig.Spec.DriverSpecDefaults)
 
 		// If provided, load an imageset from configmap to overwrite default images
