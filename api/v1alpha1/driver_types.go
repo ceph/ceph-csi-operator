@@ -213,6 +213,11 @@ type ControllerPluginSpec struct {
 	// Embedded common pods spec
 	PodCommonSpec `json:",inline"`
 
+	// DeploymentStrategy describes how to replace existing pods with new ones
+	// Default value is RollingUpdate with MaxUnavailable and MaxSurege as 25% (kubernetes default)
+	//+kubebuilder:validation:Optional
+	DeploymentStrategy *appsv1.DeploymentStrategy `json:"deploymentStrategy,omitempty"`
+
 	// Set replicas for controller plugin's deployment. Defaults to 2
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:validation:Minimum:=1

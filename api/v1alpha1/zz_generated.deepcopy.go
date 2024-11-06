@@ -438,6 +438,11 @@ func (in *ControllerPluginResourcesSpec) DeepCopy() *ControllerPluginResourcesSp
 func (in *ControllerPluginSpec) DeepCopyInto(out *ControllerPluginSpec) {
 	*out = *in
 	in.PodCommonSpec.DeepCopyInto(&out.PodCommonSpec)
+	if in.DeploymentStrategy != nil {
+		in, out := &in.DeploymentStrategy, &out.DeploymentStrategy
+		*out = new(appsv1.DeploymentStrategy)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Replicas != nil {
 		in, out := &in.Replicas, &out.Replicas
 		*out = new(int32)
