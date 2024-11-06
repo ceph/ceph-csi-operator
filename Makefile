@@ -43,7 +43,7 @@ namePrefix: $(NAME_PREFIX)
 patches:
 - patch: |-
     - op: add
-      path: /spec/template/spec/containers/1/env/-
+      path: /spec/template/spec/containers/0/env/-
       value:
         name: CSI_SERVICE_ACCOUNT_PREFIX
         value: $(NAME_PREFIX)
@@ -53,8 +53,6 @@ patches:
 images:
 - name: controller
   newName: ${IMG}
-- name: kube-rbac-proxy
-  newName: ${KUBE_RBAC_PROXY_IMG}
 endef
 export BUILD_INSTALLER_OVERLAY
 
