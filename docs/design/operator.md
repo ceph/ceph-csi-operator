@@ -54,12 +54,12 @@ graph TD
 
 In this diagram:
 
-- **CRD Changes**: Represents changes made to Custom Resource Definitions,
+- **CR Changes**: Represents changes made to Custom Resources (CRs),
   which trigger actions in the operator.
-- **Operator**: Listens for changes in CRDs and initiates the installation and
+- **Operator**: Listens for changes in CRs and initiates the installation and
   configuration of CSI drivers.
 - **Configure CephFS, NFS, RBD**: Actions performed by the operator to install
-  and configure the respective CSI drivers based on the CRD changes.
+  and configure the respective CSI drivers based on the configuration presented on the updated CR.
 
 ## CRDs for ceph-csi-operator
 
