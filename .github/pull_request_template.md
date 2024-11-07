@@ -38,11 +38,11 @@ functionality, but are work items that can be taken up subsequently.
 
 * [ ] **Commit Message Formatting**: Commit titles and messages follow
   guidelines in the [developer
-  guide](https://github.com/ceph/ceph-csi-operator/blob/devel/docs/development-guide.md#commit-messages).
+  guide](https://github.com/ceph/ceph-csi-operator/blob/main/docs/development-guide.md#commit-messages).
 * [ ] Reviewed the developer guide on [Submitting a Pull
-  Request](https://github.com/ceph/ceph-csi-operator/blob/devel/docs/development-guide.md#development-workflow)
+  Request](https://github.com/ceph/ceph-csi-operator/blob/main/docs/development-guide.md#development-workflow)
 * [ ] [Pending release
-  notes](https://github.com/ceph/ceph-csi-operator/blob/devel/PendingReleaseNotes.md)
+  notes](https://github.com/ceph/ceph-csi-operator/blob/main/PendingReleaseNotes.md)
   updated with breaking and/or notable changes for the next major release.
 * [ ] Documentation has been updated, if necessary.
 * [ ] Unit tests have been added, if necessary.
