@@ -69,6 +69,7 @@ type csiClusterInfoRecord struct {
 		SubvolumeGroup     string `json:"subvolumeGroup,omitempty"`
 		KernelMountOptions string `json:"kernelMountOptions"`
 		FuseMountOptions   string `json:"fuseMountOptions"`
+		RadosNamespace     string `json:"radosNamespace,omitempty"`
 	} `json:"cephFS,omitempty"`
 	Rbd struct {
 		RadosNamespace string `json:"radosNamespace,omitempty"`
@@ -313,6 +314,7 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1a1.ClientProfile, cephConn 
 	record.Monitors = cephConn.Spec.Monitors
 	if cephFs := clientProfile.Spec.CephFs; cephFs != nil {
 		record.CephFs.SubvolumeGroup = cephFs.SubVolumeGroup
+		record.CephFs.RadosNamespace = cephFs.RadosNamespace
 		if mountOpt := cephFs.KernelMountOptions; mountOpt != nil {
 			record.CephFs.KernelMountOptions = utils.MapToString(mountOpt, "=", ",")
 		}
