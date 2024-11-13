@@ -14164,6 +14164,32 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  name: ceph-csi-operator-manager-role
+  namespace: ceph-csi-operator-system
+rules:
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  verbs:
+  - create
+  - update
+  - get
+  - list
+  - approve
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - update
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   name: ceph-csi-operator-rbd-ctrlplugin-r
   namespace: ceph-csi-operator-system
 rules:
@@ -15279,6 +15305,19 @@ subjects:
 - kind: ServiceAccount
   name: ceph-csi-operator-controller-manager
   namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-csi-operator-manager-role-binding
+  namespace: ceph-csi-operator-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-csi-operator-manager-role
+subjects:
+- kind: ServiceAccount
+  name: controller-manageer
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
