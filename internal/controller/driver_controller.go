@@ -575,6 +575,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					HostNetwork:        ptr.Deref(pluginSpec.HostNetwork, false),
 					Affinity:           getControllerPluginPodAffinity(pluginSpec, &appSelector),
 					Tolerations:        pluginSpec.Tolerations,
 					Containers: utils.Call(func() []corev1.Container {
