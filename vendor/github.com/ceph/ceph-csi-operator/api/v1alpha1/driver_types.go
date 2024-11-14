@@ -210,6 +210,8 @@ type ControllerPluginResourcesSpec struct {
 }
 
 type ControllerPluginSpec struct {
+	// hostNetwork setting to be propagated to CSI controller plugin pods
+	HostNetwork *bool `json:"hostNetwork,omitempty"`
 	// Embedded common pods spec
 	PodCommonSpec `json:",inline"`
 
@@ -274,6 +276,7 @@ const (
 
 // DriverSpec defines the desired state of Driver
 type DriverSpec struct {
+
 	// Logging configuration for driver's pods
 	//+kubebuilder:validation:Optional
 	Log *LogSpec `json:"log,omitempty"`
