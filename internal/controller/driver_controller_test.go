@@ -32,7 +32,7 @@ import (
 
 var _ = Describe("Driver Controller", func() {
 	Context("When reconciling a resource", func() {
-		const resourceName = "test-resource"
+		const resourceName = "test.rbd.csi.ceph.com"
 
 		ctx := context.Background()
 
