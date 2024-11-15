@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
@@ -33,18 +34,39 @@ import (
 var _ = Describe("ClientProfile Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "test-resource"
+		const cephConnectionName = "foo"
+		const namespaceName = "default"
 
 		ctx := context.Background()
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: namespaceName, // TODO(user):Modify as needed
 		}
 		clientProfile := &csiv1alpha1.ClientProfile{}
+		typeCephConnectionName := types.NamespacedName{
+			Name:      cephConnectionName,
+			Namespace: namespaceName,
+		}
+		cephConn := &csiv1alpha1.CephConnection{}
 
 		BeforeEach(func() {
+			err := k8sClient.Get(ctx, typeCephConnectionName, cephConn)
+			if err != nil && errors.IsNotFound(err) {
+				resource := &csiv1alpha1.CephConnection{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      cephConnectionName,
+						Namespace: namespaceName,
+					},
+					Spec: csiv1alpha1.CephConnectionSpec{
+						Monitors: []string{"10.98.44.171:6789"},
+					},
+				}
+				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			}
+
 			By("creating the custom resource for the Kind ClientProfile")
-			err := k8sClient.Get(ctx, typeNamespacedName, clientProfile)
+			err = k8sClient.Get(ctx, typeNamespacedName, clientProfile)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &csiv1alpha1.ClientProfile{
 					ObjectMeta: metav1.ObjectMeta{
@@ -52,6 +74,11 @@ var _ = Describe("ClientProfile Controller", func() {
 						Namespace: "default",
 					},
 					// TODO(user): Specify other spec details if needed.
+					Spec: csiv1alpha1.ClientProfileSpec{
+						CephConnectionRef: corev1.LocalObjectReference{
+							Name: "foo",
+						},
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
@@ -65,6 +92,13 @@ var _ = Describe("ClientProfile Controller", func() {
 
 			By("Cleanup the specific resource instance ClientProfile")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+
+			cephConnection := &csiv1alpha1.CephConnection{}
+			err = k8sClient.Get(ctx, typeCephConnectionName, cephConnection)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Cleanup the cephConnection")
+			Expect(k8sClient.Delete(ctx, cephConnection)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
