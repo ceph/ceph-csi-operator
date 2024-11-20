@@ -18,6 +18,7 @@ package controller
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -39,9 +40,12 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var cfg *rest.Config
-var k8sClient client.Client
-var testEnv *envtest.Environment
+var (
+	cfg                   *rest.Config
+	k8sClient             client.Client
+	testEnv               *envtest.Environment
+	operatorNSUnsetNeeded bool
+)
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -66,6 +70,15 @@ var _ = BeforeSuite(func() {
 			fmt.Sprintf("1.29.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
 	}
 
+	_, set := os.LookupEnv("OPERATOR_NAMESPACE")
+	if !set {
+		Expect(os.Setenv("OPERATOR_NAMESPACE", "ceph-csi-operator-system")).To(Succeed())
+		operatorNSUnsetNeeded = true
+	}
+
+	// init the controller config
+	InitConfig()
+
 	var err error
 	// cfg is defined in this file globally.
 	cfg, err = testEnv.Start()
@@ -80,11 +93,14 @@ var _ = BeforeSuite(func() {
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
-
 })
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
+
+	if operatorNSUnsetNeeded {
+		Expect(os.Unsetenv("OPERATOR_NAMESPACE")).To(Succeed())
+	}
 })
