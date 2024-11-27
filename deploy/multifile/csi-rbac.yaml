@@ -59,6 +59,7 @@ rules:
   - get
   - create
   - update
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -104,6 +105,7 @@ rules:
   - get
   - create
   - update
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -138,6 +140,7 @@ rules:
   - get
   - create
   - update
+  - delete
 - apiGroups:
   - ""
   resources:
