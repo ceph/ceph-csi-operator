@@ -130,6 +130,10 @@ func (r *ClientProfileReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 func (r *ClientProfileReconcile) reconcile() error {
 	if err := r.loadAndValidate(); err != nil {
+		if utils.IsNotFoundWithName(err, r.clientProfile.Name) {
+			r.log.Info("Client profile resource does not exists anymore, skipping reconcile")
+			return nil
+		}
 		return err
 	}
 
