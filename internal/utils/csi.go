@@ -38,8 +38,10 @@ const (
 	CsiConfigMapConfigKey  = "config.json"
 	CsiConfigMapMappingKey = "cluster-mapping.json"
 
-	logsDirVolumeName      = "logs-dir"
-	logRotateDirVolumeName = "log-rotate-dir"
+	logsDirVolumeName                       = "logs-dir"
+	logRotateDirVolumeName                  = "log-rotate-dir"
+	RBDNodePluginAddonsSidecarTlsSecretName = "tls-secret-node-plugin"
+	RBDCtrlPluginAddonsSidecarTlsSecretName = "tls-secret-ctrl-plugin"
 )
 
 // Ceph CSI common volumes
@@ -101,6 +103,38 @@ var OidcTokenVolume = corev1.Volume{
 						Path:              "oidc-token",
 						ExpirationSeconds: ptr.To(int64(3600)),
 						Audience:          "ceph-csi-kms",
+					},
+				},
+			},
+		},
+	},
+}
+var TlsCertsRBDNodePluginVolume = corev1.Volume{
+	Name: "certs",
+	VolumeSource: corev1.VolumeSource{
+		Projected: &corev1.ProjectedVolumeSource{
+			Sources: []corev1.VolumeProjection{
+				{
+					Secret: &corev1.SecretProjection{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: RBDNodePluginAddonsSidecarTlsSecretName,
+						},
+					},
+				},
+			},
+		},
+	},
+}
+var TlsCertsRBDCtrlPluginVolume = corev1.Volume{
+	Name: "certs",
+	VolumeSource: corev1.VolumeSource{
+		Projected: &corev1.ProjectedVolumeSource{
+			Sources: []corev1.VolumeProjection{
+				{
+					Secret: &corev1.SecretProjection{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: RBDCtrlPluginAddonsSidecarTlsSecretName,
+						},
 					},
 				},
 			},
@@ -270,6 +304,14 @@ var LogsDirVolumeMount = corev1.VolumeMount{
 var LogRotateDirVolumeMount = corev1.VolumeMount{
 	Name:      logRotateDirVolumeName,
 	MountPath: "/logrotate-config",
+}
+var RBDNodePluginTLSCertVolumeMount = corev1.VolumeMount{
+	Name:      "certs",
+	MountPath: "/etc/tls",
+}
+var RBDCtrlPluginTLSCertVolumeMount = corev1.VolumeMount{
+	Name:      "certs",
+	MountPath: "/etc/tls",
 }
 
 func PodsMountDirVolumeMount(kubletDirPath string) corev1.VolumeMount {
