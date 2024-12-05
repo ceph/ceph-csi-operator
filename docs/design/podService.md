@@ -10,15 +10,36 @@ CSI addons sidecar which is being deployed here needs certificates. Currently we
 
 ## Proposed Solution
 
-###  Introduce a new argument for TLS
+### Introduce a new argument for TLS
 
-We introduce a new argument in the commands to enable TLS. It is diabled by default. But if this is enabled the deployer is expected to have mounted a secret that contains the required certificates. We will essentially need a certifiate that is compatible with the hostname that the manager will be issuing network calls using it. 
-
+We introduce a new argument in the commands to enable TLS. It is diabled by default. But if this is enabled the deployer is expected to have mounted a secret that contains the required certificates. We will essentially need a certifiate that is compatible with the hostname that the manager will be issuing network calls using it.
 
 ### Operator changes
 
-The Ceph CSI Operator is only responsible for taking in the information mounted to it and project those as volumes in the CSI Addons sidecar. The deployer of CSI Addons should create these certificates and mount it at `/etc/tls/tls.crt` and `/etc/tls/tls.key`. We keep this hardcoded to reduce the number of new arguments introduced. The logger should provide enough information if the user is not mounting this correctly for easy debugging.
+The Ceph CSI Operator when deploying the sidecar for CSI Addons should will the secret provided in the OperatorConfig in `/etc/tls` folder. The infomration about the secret should be provided via OperatorConfig which in then will be used during sidecar creation. The secret contains information the certficate that is going to be used by the CSI Addons sidecar.
 
-## Guide to the deployeer for handling certificates
+## Guide to the operator incharge of creating certificates (Optional)
 
-Since we use host networking the certificates should have these IP addresses as valid Subject names.
+Based on the type of networking that is to be used. Hostnames used to connect to the Sidecar endpoint should be set in the certificate accordingly.
+
+## Changes proposed to OperatorConfig
+
+```
+// New struct proposed
+type TLSConfiguration struct {
+    certificateSecretname string
+    cretificateSecretNamespace string
+    enableTLS bool
+}
+
+// OperatorConfigSpec defines the desired state of OperatorConfig
+type OperatorConfigSpec struct {
+	//+kubebuilder:validation:Optional
+	Log *OperatorLogSpec `json:"log,omitempty"`
+
+	// Allow overwrite of hardcoded defaults for any driver managed by this operator
+	//+kubebuilder:validation:Optional
+	DriverSpecDefaults *DriverSpec `json:"driverSpecDefaults,omitempty"`
+    TLSConfiguration *TLSConfiguration // Conigure TLS certificates for CSI addons
+}
+```
