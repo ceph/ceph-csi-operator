@@ -19,7 +19,9 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"os"
+	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -29,6 +31,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -36,6 +39,7 @@ import (
 
 	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 	"github.com/ceph/ceph-csi-operator/internal/controller"
+	"github.com/ceph/ceph-csi-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -94,6 +98,23 @@ func main() {
 		TLSOpts: tlsOpts,
 	})
 
+	defaultNamespaces := map[string]cache.Config{}
+	operatorNamespace, err := utils.GetOperatorNamespace()
+	if err != nil {
+		setupLog.Error(err, "manager requires namespace to be registered for controllers to reconcile")
+		os.Exit(1)
+	}
+	// ensure we always cache items from operator namespace
+	defaultNamespaces[operatorNamespace] = cache.Config{}
+
+	watchNamespace, err := getWatchNamespace()
+	if err != nil {
+		setupLog.Error(err, "manager will only watch for resources in the operator deployed namespace")
+	} else {
+		for _, namespace := range strings.Split(watchNamespace, ",") {
+			defaultNamespaces[namespace] = cache.Config{}
+		}
+	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
 		Metrics: metricsserver.Options{
@@ -116,6 +137,7 @@ func main() {
 		// if you are doing or is intended to do any operation such as perform cleanups
 		// after the manager stops then its usage might be unsafe.
 		// LeaderElectionReleaseOnCancel: true,
+		Cache: cache.Options{DefaultNamespaces: defaultNamespaces},
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -159,4 +181,15 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+// getWatchNamespace returns the Namespace the operator should be watching for changes
+func getWatchNamespace() (string, error) {
+	var watchNamespaceEnvVar = "WATCH_NAMESPACE"
+
+	ns := os.Getenv(watchNamespaceEnvVar)
+	if ns == "" {
+		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
+	}
+	return ns, nil
 }
