@@ -368,7 +368,7 @@ var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=
 var HonorPVReclaimPolicyContainerArg = "--feature-gates=HonorPVReclaimPolicy=true"
 var ImmediateTopologyContainerArg = "--immediate-topology=false"
 var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
-var EnableVolumeGroupSnapshotsContainerArg = "--enable-volume-group-snapshots=true"
+var EnableVolumeGroupSnapshotsContainerArg = "--feature-gates=CSIVolumeGroupSnapshot=true"
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
 var LogToStdErrContainerArg = "--logtostderr=false"
 var AlsoLogToStdErrContainerArg = "--alsologtostderr=true"
