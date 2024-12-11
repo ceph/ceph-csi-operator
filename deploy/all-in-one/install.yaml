@@ -1301,6 +1301,10 @@ spec:
                           Default is RollingUpdate.
                         type: string
                     type: object
+                  hostNetwork:
+                    description: hostNetwork setting to be propagated to CSI controller
+                      plugin pods
+                    type: boolean
                   imagePullPolicy:
                     description: To indicate the image pull policy to be applied to
                       all the containers in the csi driver pods.
@@ -8161,6 +8165,10 @@ spec:
                               "RollingUpdate". Default is RollingUpdate.
                             type: string
                         type: object
+                      hostNetwork:
+                        description: hostNetwork setting to be propagated to CSI controller
+                          plugin pods
+                        type: boolean
                       imagePullPolicy:
                         description: To indicate the image pull policy to be applied
                           to all the containers in the csi driver pods.
