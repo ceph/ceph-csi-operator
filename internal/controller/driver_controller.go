@@ -86,18 +86,68 @@ var nameRegExp, _ = regexp.Compile(fmt.Sprintf(
 // DriverReconciler reconciles a Driver object
 type DriverReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme    *runtime.Scheme
+	enableTLS bool
 }
 
 // A local reconcile object tied to a single reconcile iteration
 type driverReconcile struct {
 	DriverReconciler
 
-	ctx        context.Context
-	log        logr.Logger
-	driver     csiv1a1.Driver
-	driverType DriverType
-	images     map[string]string
+	ctx                  context.Context
+	log                  logr.Logger
+	driver               csiv1a1.Driver
+	driverType           DriverType
+	images               map[string]string
+	certificateGenerated bool
+}
+
+func createK8sSecret(csrPEM, privKeyPEM []byte, secretName, namespace string) (*corev1.Secret, error) {
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: namespace,
+		},
+		Data: map[string][]byte{
+			"tls.crt": csrPEM, // Store the CSR as the certificate (it can be replaced with an actual cert later)
+			"tls.key": privKeyPEM,
+		},
+	}
+
+	return secret, nil
+}
+
+func (r *driverReconcile) performCertificateGeneration(Name string, log logr.Logger) error {
+
+	if r.isRdbDriver() {
+		if !r.isCertificateGenerated() {
+			secretName := "tls-cert"
+			requestObject, privateKey, err := utils.GetCertificateSigningRequest(r.driver.Name,
+				Name,
+				[]string{"rook"}, []string{strings.Join([]string{Name, "*"},
+					"kubernetes.io/kube-apiserver-client")}, "ceph-csi")
+			if err != nil {
+				log.Error(err, "Failed to create certificate signign request object")
+				return err
+			}
+			err = r.Client.Create(r.ctx, requestObject)
+			if err != nil {
+				log.Error(err, "Failed to create CertificateSigningRequest resource")
+				return err
+			}
+			secretObject, err := createK8sSecret(requestObject.Spec.Request, privateKey, secretName, r.driver.Namespace)
+			if err != nil {
+				log.Error(err, "Failed to create CertificateSigningRequest resource")
+				return err
+			}
+			err = r.Client.Create(r.ctx, secretObject)
+			if err != nil {
+				log.Error(err, "Failed to create secret resource")
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -516,6 +566,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	log := r.log.WithValues("deploymentName", deploy.Name)
 	log.Info("Reconciling controller plugin deployment")
 
+	if err := r.performCertificateGeneration(deploy.Name, log); err != nil {
+		return err
+	}
+
 	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
 		if err := ctrlutil.SetControllerReference(&r.driver, deploy, r.Scheme); err != nil {
 			log.Error(err, "Failed setting an owner reference on deployment")
@@ -794,6 +848,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									if logRotationEnabled {
 										mounts = append(mounts, utils.LogsDirVolumeMount)
 									}
+									if r.enableTLS {
+										mounts = append(mounts, utils.RBDCtrlPluginTLSCertVolumeMount)
+									}
 									return mounts
 								}),
 								Resources: ptr.Deref(
@@ -908,6 +965,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								utils.LogRotateDirVolumeName(r.driver.Name),
 							)
 						}
+						if r.enableTLS {
+							volumes = append(volumes, utils.TlsCertsRBDCtrlPluginVolume)
+						}
 						return volumes
 					}),
 				},
@@ -928,6 +988,12 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 
 	log := r.log.WithValues("daemonSetName", daemonSet.Name)
 	log.Info("Reconciling node plugin deployment")
+
+	if err := r.performCertificateGeneration(daemonSet.Name, log); err != nil {
+		return err
+	}
+
+	// if is rbd driver and certificates are required then generate a certificate if not already
 
 	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
 		if err := ctrlutil.SetControllerReference(&r.driver, daemonSet, r.Scheme); err != nil {
@@ -1129,6 +1195,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
 										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
 										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+										utils.If(r.enableTLS, "--enable-tls=true", ""),
 									},
 								),
 								Ports: []corev1.ContainerPort{
@@ -1146,6 +1213,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									}
 									if logRotationEnabled {
 										mounts = append(mounts, utils.LogsDirVolumeMount)
+									}
+									if r.enableTLS {
+										mounts = append(mounts, utils.RBDNodePluginTLSCertVolumeMount)
 									}
 									return mounts
 								}),
@@ -1250,6 +1320,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 								volumes,
 								utils.OidcTokenVolume,
 							)
+							if r.enableTLS {
+								volumes = append(volumes, utils.TlsCertsRBDNodePluginVolume)
+							}
 						}
 						if logRotationEnabled {
 							logHostPath := cmp.Or(logRotationSpec.LogHostPath, defaultLogHostPath)
@@ -1312,6 +1385,10 @@ func (r *driverReconcile) reconcileLivenessService() error {
 		}
 		return nil
 	}
+}
+
+func (r *driverReconcile) isCertificateGenerated() bool {
+	return r.certificateGenerated
 }
 
 func (r *driverReconcile) isRdbDriver() bool {
