@@ -24,7 +24,6 @@ import (
 	"k8s.io/utils/ptr"
 
 	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
-	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
 var imageDefaults = map[string]string{
@@ -65,25 +64,26 @@ var defaultDeploymentStrategy = appsv1.DeploymentStrategy{
 	},
 }
 
-var operatorNamespace = utils.Call(func() string {
-	namespace := os.Getenv("OPERATOR_NAMESPACE")
-	if namespace == "" {
+var (
+	operatorNamespace    string
+	operatorConfigName   string
+	serviceAccountPrefix string
+)
+
+func InitConfig() {
+	if operatorNamespace = os.Getenv("OPERATOR_NAMESPACE"); operatorNamespace == "" {
 		panic("Required OPERATOR_NAMESPACE environment variable is either missing or empty")
 	}
-	return namespace
-})
 
-var operatorConfigName = utils.Call(func() string {
-	name, ok := os.LookupEnv("OPERATOR_CONFIG_NAME")
-	if ok {
-		if name == "" {
+	serviceAccountPrefix = os.Getenv("CSI_SERVICE_ACCOUNT_PREFIX")
+
+	envOperatorConfigName, set := os.LookupEnv("OPERATOR_CONFIG_NAME")
+	if set {
+		if envOperatorConfigName == "" {
 			panic("OPERATOR_CONFIG_NAME exists but empty")
 		}
-		return name
+		operatorConfigName = envOperatorConfigName
+	} else {
+		operatorConfigName = "ceph-csi-operator-config"
 	}
-	return "ceph-csi-operator-config"
-})
-
-var serviceAccountPrefix = utils.Call(func() string {
-	return os.Getenv("CSI_SERVICE_ACCOUNT_PREFIX")
-})
+}

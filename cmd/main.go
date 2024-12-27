@@ -94,6 +94,9 @@ func main() {
 		TLSOpts: tlsOpts,
 	})
 
+	// Init the config options from the environment
+	controller.InitConfig()
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
 		Metrics: metricsserver.Options{
