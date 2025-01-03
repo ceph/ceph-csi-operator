@@ -7,6 +7,8 @@ IMAGE_NAME ?= ceph-csi-operator
 # Allow customization of the name prefix and/or namespace
 NAME_PREFIX ?= ceph-csi-operator-
 NAMESPACE ?= $(NAME_PREFIX)system
+# A comma separated list of namespaces for operator to cache objects from
+WATCH_NAMESPACE ?= ""
 
 IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
 
@@ -47,6 +49,11 @@ patches:
       value:
         name: CSI_SERVICE_ACCOUNT_PREFIX
         value: $(NAME_PREFIX)
+    - op: add
+      path: /spec/template/spec/containers/1/env/-
+      value:
+        name: WATCH_NAMESPACE
+        value: $(WATCH_NAMESPACE)
   target:
     kind: Deployment
     name: controller-manager
