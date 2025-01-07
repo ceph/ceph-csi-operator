@@ -66,8 +66,8 @@ var defaultDeploymentStrategy = appsv1.DeploymentStrategy{
 }
 
 var operatorNamespace = utils.Call(func() string {
-	namespace := os.Getenv("OPERATOR_NAMESPACE")
-	if namespace == "" {
+	namespace, err := utils.GetOperatorNamespace()
+	if err != nil {
 		panic("Required OPERATOR_NAMESPACE environment variable is either missing or empty")
 	}
 	return namespace

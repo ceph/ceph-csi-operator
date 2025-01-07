@@ -18,9 +18,15 @@ package utils
 
 import (
 	"cmp"
+	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"sync"
+)
+
+const (
+	operatorNamespaceEnvVar = "OPERATOR_NAMESPACE"
 )
 
 // RunConcurrently runs all the of the given functions concurrently returning a channel with
@@ -128,4 +134,12 @@ func DeleteZeroValues[T comparable](slice []T) []T {
 	return slices.DeleteFunc(slice, func(value T) bool {
 		return value == zero
 	})
+}
+
+func GetOperatorNamespace() (string, error) {
+	ns := os.Getenv(operatorNamespaceEnvVar)
+	if ns == "" {
+		return "", fmt.Errorf("%s must be set", operatorNamespaceEnvVar)
+	}
+	return ns, nil
 }
