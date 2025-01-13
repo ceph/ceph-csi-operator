@@ -133,13 +133,17 @@ test: manifests generate fmt vet envtest ## Run tests.
 test-e2e:
 	go test ./test/e2e/ -v -ginkgo.v
 
-.PHONY: lint
-lint: golangci-lint ## Run golangci-lint linter & yamllint
-	$(GOLANGCI_LINT) run
 
+
+.PHONY:	golangci-lint-fix
+golangci-lint-fix: $(GOLANGCI_LINT) ## Run the golangci-lint linter and perform fixes
+	@$(GOLANGCI_LINT) --config=.golangci.yml -verbose run --fix
+
+
+.PHONY: lint
+lint: golangci-lint ## Run various linters
 .PHONY: lint-fix
-lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
-	$(GOLANGCI_LINT) run --fix
+lint-fix: golangci-lint-fix ## run linters and perform fixes
 
 ##@ Build
 
@@ -269,8 +273,9 @@ check-all-committed: ## Fail in case there are uncommitted changes
 	test -z "$(shell git status --short)" || (echo "files were modified: " ; git status --short ; false)
 
 .PHONY: golangci-lint
-golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
-$(GOLANGCI_LINT): $(LOCALBIN)
+golangci-lint: $(GOLANGCI_LINT) ## Run the golangci-lint linter
+	@$(GOLANGCI_LINT) --config=.golangci.yml -verbose run
+$(GOLANGCI_LINT): $(LOCALBIN) ## Download golangci-lint locally if necessary.
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,${GOLANGCI_LINT_VERSION})
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
