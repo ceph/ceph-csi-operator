@@ -134,6 +134,15 @@ test-e2e:
 	go test ./test/e2e/ -v -ginkgo.v
 
 
+MARKDOWNLINT_IMAGE = docker.io/davidanson/markdownlint-cli2:v0.17.1
+.PHONY: markdownlint
+markdownlint:
+	@$(CONTAINER_TOOL) run --platform linux/amd64 -v .\:/workdir\:z  $(MARKDOWNLINT_IMAGE) markdownlint-cli2 "**.md" "#vendor/**"  --config .markdownlint.yaml
+
+.PHONY: markdownlint-fix
+markdownlint-fix:
+	@$(CONTAINER_TOOL) run --platform linux/amd64 -v .\:/workdir\:z  $(MARKDOWNLINT_IMAGE) markdownlint-cli2 "**.md" "#vendor/**"  --config .markdownlint.yaml --fix
+
 
 .PHONY:	golangci-lint-fix
 golangci-lint-fix: $(GOLANGCI_LINT) ## Run the golangci-lint linter and perform fixes
@@ -141,9 +150,9 @@ golangci-lint-fix: $(GOLANGCI_LINT) ## Run the golangci-lint linter and perform 
 
 
 .PHONY: lint
-lint: golangci-lint ## Run various linters
+lint: golangci-lint markdownlint ## Run various linters
 .PHONY: lint-fix
-lint-fix: golangci-lint-fix ## run linters and perform fixes
+lint-fix: golangci-lint-fix markdownlint-fix## run linters and perform fixes
 
 ##@ Build
 
