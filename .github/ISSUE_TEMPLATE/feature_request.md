@@ -8,7 +8,7 @@ about: Suggest an idea for this project
 
 What new functionality do you want?
 
-# Who is the end user and what is the use case where this feature will be valuable?
+## Who is the end user and what is the use case where this feature will be valuable? ##
   
 Who is going to use this feature and under what circumstances?
 
