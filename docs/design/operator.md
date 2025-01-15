@@ -358,8 +358,8 @@ status: {}
 
 The ClientProfileMapping CR contains a mapping between pairs of Ceph
 CSI client profiles. The information in this CR helps Ceph CSI identify
-peered configuration between different k8s cluster. This information is 
-utilized in the management and consumption of volumes in backup and 
+peered configuration between different k8s cluster. This information is
+utilized in the management and consumption of volumes in backup and
 DR scenarios
 
 ```yaml

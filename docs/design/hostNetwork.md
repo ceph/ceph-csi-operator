@@ -1,7 +1,7 @@
 # Enabling host networking for controller plugin pods
 
 By default, the Ceph-CSI controller plugins operate on the pod network
-but under some circumstances, like setups with a dedicated storage network, 
+but under some circumstances, like setups with a dedicated storage network,
 where the pod network cannot connect to the ceph cluster,
 it is necessary to run the Ceph-CSI controller plugin pods on the host network.
 

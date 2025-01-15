@@ -2,7 +2,7 @@
 
 Log rotation involves managing log files by controlling their size. This feature will be added to the CephCSI and csi-addons containers in the CephCSI node-plugin and controller-plugin pods. When logrotate is used, it will generate a log file at the host path and run the logrotator sidecar container in CephCSI pods. The logrotator sidecar container will then ensure that log files are rotated based on predefined settings.
 
-Logroate configuration, 
+Logroate configuration,
 
 `OperatorConfig CRD`:
 
