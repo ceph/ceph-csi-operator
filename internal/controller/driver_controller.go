@@ -575,6 +575,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					HostNetwork:        ptr.Deref(pluginSpec.HostNetwork, false),
 					Affinity:           getControllerPluginPodAffinity(pluginSpec, &appSelector),
 					Tolerations:        pluginSpec.Tolerations,
 					Containers: utils.Call(func() []corev1.Container {
@@ -758,6 +759,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						}
 						// Addons Sidecar Container
 						if !r.isNfsDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+							port := r.controllerPluginCsiAddonsContainerPort()
 							containers = append(containers, corev1.Container{
 								Name:            "csi-addons",
 								Image:           r.images["addons"],
@@ -771,7 +773,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.PodContainerArg,
 										utils.PodUidContainerArg,
 										utils.CsiAddonsAddressContainerArg,
-										utils.ControllerPortContainerArg,
+										utils.ContainerPortArg(port),
 										utils.NamespaceContainerArg,
 										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
 										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
@@ -779,7 +781,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									),
 								),
 								Ports: []corev1.ContainerPort{
-									utils.CsiAddonsContainerPort,
+									port,
 								},
 								Env: []corev1.EnvVar{
 									utils.NodeIdEnvVar,
@@ -919,6 +921,20 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 
 	logCreateOrUpdateResult(log, "controller plugin deployment", deploy, opResult, err)
 	return err
+}
+
+func (r *driverReconcile) controllerPluginCsiAddonsContainerPort() corev1.ContainerPort {
+
+	// the cephFS and rbd drivers need to use different ports
+	// to avoid port collisions with host network.
+	port := utils.ControllerPluginCsiAddonsContainerRbdPort
+	if r.isCephFsDriver() {
+		port = utils.ControllerPluginCsiAddonsContainerCephFsPort
+
+	}
+
+	return port
+
 }
 
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
@@ -1106,6 +1122,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 						}
 						// CSI Addons Sidecar Container
 						if r.isRdbDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+							port := utils.NodePluginCsiAddonsContainerPort
 							containers = append(containers, corev1.Container{
 								Name:            "csi-addons",
 								Image:           r.images["addons"],
@@ -1121,7 +1138,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										utils.CsiAddonsNodeIdContainerArg,
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddonsAddressContainerArg,
-										utils.ControllerPortContainerArg,
+										utils.ContainerPortArg(port),
 										utils.PodContainerArg,
 										utils.NamespaceContainerArg,
 										utils.PodUidContainerArg,
@@ -1132,7 +1149,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									},
 								),
 								Ports: []corev1.ContainerPort{
-									utils.CsiAddonsContainerPort,
+									port,
 								},
 								Env: []corev1.EnvVar{
 									utils.NodeIdEnvVar,

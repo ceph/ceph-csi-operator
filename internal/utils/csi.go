@@ -337,9 +337,23 @@ var DriverNamespaceEnvVar = corev1.EnvVar{
 	},
 }
 
-// CSI Addons container port definition
-var CsiAddonsContainerPort = corev1.ContainerPort{
+// CSI Addons container port definitions
+var ControllerPluginCsiAddonsContainerRbdPort = corev1.ContainerPort{
 	ContainerPort: int32(9070),
+}
+
+var ControllerPluginCsiAddonsContainerCephFsPort = corev1.ContainerPort{
+	ContainerPort: int32(9080),
+}
+
+var NodePluginCsiAddonsContainerPort = corev1.ContainerPort{
+	ContainerPort: int32(9071),
+}
+
+func ContainerPortArg(port corev1.ContainerPort) string {
+
+	return fmt.Sprintf("--controller-port=%d", port.ContainerPort)
+
 }
 
 // Ceph CSI common container arguments
@@ -359,7 +373,6 @@ var HandleVolumeInuseErrorContainerArg = "--handle-volume-inuse-error=false"
 var PodUidContainerArg = fmt.Sprintf("--pod-uid=$(%s)", PodUidEnvVar.Name)
 var PodContainerArg = fmt.Sprintf("--pod=$(%s)", PodNameEnvVar.Name)
 var NamespaceContainerArg = fmt.Sprintf("--namespace=$(%s)", PodNamespaceEnvVar.Name)
-var ControllerPortContainerArg = fmt.Sprintf("--controller-port=%d", CsiAddonsContainerPort.ContainerPort)
 var DriverNamespaceContainerArg = fmt.Sprintf("--drivernamespace=$(%s)", DriverNamespaceEnvVar.Name)
 var MetricsPathContainerArg = "--metricspath=/metrics"
 var PoolTimeContainerArg = "--polltime=60s"
