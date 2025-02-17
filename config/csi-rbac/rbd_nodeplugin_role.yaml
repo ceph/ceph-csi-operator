@@ -5,7 +5,7 @@ metadata:
 rules:
   - apiGroups: ["csiaddons.openshift.io"]
     resources: ["csiaddonsnodes"]
-    verbs: ["get", "create", "update", "delete"]
+    verbs: ["get", "watch", "list", "create", "update", "delete"]
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get"]
