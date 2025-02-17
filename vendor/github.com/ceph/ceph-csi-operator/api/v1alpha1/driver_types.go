@@ -276,7 +276,6 @@ const (
 
 // DriverSpec defines the desired state of Driver
 type DriverSpec struct {
-
 	// Logging configuration for driver's pods
 	//+kubebuilder:validation:Optional
 	Log *LogSpec `json:"log,omitempty"`
