@@ -1,0 +1,63 @@
+name: Test Charts
+
+on:
+  pull_request:
+
+jobs:
+  test-operator:
+    name: operator chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: set up tmate session for debugging
+        if: ${{ failure() || runner.debug || contains(github.event.pull_request.labels.*.name, 'debug-ci') }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: false
+          detached: true
+
+      - name: Setup Minikube
+        run: |
+            test/scripts/github-action-helper.sh install_minikube_with_none_driver
+      - name: print k8s cluster status
+        run: |
+            kubectl get nodes
+      - name: use local disk
+        run: test/scripts/github-action-helper.sh use_local_disk
+
+      - name: create ceph cluster
+        run: test/scripts/github-action-helper.sh deploy_rook
+
+      - name: Prepare ceph-csi-operator
+        run: |
+          make docker-build
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Verify Helm installation
+        run: helm version
+
+      - name: Lint Helm Chart
+        run: |
+          helm lint ./deploy/charts/ceph-csi-operator
+
+      - name: Install Helm chart for project
+        run: |
+          helm install my-release ./deploy/charts/ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system
+
+      - name: Check Helm release status
+        run: |
+          helm status my-release --namespace ceph-csi-operator-system
+
+      - name: Check operator is running
+        run: |
+          for i in {1..180}; do kubectl get pods -l app.kubernetes.io/name=ceph-csi-operator -n ceph-csi-operator-system -o jsonpath='{.items[0].status.phase}' | grep -q "Running" && exit 0 || sleep 1; done; echo "Pod not running after 3 minutes"; exit 1
