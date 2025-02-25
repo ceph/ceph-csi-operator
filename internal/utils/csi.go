@@ -439,14 +439,14 @@ func LogRotateConfigMapName(driverName string) string {
 func KernelMountOptionsContainerArg(options map[string]string) string {
 	return If(
 		len(options) > 0,
-		fmt.Sprintf("--kernelmountoptions==%s", MapToString(options, "=", ",")),
+		fmt.Sprintf("--kernelmountoptions=%s", MapToString(options, "=", ",")),
 		"",
 	)
 }
 func FuseMountOptionsContainerArg(options map[string]string) string {
 	return If(
-		len(options) == 0,
-		fmt.Sprintf("--fusemountoptions==%s", MapToString(options, "=", ",")),
+		len(options) > 0,
+		fmt.Sprintf("--fusemountoptions=%s", MapToString(options, "=", ",")),
 		"",
 	)
 }
