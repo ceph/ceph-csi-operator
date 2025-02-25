@@ -30,6 +30,7 @@ const (
 	csiAddonsEndpoint = "unix://" + SocketDir + "/csi-addons.sock"
 
 	kmsConfigVolumeName      = "ceph-csi-kms-config"
+	csiMountInfoVolumeName   = "ceph-csi-mountinfo"
 	registrationVolumeName   = "registration-dir"
 	pluginDirVolumeName      = "plugin-dir"
 	podsMountDirVolumeName   = "pods-mount-dir"
@@ -126,6 +127,17 @@ var EtcSelinuxVolume = corev1.Volume{
 	},
 }
 
+func CsiMountInfoVolume(kubeletDirPath string, driverName string) corev1.Volume {
+	return corev1.Volume{
+		Name: csiMountInfoVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/plugins/%s/mountinfo", kubeletDirPath, driverName),
+				Type: ptr.To(corev1.HostPathDirectoryOrCreate),
+			},
+		},
+	}
+}
 func KmsConfigVolume(configRef *corev1.LocalObjectReference) corev1.Volume {
 	return corev1.Volume{
 		Name: kmsConfigVolumeName,
@@ -244,6 +256,10 @@ var OidcTokenVolumeMount = corev1.VolumeMount{
 var CsiConfigVolumeMount = corev1.VolumeMount{
 	Name:      CsiConfigVolume.Name,
 	MountPath: "/etc/ceph-csi-config",
+}
+var CsiMountInfoVolumeMount = corev1.VolumeMount{
+	Name:      csiMountInfoVolumeName,
+	MountPath: "/csi/mountinfo",
 }
 var KmsConfigVolumeMount = corev1.VolumeMount{
 	Name:      kmsConfigVolumeName,
