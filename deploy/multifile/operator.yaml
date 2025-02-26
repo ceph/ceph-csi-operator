@@ -425,6 +425,27 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: ceph-csi-operator
+  name: ceph-csi-operator-metrics-auth-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ceph-csi-operator
   name: ceph-csi-operator-metrics-reader
 rules:
 - nonResourceURLs:
@@ -483,27 +504,6 @@ rules:
   - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: ceph-csi-operator
-  name: ceph-csi-operator-proxy-role
-rules:
-- apiGroups:
-  - authentication.k8s.io
-  resources:
-  - tokenreviews
-  verbs:
-  - create
-- apiGroups:
-  - authorization.k8s.io
-  resources:
-  - subjectaccessreviews
-  verbs:
-  - create
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
@@ -542,33 +542,15 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: ceph-csi-operator
-  name: ceph-csi-operator-proxy-rolebinding
+  name: ceph-csi-operator-metrics-auth-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: ceph-csi-operator-proxy-role
+  name: ceph-csi-operator-metrics-auth-role
 subjects:
 - kind: ServiceAccount
   name: ceph-csi-operator-controller-manager
   namespace: ceph-csi-operator-system
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: ceph-csi-operator
-    control-plane: controller-manager
-  name: ceph-csi-operator-controller-manager-metrics-service
-  namespace: ceph-csi-operator-system
-spec:
-  ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: https
-  selector:
-    control-plane: controller-manager
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -593,31 +575,6 @@ spec:
     spec:
       containers:
       - args:
-        - --secure-listen-address=0.0.0.0:8443
-        - --upstream=http://127.0.0.1:8080/
-        - --v=0
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
-        name: kube-rbac-proxy
-        ports:
-        - containerPort: 8443
-          name: https
-          protocol: TCP
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 5m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-      - args:
-        - --health-probe-bind-address=:8081
-        - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         command:
         - /manager
