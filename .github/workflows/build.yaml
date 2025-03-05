@@ -30,6 +30,8 @@ jobs:
         run: make build-installer
       - name: run build multifile installer
         run: make build-multifile-installer
+      - name: Generate operator helm charts
+        run: make build-helm-installer
       - name: Check for uncommitted changes
         run: make check-all-committed
       - name: Show the uncommitted "git diff"
