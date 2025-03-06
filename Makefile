@@ -117,7 +117,7 @@ mod.check:#check go module dependencies
 	@echo 'running "go mod verify"'
 	@go mod verify
 	@echo 'checking for modified files.'
-        # fail in case there are uncommitted changes
+	# fail in case there are uncommitted changes
 	@ git diff --quiet || (echo "files were modified: " ; git status --porcelain ; false)
 
 .PHONY: test
@@ -220,6 +220,14 @@ build-csi-rbac:
 	$(KUSTOMIZE) build build > deploy/multifile/csi-rbac.yaml
 	rm -rf build
 
+##@ Docs
+.PHONY: generate-helm-docs
+generate-helm-docs: helm-docs
+	$(HELM_DOCS) -c deploy/charts/ceph-csi-operator \
+		-t docs/helm-charts/operator-chart.gotmpl.md \
+		-t docs/helm-charts/_templates.gotmpl \
+		-o ../../../docs/helm-charts/operator-chart.md
+
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -260,6 +268,7 @@ CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen-$(CONTROLLER_TOOLS_VERSION)
 ENVTEST ?= $(LOCALBIN)/setup-envtest-$(ENVTEST_VERSION)
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
 HELMIFY ?= $(LOCALBIN)/helmify-$(HELMIFY_VERSION)
+HELM_DOCS ?= $(LOCALBIN)/helm-docs-$(HELM_DOCS_VERSION)
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.3.0
@@ -267,6 +276,12 @@ CONTROLLER_TOOLS_VERSION ?= v0.14.0
 ENVTEST_VERSION ?= release-0.17
 GOLANGCI_LINT_VERSION ?= v1.63.4
 HELMIFY_VERSION ?= v0.4.18
+HELM_DOCS_VERSION ?= v1.14.2
+
+.PHONY: helm-docs
+helm-docs: $(HELM_DOCS) ## Download helm-docs locally if necessary.
+$(HELM_DOCS): $(LOCALBIN)
+	$(call go-install-tool,$(HELM_DOCS),github.com/norwoodj/helm-docs/cmd/helm-docs,$(HELM_DOCS_VERSION))
 
 .PHONY: helmify
 helmify: $(HELMIFY) ## Download helmify locally if necessary.
