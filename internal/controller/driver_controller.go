@@ -226,6 +226,10 @@ func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 func (r *driverReconcile) reconcile() error {
 	// Load the driver desired state based on driver resource, operator config resource and default values.
 	if err := r.LoadAndValidateDesiredState(); err != nil {
+		if utils.IsNotFoundWithName(err, r.driver.Name) {
+			r.log.Info("Driver resource does not exist anymore, skipping reconcile")
+			return nil
+		}
 		return err
 	}
 
