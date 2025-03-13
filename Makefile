@@ -114,6 +114,8 @@ vet: ## Run go vet against code.
 
 .PHONY: mod.check
 mod.check:#check go module dependencies
+	@echo 'running "go mod vendor"'
+	@go mod vendor
 	@echo 'running "go mod verify"'
 	@go mod verify
 	@echo 'checking for modified files.'
