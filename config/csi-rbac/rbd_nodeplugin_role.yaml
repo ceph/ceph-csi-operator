@@ -15,6 +15,3 @@ rules:
   - apiGroups: ["apps"]
     resources: ["deployments/finalizers", "daemonsets/finalizers"]
     verbs: ["update"]
-  - apiGroups: ["authentication.k8s.io"]
-    resources: ["tokenreviews"]
-    verbs: ["create"]
