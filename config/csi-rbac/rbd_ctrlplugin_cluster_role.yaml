@@ -69,3 +69,6 @@ rules:
   - apiGroups: ["replication.storage.openshift.io"]
     resources: ["volumegroupreplicationclasses"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["authentication.k8s.io"]
+    resources: ["tokenreviews"]
+    verbs: ["create"]
