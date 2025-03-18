@@ -14,7 +14,7 @@ spec:
     singular: driver
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: Driver is the Schema for the drivers API
