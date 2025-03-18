@@ -22,7 +22,7 @@ spec:
     singular: cephconnection
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: CephConnection is the Schema for the cephconnections API
@@ -91,7 +91,7 @@ spec:
     singular: clientprofilemapping
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: ClientProfileMapping is the Schema for the clientprofilemappings
@@ -162,7 +162,7 @@ spec:
     singular: clientprofile
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: ClientProfile is the Schema for the clientprofiles API
@@ -264,7 +264,7 @@ spec:
     singular: driver
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: Driver is the Schema for the drivers API
@@ -7119,7 +7119,7 @@ spec:
     singular: operatorconfig
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: OperatorConfig is the Schema for the operatorconfigs API
