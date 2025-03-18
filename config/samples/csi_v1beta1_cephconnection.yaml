@@ -1,4 +1,4 @@
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1beta1
 kind: CephConnection
 metadata:
   labels:

@@ -1,9 +1,9 @@
-apiVersion: csi.ceph.io/v1alpha1
-kind: OperatorConfig
+apiVersion: csi.ceph.io/v1beta1
+kind: Driver
 metadata:
   labels:
     app.kubernetes.io/name: ceph-csi-operator
     app.kubernetes.io/managed-by: kustomize
-  name: operatorconfig-sample
+  name: driver-sample
 spec:
   # TODO(user): Add fields here
