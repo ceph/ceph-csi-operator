@@ -33,7 +33,7 @@ import (
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1b1 "github.com/ceph/ceph-csi-operator/api/v1beta1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
@@ -55,8 +55,8 @@ type ClientProfileReconcile struct {
 
 	ctx           context.Context
 	log           logr.Logger
-	clientProfile csiv1a1.ClientProfile
-	cephConn      csiv1a1.CephConnection
+	clientProfile csiv1b1.ClientProfile
+	cephConn      csiv1b1.CephConnection
 	cleanUp       bool
 }
 
@@ -94,9 +94,9 @@ func (r *ClientProfileReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	genChangedPredicate := predicate.GenerationChangedPredicate{}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&csiv1a1.ClientProfile{}).
+		For(&csiv1b1.ClientProfile{}).
 		Owns(
-			&csiv1a1.CephConnection{},
+			&csiv1b1.CephConnection{},
 			builder.MatchEveryOwner,
 			builder.WithPredicates(genChangedPredicate),
 		).
@@ -307,7 +307,7 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 
 // ComposeCsiClusterInfoRecord composes the desired csi cluster info record for
 // a given ClientProfile and CephConnection specs
-func composeCsiClusterInfoRecord(clientProfile *csiv1a1.ClientProfile, cephConn *csiv1a1.CephConnection) *csiClusterInfoRecord {
+func composeCsiClusterInfoRecord(clientProfile *csiv1b1.ClientProfile, cephConn *csiv1b1.CephConnection) *csiClusterInfoRecord {
 	record := csiClusterInfoRecord{}
 	record.ClusterId = clientProfile.Name
 	record.Monitors = cephConn.Spec.Monitors

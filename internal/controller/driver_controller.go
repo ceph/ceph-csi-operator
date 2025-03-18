@@ -47,7 +47,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1b1 "github.com/ceph/ceph-csi-operator/api/v1beta1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
@@ -95,7 +95,7 @@ type driverReconcile struct {
 
 	ctx        context.Context
 	log        logr.Logger
-	driver     csiv1a1.Driver
+	driver     csiv1b1.Driver
 	driverType DriverType
 	images     map[string]string
 }
@@ -110,17 +110,17 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// request for drivers
 	driverDefaultsPredicate := predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			opConf, ok := e.Object.(*csiv1a1.OperatorConfig)
+			opConf, ok := e.Object.(*csiv1b1.OperatorConfig)
 			return ok && opConf.Spec.DriverSpecDefaults != nil
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldConf, oldOk := e.ObjectOld.(*csiv1a1.OperatorConfig)
-			newConf, newOk := e.ObjectNew.(*csiv1a1.OperatorConfig)
+			oldConf, oldOk := e.ObjectOld.(*csiv1b1.OperatorConfig)
+			newConf, newOk := e.ObjectNew.(*csiv1b1.OperatorConfig)
 			return !oldOk || !newOk ||
 				!reflect.DeepEqual(oldConf.Spec.DriverSpecDefaults, newConf.Spec.DriverSpecDefaults)
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			opConf, ok := e.Object.(*csiv1a1.OperatorConfig)
+			opConf, ok := e.Object.(*csiv1b1.OperatorConfig)
 			return ok && opConf.Spec.DriverSpecDefaults != nil
 		},
 		GenericFunc: func(event.GenericEvent) bool {
@@ -132,7 +132,7 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// for all drivers whenever the driver default configuration changes
 	enqueueAllDrivers := handler.EnqueueRequestsFromMapFunc(
 		func(ctx context.Context, obj client.Object) []reconcile.Request {
-			driverList := csiv1a1.DriverList{}
+			driverList := csiv1b1.DriverList{}
 			if err := r.List(ctx, &driverList); err != nil {
 				return []reconcile.Request{}
 			}
@@ -165,7 +165,7 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	)
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&csiv1a1.Driver{}).
+		For(&csiv1b1.Driver{}).
 		Owns(
 			&appsv1.Deployment{},
 			builder.WithPredicates(genChangedPredicate),
@@ -187,7 +187,7 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			),
 		).
 		Watches(
-			&csiv1a1.OperatorConfig{},
+			&csiv1b1.OperatorConfig{},
 			enqueueAllDrivers,
 			builder.WithPredicates(driverDefaultsPredicate),
 		).
@@ -293,7 +293,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	r.driverType = DriverType(strings.ToLower(matches[1]))
 
 	// Load operator configuration resource
-	opConfig := csiv1a1.OperatorConfig{}
+	opConfig := csiv1b1.OperatorConfig{}
 	opConfig.Name = operatorConfigName
 	opConfig.Namespace = operatorNamespace
 	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&opConfig), &opConfig); client.IgnoreNotFound(err) != nil {
@@ -362,7 +362,7 @@ func (r *driverReconcile) reconcileLogRotateConfigMap() error {
 	log := r.log.WithValues("logRotateConfigMap", logRotateConfigmap.Name)
 	log.Info("Reconciling logRotate configmap")
 
-	logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1a1.LogSpec{}).Rotation
+	logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1b1.LogSpec{}).Rotation
 	if logRotationSpec != nil {
 		opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, logRotateConfigmap, func() error {
 			if _, err := utils.ToggleOwnerReference(true, logRotateConfigmap, &r.driver, r.Scheme); err != nil {
@@ -528,17 +528,17 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		}
 
 		leaderElectionSpec := cmp.Or(r.driver.Spec.LeaderElection, &defaultLeaderElection)
-		pluginSpec := cmp.Or(r.driver.Spec.ControllerPlugin, &csiv1a1.ControllerPluginSpec{})
+		pluginSpec := cmp.Or(r.driver.Spec.ControllerPlugin, &csiv1b1.ControllerPluginSpec{})
 		serviceAccountName := cmp.Or(
 			ptr.Deref(pluginSpec.ServiceAccountName, ""),
 			fmt.Sprintf("%s%s-ctrlplugin-sa", serviceAccountPrefix, r.driverType),
 		)
 		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
 		grpcTimeout := cmp.Or(r.driver.Spec.GRpcTimeout, defaultGRrpcTimeout)
-		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).Verbosity
-		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
-		snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1a1.VolumeSnapshotSnapshotPolicy)
-		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1a1.LogSpec{}).Rotation
+		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1b1.LogSpec{}).Verbosity
+		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1b1.KernelCephFsClient
+		snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1b1.VolumeSnapshotSnapshotPolicy)
+		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1b1.LogSpec{}).Rotation
 		logRotationEnabled := logRotationSpec != nil
 		logRotateSecurityContext := utils.If(
 			pluginSpec.Privileged != nil && logRotationEnabled,
@@ -623,7 +623,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										// overwrite built in volumes mounts.
 										utils.MapSlice(
 											pluginSpec.Volumes,
-											func(v csiv1a1.VolumeSpec) corev1.VolumeMount {
+											func(v csiv1b1.VolumeSpec) corev1.VolumeMount {
 												return v.Mount
 											},
 										),
@@ -728,7 +728,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							},
 						}
 						// Snapshotter Sidecar Container
-						if snPolicy != csiv1a1.NoneSnapshotPolicy {
+						if snPolicy != csiv1b1.NoneSnapshotPolicy {
 							containers = append(containers, corev1.Container{
 								Name:            "csi-snapshotter",
 								ImagePullPolicy: imagePullPolicy,
@@ -742,7 +742,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.TimeoutContainerArg(grpcTimeout),
 										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 										utils.If(
-											r.driverType != NfsDriverType && snPolicy == csiv1a1.VolumeGroupSnapshotPolicy,
+											r.driverType != NfsDriverType && snPolicy == csiv1b1.VolumeGroupSnapshotPolicy,
 											utils.EnableVolumeGroupSnapshotsContainerArg,
 											"",
 										),
@@ -885,7 +885,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							// overwrite built in volumes.
 							utils.MapSlice(
 								pluginSpec.Volumes,
-								func(v csiv1a1.VolumeSpec) corev1.Volume {
+								func(v csiv1b1.VolumeSpec) corev1.Volume {
 									return v.Volume
 								},
 							),
@@ -924,17 +924,14 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 }
 
 func (r *driverReconcile) controllerPluginCsiAddonsContainerPort() corev1.ContainerPort {
-
 	// the cephFS and rbd drivers need to use different ports
 	// to avoid port collisions with host network.
 	port := utils.ControllerPluginCsiAddonsContainerRbdPort
 	if r.isCephFsDriver() {
 		port = utils.ControllerPluginCsiAddonsContainerCephFsPort
-
 	}
 
 	return port
-
 }
 
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
@@ -952,19 +949,19 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 		}
 
 		appName := daemonSet.Name
-		pluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
+		pluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1b1.NodePluginSpec{})
 		serviceAccountName := cmp.Or(
 			ptr.Deref(pluginSpec.ServiceAccountName, ""),
 			fmt.Sprintf("%s%s-nodeplugin-sa", serviceAccountPrefix, r.driverType),
 		)
 		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
-		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1a1.LogSpec{}).Verbosity
+		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1b1.LogSpec{}).Verbosity
 		kubeletDirPath := cmp.Or(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
-		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1a1.KernelCephFsClient
+		forceKernelClient := r.isCephFsDriver() && r.driver.Spec.CephFsClientType == csiv1b1.KernelCephFsClient
 
 		topology := r.isRdbDriver() && pluginSpec.Topology != nil
-		domainLabels := cmp.Or(pluginSpec.Topology, &csiv1a1.TopologySpec{}).DomainLabels
-		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1a1.LogSpec{}).Rotation
+		domainLabels := cmp.Or(pluginSpec.Topology, &csiv1b1.TopologySpec{}).DomainLabels
+		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1b1.LogSpec{}).Rotation
 		logRotationEnabled := logRotationSpec != nil
 
 		daemonSet.Spec = appsv1.DaemonSetSpec{
@@ -1238,7 +1235,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 							// overwrite built in volumes.
 							utils.MapSlice(
 								pluginSpec.Volumes,
-								func(v csiv1a1.VolumeSpec) corev1.Volume {
+								func(v csiv1b1.VolumeSpec) corev1.Volume {
 									return v.Volume
 								},
 							),
@@ -1368,7 +1365,7 @@ func (r *driverReconcile) generateServiceName(suffix string) string {
 }
 
 func getControllerPluginPodAffinity(
-	pluginSpec *csiv1a1.ControllerPluginSpec,
+	pluginSpec *csiv1b1.ControllerPluginSpec,
 	selector *metav1.LabelSelector,
 ) *corev1.Affinity {
 	if pluginSpec.Affinity != nil && pluginSpec.Affinity.PodAntiAffinity != nil {
@@ -1412,7 +1409,7 @@ func logCreateOrUpdateResult(
 }
 
 // mergeDriverSpecs will fill in any unset fields in dest with a copy of the same field in src
-func mergeDriverSpecs(dest, src *csiv1a1.DriverSpec) {
+func mergeDriverSpecs(dest, src *csiv1b1.DriverSpec) {
 	// Create a copy of the src, making sure that any value copied into dest is a not shared
 	// with the original src
 	src = src.DeepCopy()
