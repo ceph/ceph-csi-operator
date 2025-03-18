@@ -15,7 +15,7 @@ spec:
     singular: clientprofilemapping
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: ClientProfileMapping is the Schema for the clientprofilemappings

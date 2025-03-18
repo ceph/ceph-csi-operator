@@ -15,7 +15,7 @@ spec:
     singular: operatorconfig
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         description: OperatorConfig is the Schema for the operatorconfigs API
