@@ -39,8 +39,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
-	"github.com/ceph/ceph-csi-operator/internal/controller"
+	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/csi/v1alpha1"
+	controller "github.com/ceph/ceph-csi-operator/internal/controller/csi"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 	//+kubebuilder:scaffold:imports
 )
