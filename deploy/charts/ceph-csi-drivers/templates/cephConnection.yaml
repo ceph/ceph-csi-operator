@@ -1,0 +1,21 @@
+{{- $root := . -}}
+{{- range $cephConnection := .Values.cephConnections -}}
+{{- if $cephConnection.name -}}
+apiVersion: csi.ceph.io/v1alpha1
+kind: CephConnection
+metadata:
+  name: {{  $cephConnection.name  }}
+  namespace: {{ $root.Release.Namespace }}
+spec:
+  monitors:
+  {{- range $cephConnection.monitors }}
+  - {{ . }}
+  {{- end }}
+  rbdMirrorDaemonCount: {{ $cephConnection.rbdMirrorDaemonCount }}
+  readAffinity:
+    crushLocationLabels:
+    {{- range $cephConnection.crushLocationLabels }}
+    - {{ . }}
+    {{- end }}
+{{- end }}
+{{- end }}

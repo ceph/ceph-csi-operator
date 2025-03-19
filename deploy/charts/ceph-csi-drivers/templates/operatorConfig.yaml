@@ -1,0 +1,124 @@
+{{- $root := . -}}
+{{- $config := .Values.operatorConfig -}}
+{{- if $config.create }}
+---
+apiVersion: csi.ceph.io/v1alpha1
+kind: OperatorConfig
+metadata:
+  name: {{ $config.name }}
+  namespace: {{ $config.namespace }}
+spec:
+  {{ if $config.log }}
+  log:
+    verbosity: {{ $config.log.verbosity }}
+  {{- end }}
+  driverSpecDefaults:
+    {{- if $config.driverSpecDefaults.log }}
+    log:
+      verbosity: {{ $config.driverSpecDefaults.log.verbosity }}
+      {{- if $config.driverSpecDefaults.log.rotation }}
+      rotation:
+        maxFiles: {{ $config.driverSpecDefaults.log.rotation.maxFiles }}
+        maxLogSize: {{ $config.driverSpecDefaults.log.rotation.maxLogSize }}
+        periodicity: {{ $config.driverSpecDefaults.log.rotation.periodicity }}
+        logHostPath: {{ $config.driverSpecDefaults.log.rotation.logHostPath }}
+      {{- end }}
+    {{- end }}
+    {{- if $config.driverSpecDefaults.imageSet }}
+    {{- if $config.driverSpecDefaults.imageSet.name }}
+    imageSet:
+        name: {{ $config.driverSpecDefaults.imageSet.name }}
+    {{- end }}
+    {{- end }}
+    clusterName: {{ $config.driverSpecDefaults.clusterName }}
+    enableMetadata: {{ $config.driverSpecDefaults.enableMetadata }}
+    grpcTimeout: {{ $config.driverSpecDefaults.grpcTimeout }}
+    snapshotPolicy: {{ $config.driverSpecDefaults.snapshotPolicy }}
+    generateOMapInfo: {{ $config.driverSpecDefaults.generateOMapInfo }}
+    fsGroupPolicy: {{ $config.driverSpecDefaultsfsGroupPolicy }}
+    {{- if $config.driverSpecDefaults.encryption }}
+      {{- if $config.driverSpecDefaults.encryption.configMapRef.name }}
+    encryption:
+      configMapRef:
+        name: {{ $config.driverSpecDefaults.encryption.configMapRef.name }}
+      {{- end }}
+    {{- end }}
+    attachRequired: {{ $config.driverSpecDefaults.attachRequired  }}
+    deployCsiAddons: {{ $config.driverSpecDefaults.deployCsiAddons  }}
+    cephFsClientType: {{ $config.driverSpecDefaults.cephFsClientType  }}
+    kernelMountOptions:
+      {{- if $config.driverSpecDefaults.kernelMountOptions }}
+      {{- toYaml $config.driverSpecDefaults.kernelMountOptions | nindent 4 }}
+      {{- else }}
+      {}  # Empty map if not defined
+      {{- end }}
+    fuseMountOptions:
+      {{- if $config.driverSpecDefaults.fuseMountOptions }}
+      {{- toYaml $config.driverSpecDefaults.fuseMountOptions | nindent 4 }}
+      {{- else }}
+      {}  # Empty map if not defined
+      {{- end }}
+    # Node Plugin Configuration
+    nodePlugin:
+      {{- if $config.driverSpecDefaults.nodePlugin }}
+      updateStrategy: {{ $config.driverSpecDefaults.nodePlugin.updateStrategy | toYaml | nindent 8 }}
+      {{- if $config.driverSpecDefaults.nodePlugin.resources }}
+      resources:
+        registrar: {{ $config.driverSpecDefaults.nodePlugin.resources.registrar | toYaml | nindent 4 }}
+        liveness: {{ $config.driverSpecDefaults.nodePlugin.resources.liveness | toYaml | nindent 4 }}
+        addons: {{ $config.driverSpecDefaults.nodePlugin.resources.addons | toYaml | nindent 4 }}
+        logRotator: {{ $config.driverSpecDefaults.nodePlugin.resources.logRotator | toYaml | nindent 4 }}
+        plugin: {{ $config.driverSpecDefaults.nodePlugin.resources.plugin | toYaml | nindent 4 }}
+      {{- end }}
+      kubeletDirPath: {{ $config.driverSpecDefaults.nodePlugin.kubeletDirPath }}
+      EnableSeLinuxHostMount: {{ $config.driverSpecDefaults.nodePlugin.enableSeLinuxHostMount }}
+      priorityClassName: {{ $config.driverSpecDefaults.nodePlugin.priorityClassName }}
+      labels: {{ $config.driverSpecDefaults.nodePlugin.labels | toYaml | nindent 8 }}
+      annotations: {{ $config.driverSpecDefaults.nodePlugin.annotations | toYaml | nindent 8 }}
+      affinity: {{ $config.driverSpecDefaults.nodePlugin.affinity | toYaml | nindent 8 }}
+      tolerations: {{ $config.driverSpecDefaults.nodePlugin.tolerations | toYaml | nindent 8 }}
+      imagePullPolicy: {{ $config.driverSpecDefaults.nodePlugin.imagePullPolicy }}
+      {{- if $config.driverSpecDefaults.nodePlugin.topology }}
+        topology:
+          domainLabels:
+          {{ $config.driverSpecDefaults.nodePlugin.topology.domainLabels | toYaml | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if $config.driverSpecDefaults.nodePlugin.volumes }}
+        {{- toYaml $config.driverSpecDefaults.nodePlugin.volumes | nindent 4 }}
+        {{- else }}
+        []  # Empty list if no volumes are defined
+        {{- end }}
+    {{- end }}
+    # Controller Plugin Configuration
+    controllerPlugin:
+      {{- if $config.driverSpecDefaults.controllerPlugin }}
+      hostNetwork: {{ $config.driverSpecDefaults.controllerPlugin.hostNetwork | default false }}
+      deploymentStrategy: {{ $config.driverSpecDefaults.controllerPlugin.deploymentStrategy | toYaml | nindent 8 }}
+      replicas: {{ $config.driverSpecDefaults.controllerPlugin.replicas | default 2 }}
+      {{- if $config.driverSpecDefaults.controllerPlugin.resources }}
+      resources:
+        attacher: {{ $config.driverSpecDefaults.controllerPlugin.resources.attacher | toYaml | nindent 8 }}
+        snapshotter: {{ $config.driverSpecDefaults.controllerPlugin.resources.snapshotter | toYaml | nindent 8 }}
+        resizer: {{ $config.driverSpecDefaults.controllerPlugin.resources.resizer | toYaml | nindent 8 }}
+        provisioner: {{ $config.driverSpecDefaults.controllerPlugin.resources.provisioner | toYaml | nindent 8 }}
+        omapGenerator: {{ $config.driverSpecDefaults.controllerPlugin.resources.omapGenerator | toYaml | nindent 8 }}
+        liveness: {{ $config.driverSpecDefaults.controllerPlugin.resources.liveness | toYaml | nindent 8 }}
+        addons: {{ $config.driverSpecDefaults.controllerPlugin.resources.addons | toYaml | nindent 8 }}
+        logRotator: {{ $config.driverSpecDefaults.controllerPlugin.resources.logRotator | toYaml | nindent 8 }}
+        plugin: {{ $config.driverSpecDefaults.controllerPlugin.resources.plugin | toYaml | nindent 8 }}
+      {{- end }}
+      privileged: {{ $config.driverSpecDefaults.controllerPlugin.privileged | default false }}
+      priorityClassName: {{ $config.driverSpecDefaults.controllerPlugin.priorityClassName }}
+      affinity: {{ $config.driverSpecDefaults.controllerPlugin.affinity | toYaml | nindent 8 }}
+      tolerations:
+      {{- toYaml $config.driverSpecDefaults.controllerPlugin.tolerations | nindent 8 }}
+      volumes:
+        {{- if $config.driverSpecDefaults.controllerPlugin.volumes }}
+        {{- toYaml $config.driverSpecDefaults.controllerPlugin.volumes | nindent 4 }}
+        {{- else }}
+        []
+        {{- end }}
+      imagePullPolicy: {{ $config.driverSpecDefaults.controllerPlugin.imagePullPolicy }}
+    {{- end }}
+{{- end }}
