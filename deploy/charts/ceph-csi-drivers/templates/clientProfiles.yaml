@@ -1,0 +1,35 @@
+{{- $root := . -}}
+{{- range $clientProfile := .Values.clientProfiles -}}
+{{- if $clientProfile.name -}}
+apiVersion: csi.ceph.io/v1alpha1
+kind: ClientProfile
+metadata:
+  name: {{  $clientProfile.name  }}
+  namespace: {{ $root.Release.Namespace }}
+spec:
+  cephConnectionRef:
+    name: {{  $clientProfile.cephConnection.name  }}
+  {{- if $clientProfile.cephFs }}
+  cephFs:
+    {{- if $clientProfile.cephFs.fuseMountOptions }}
+    fuseMountOptions:
+      {{ range $key, $value := $clientProfile.cephFs.fuseMountOptions }}
+         {{ $key }}: {{ $value }}
+      {{ end }}
+    {{- end }}
+    {{- if $clientProfile.cephFs.kernelMountOptions }}
+    kernelMountOptions:
+    {{ range $key, $value := $clientProfile.cephFs.kernelMountOptions }}
+         {{ $key }}: {{ $value }}
+      {{ end }}
+    {{- end }}
+    subVolumeGroup: {{ $clientProfile.cephFs.subVolumeGroup }}
+  {{- end }}
+  {{- if $clientProfile.rbd }}
+  rbd:
+    {{- if $clientProfile.rbd.radosNamespace }}
+    radosNamespace: {{  $clientProfile.rbd.radosNamespace  }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}
