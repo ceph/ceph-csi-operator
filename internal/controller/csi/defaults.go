@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1a1 "github.com/ceph/ceph-csi-operator/api/csi/v1alpha1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 

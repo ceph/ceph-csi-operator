@@ -27,12 +27,12 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/csi/v1alpha1"
 )
 
-var _ = Describe("ClientProfileMapping Controller", func() {
+var _ = Describe("Driver Controller", func() {
 	Context("When reconciling a resource", func() {
-		const resourceName = "test-resource"
+		const resourceName = "test.rbd.csi.ceph.com"
 
 		ctx := context.Background()
 
@@ -40,13 +40,13 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		clientprofilemapping := &csiv1alpha1.ClientProfileMapping{}
+		driver := &csiv1alpha1.Driver{}
 
 		BeforeEach(func() {
-			By("creating the custom resource for the Kind ClientProfileMapping")
-			err := k8sClient.Get(ctx, typeNamespacedName, clientprofilemapping)
+			By("creating the custom resource for the Kind Driver")
+			err := k8sClient.Get(ctx, typeNamespacedName, driver)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &csiv1alpha1.ClientProfileMapping{
+				resource := &csiv1alpha1.Driver{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
@@ -59,16 +59,16 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &csiv1alpha1.ClientProfileMapping{}
+			resource := &csiv1alpha1.Driver{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Cleanup the specific resource instance ClientProfileMapping")
+			By("Cleanup the specific resource instance Driver")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
-			controllerReconciler := &ClientProfileMappingReconciler{
+			controllerReconciler := &DriverReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}

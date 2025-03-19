@@ -28,7 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/csi/v1alpha1"
 )
 
 var _ = Describe("ClientProfile Controller", func() {
