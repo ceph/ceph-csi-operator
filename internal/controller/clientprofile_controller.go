@@ -26,6 +26,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -69,6 +70,7 @@ type csiClusterInfoRecord struct {
 		SubvolumeGroup     string `json:"subvolumeGroup,omitempty"`
 		KernelMountOptions string `json:"kernelMountOptions"`
 		FuseMountOptions   string `json:"fuseMountOptions"`
+		RadosNamespace     string `json:"radosNamespace,omitempty"`
 	} `json:"cephFS,omitempty"`
 	Rbd struct {
 		RadosNamespace string `json:"radosNamespace,omitempty"`
@@ -313,6 +315,7 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1a1.ClientProfile, cephConn 
 	record.Monitors = cephConn.Spec.Monitors
 	if cephFs := clientProfile.Spec.CephFs; cephFs != nil {
 		record.CephFs.SubvolumeGroup = cephFs.SubVolumeGroup
+		record.CephFs.RadosNamespace = ptr.Deref(cephFs.RadosNamespace, "")
 		if mountOpt := cephFs.KernelMountOptions; mountOpt != nil {
 			record.CephFs.KernelMountOptions = utils.MapToString(mountOpt, "=", ",")
 		}

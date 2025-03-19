@@ -349,6 +349,7 @@ spec:
     subvolumeGroup: csi
     kernelMountOptions: readdir_max_bytes=1048576,norbytes
     fuseMountOptions: debug
+    radosNamespace: rados-test-cephfs
   rbd:
     radosNamespace: rados-test
 status: {}

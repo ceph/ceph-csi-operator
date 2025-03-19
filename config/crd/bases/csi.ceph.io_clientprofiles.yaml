@@ -74,6 +74,11 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  radosNamespace:
+                    type: string
+                    x-kubernetes-validations:
+                    - message: field is immutable
+                      rule: self == oldSelf
                   subVolumeGroup:
                     type: string
                 type: object
@@ -85,6 +90,9 @@ spec:
                 properties:
                   radosNamespace:
                     type: string
+                    x-kubernetes-validations:
+                    - message: field is immutable
+                      rule: self == oldSelf
                 type: object
             required:
             - cephConnectionRef
