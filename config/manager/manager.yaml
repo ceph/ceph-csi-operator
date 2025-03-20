@@ -64,6 +64,8 @@ spec:
         - --leader-elect
         image: controller
         name: manager
+        volumeMounts: []
+        ports: []
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -96,3 +98,4 @@ spec:
             memory: 64Mi
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
+      volumes: []
