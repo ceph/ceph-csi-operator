@@ -47,7 +47,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1a1 "github.com/ceph/ceph-csi-operator/api/csi/v1alpha1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
