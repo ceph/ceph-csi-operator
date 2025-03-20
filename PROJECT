@@ -52,4 +52,12 @@ resources:
   kind: ClientProfileMapping
   path: github.com/ceph/ceph-csi-operator/api/csi/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: CephConnection
+  path: github.com/ceph/ceph-csi-operator/api/csi/v1beta1
+  version: v1beta1
 version: "3"
