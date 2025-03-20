@@ -46,6 +46,7 @@ type CephConnectionStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:conversion:hub
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 
