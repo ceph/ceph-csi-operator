@@ -17,6 +17,9 @@ limitations under the License.
 package utils
 
 import (
+	"errors"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -61,4 +64,14 @@ func ToggleOwnerReference(on bool, obj, owner metav1.Object, scheme *runtime.Sch
 		return err == nil, err
 	}
 	return false, nil
+}
+
+func IsNotFoundWithName(err error, name string) bool {
+	if !k8serrors.IsNotFound(err) {
+		return false
+	}
+	status, ok := err.(k8serrors.APIStatus)
+	return (ok || errors.As(err, &status)) &&
+		status.Status().Details != nil &&
+		status.Status().Details.Name == name
 }
