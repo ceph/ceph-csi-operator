@@ -31,14 +31,6 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: set up tmate session for debugging
-        if: ${{ failure() || runner.debug || contains(github.event.pull_request.labels.*.name, 'debug-ci') }}
-        uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # v3.19
-        with:
-          limit-access-to-actor: false
-          detached: true
-
-
       - name: Setup Minikube
         run: |
             test/scripts/github-action-helper.sh install_minikube_with_none_driver
