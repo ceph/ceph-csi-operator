@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: clientprofilemappings.csi.ceph.io
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.17.2
   labels:
   {{- include "ceph-csi-operator.labels" . | nindent 4 }}
 spec:
@@ -58,8 +58,13 @@ spec:
                       type: string
                     remoteClientProfile:
                       type: string
+                  required:
+                  - localClientProfile
+                  - remoteClientProfile
                   type: object
                 type: array
+            required:
+            - mappings
             type: object
           status:
             description: ClientProfileMappingStatus defines the observed state of ClientProfileMapping

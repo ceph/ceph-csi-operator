@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: cephconnections.csi.ceph.io
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.17.2
   labels:
   {{- include "ceph-csi-operator.labels" . | nindent 4 }}
 spec:
@@ -56,6 +56,8 @@ spec:
                       type: string
                     minItems: 1
                     type: array
+                required:
+                - crushLocationLabels
                 type: object
             required:
             - monitors
