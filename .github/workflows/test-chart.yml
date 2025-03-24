@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  test-operator:
-    name: operator chart
+  test-helm:
+    name: helm charts
     runs-on: ubuntu-latest
     steps:
       - name: Clone the code
@@ -35,25 +35,55 @@ jobs:
         run: |
           make docker-build
 
-      - name: Install Helm
+      - name: Install helm
         run: |
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-      - name: Verify Helm installation
+      - name: Verify helm installation
         run: helm version
 
-      - name: Lint Helm Chart
+      - name: Lint operator helm chart
         run: |
           helm lint ./deploy/charts/ceph-csi-operator
 
-      - name: Install Helm chart for project
+      - name: Install operator helm chart
         run: |
-          helm install my-release ./deploy/charts/ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system
+          helm install csi-operator ./deploy/charts/ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system
 
-      - name: Check Helm release status
+      - name: Check operator helm release status
         run: |
-          helm status my-release --namespace ceph-csi-operator-system
+          helm status csi-operator --namespace ceph-csi-operator-system
 
       - name: Check operator is running
         run: |
           for i in {1..180}; do kubectl get pods -l app.kubernetes.io/name=ceph-csi-operator -n ceph-csi-operator-system -o jsonpath='{.items[0].status.phase}' | grep -q "Running" && exit 0 || sleep 1; done; echo "Pod not running after 3 minutes"; exit 1
+
+      - name: Patch operator to watch csi driver namespace
+        run: |
+          kubectl patch deployment csi-operator-ceph-csi-operator-controller-manager -nceph-csi-operator-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/2/value", "value": "csi-driver"}]'
+
+      - name: Lint csi driver helm chart
+        run: |
+          helm lint ./deploy/charts/ceph-csi-drivers
+
+      - name: Install csi driver helm chart
+        run: |
+          helm install csi-driver ./deploy/charts/ceph-csi-drivers --create-namespace --namespace csi-driver
+
+      - name: Check csi driver helm release status
+        run: |
+          helm status csi-driver --namespace csi-driver
+
+      - name: Check csi pods are running
+        run: |
+          for i in {1..180}; do
+          if [ $(kubectl get pods -n csi-driver --field-selector=status.phase=Running --no-headers | wc -l) -eq 6 ]; then
+            exit 0;
+          fi
+            sleep 1;
+          done;
+          kubectl get pods,deployment,daemonset,replicaset -oyaml -n csi-driver
+          kubectl get pods,deployment,daemonset,replicaset -n csi-driver
+          kubectl logs -l app.kubernetes.io/instance=ceph-csi-operator -nceph-csi-operator-system
+          echo "Pod(s) not running after 3 minutes";
+          exit 1;
