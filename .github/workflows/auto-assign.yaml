@@ -14,6 +14,11 @@ jobs:
     name: Run self assign job
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - name: take the issue
         uses: bdougie/take-action@1439165ac45a7461c2d89a59952cd7d941964b87 # main
         with:

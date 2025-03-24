@@ -3,22 +3,30 @@ name: Test Charts
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test-operator:
     name: operator chart
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481 # v2.11.0
+        with:
+          egress-policy: audit
+
       - name: Clone the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
         with:
           go-version-file: go.mod
 
       - name: set up tmate session for debugging
         if: ${{ failure() || runner.debug || contains(github.event.pull_request.labels.*.name, 'debug-ci') }}
-        uses: mxschmitt/action-tmate@v3
+        uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # v3.19
         with:
           limit-access-to-actor: false
           detached: true

@@ -23,3 +23,18 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /api
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /vendor/go.opentelemetry.io/otel
+    schedule:
+      interval: daily
