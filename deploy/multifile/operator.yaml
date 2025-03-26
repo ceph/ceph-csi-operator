@@ -266,17 +266,6 @@ rules:
   - ""
   resources:
   - configmaps
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
   - services
   verbs:
   - create
@@ -290,17 +279,6 @@ rules:
   - apps
   resources:
   - daemonsets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - apps
-  resources:
   - deployments
   verbs:
   - create
@@ -324,57 +302,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - csi.ceph.io
-  resources:
-  - clientprofilemappings/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - csi.ceph.io
-  resources:
-  - clientprofilemappings/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - csi.ceph.io
-  resources:
   - clientprofiles
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - csi.ceph.io
-  resources:
-  - clientprofiles/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - csi.ceph.io
-  resources:
-  - clientprofiles/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - csi.ceph.io
-  resources:
   - drivers
   verbs:
   - create
@@ -387,12 +315,16 @@ rules:
 - apiGroups:
   - csi.ceph.io
   resources:
+  - clientprofilemappings/finalizers
+  - clientprofiles/finalizers
   - drivers/finalizers
   verbs:
   - update
 - apiGroups:
   - csi.ceph.io
   resources:
+  - clientprofilemappings/status
+  - clientprofiles/status
   - drivers/status
   verbs:
   - get
