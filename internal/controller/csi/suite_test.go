@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/csi/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
