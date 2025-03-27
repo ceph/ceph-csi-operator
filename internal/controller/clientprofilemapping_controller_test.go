@@ -53,7 +53,7 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 					},
 					Spec: csiv1alpha1.ClientProfileMappingSpec{
 						Mappings: []csiv1alpha1.MappingsSpec{
-							csiv1alpha1.MappingsSpec{
+							{
 								LocalClientProfile:  "test",
 								RemoteClientProfile: "test",
 							},
