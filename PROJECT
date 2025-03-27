@@ -78,4 +78,17 @@ resources:
     spoke:
     - v1alpha1
     webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: ClientProfileMapping
+  path: github.com/ceph/ceph-csi-operator/api/csi/v1beta1
+  version: v1beta1
+  webhooks:
+    conversion: true
+    spoke:
+    - v1alpha1
+    webhookVersion: v1
 version: "3"

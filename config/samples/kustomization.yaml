@@ -7,4 +7,5 @@ resources:
 - csi_v1alpha1_clientprofilemapping.yaml
 - csi_v1beta1_cephconnection.yaml
 - csi_v1beta1_clientprofile.yaml
+- csi_v1beta1_clientprofilemapping.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
