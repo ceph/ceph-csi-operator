@@ -9,4 +9,5 @@ resources:
 - csi_v1beta1_clientprofile.yaml
 - csi_v1beta1_clientprofilemapping.yaml
 - csi_v1beta1_driver.yaml
+- csi_v1beta1_operatorconfig.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

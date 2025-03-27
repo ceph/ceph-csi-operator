@@ -44,6 +44,7 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ClientProfile{}, &ClientProfileList{},
 		&ClientProfileMapping{}, &ClientProfileMappingList{},
 		&Driver{}, &DriverList{},
+		&OperatorConfig{}, &OperatorConfigList{},
 	)
 	metav1.AddToGroupVersion(scheme, GroupVersion)
 	return nil
