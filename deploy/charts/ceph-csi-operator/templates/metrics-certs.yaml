@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "ceph-csi-operator.fullname" . }}-metrics-certs
+  labels:
+  {{- include "ceph-csi-operator.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+  - '{{ include "ceph-csi-operator.fullname" . }}-webhook-service.{{ .Release.Namespace
+    }}.svc'
+  - '{{ include "ceph-csi-operator.fullname" . }}-webhook-service.{{ .Release.Namespace
+    }}.svc.{{ .Values.kubernetesClusterDomain }}'
+  issuerRef:
+    kind: Issuer
+    name: '{{ include "ceph-csi-operator.fullname" . }}-selfsigned-issuer'
+  secretName: metrics-server-cert
