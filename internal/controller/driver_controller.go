@@ -465,12 +465,7 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 				storagev1.FileFSGroupPolicy,
 			),
 		)
-		if nodePlugin := r.driver.Spec.NodePlugin; nodePlugin != nil {
-			csiDriver.Spec.SELinuxMount = cmp.Or(
-				nodePlugin.EnableSeLinuxHostMount,
-				csiDriver.Spec.SELinuxMount,
-			)
-		}
+		csiDriver.Spec.SELinuxMount = ptr.To(true)
 
 		return nil
 	})
