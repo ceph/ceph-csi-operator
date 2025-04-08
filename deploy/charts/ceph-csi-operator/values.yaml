@@ -8,6 +8,7 @@ controllerManager:
   manager:
     args:
     - --leader-elect
+    - --webhook-cert-path=/tmp/k8s-webhook-server/serving-certs
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -45,3 +46,9 @@ rbdCtrlpluginSa:
 rbdNodepluginSa:
   serviceAccount:
     annotations: {}
+webhookService:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+  type: ClusterIP

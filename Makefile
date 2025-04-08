@@ -58,6 +58,202 @@ patches:
 images:
 - name: controller
   newName: ${IMG}
+replacements:
+ - source: # Add service DNS names to the certificates
+     kind: Service
+     version: v1
+     name: webhook-service
+     fieldPath: .metadata.name
+   targets:
+     - select:
+         kind: Certificate
+         group: cert-manager.io
+         version: v1
+       fieldPaths:
+         - .spec.dnsNames.0
+         - .spec.dnsNames.1
+       options:
+         delimiter: '.'
+         index: 0
+         create: true
+ - source:
+     kind: Service
+     version: v1
+     name: webhook-service
+     fieldPath: .metadata.namespace
+   targets:
+     - select:
+         kind: Certificate
+         group: cert-manager.io
+         version: v1
+       fieldPaths:
+         - .spec.dnsNames.0
+         - .spec.dnsNames.1
+       options:
+         delimiter: '.'
+         index: 1
+         create: true
+ - source: # Add the certificate namespace to CRDs annotation for CA Bundle injection
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.namespace
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: cephconnections.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 0
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.namespace
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: clientprofiles.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 0
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.namespace
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: clientprofilemappings.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 0
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.namespace
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: drivers.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 0
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.namespace
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: operatorconfigs.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 0
+        create: true
+
+ - source: # Add the certificate name to CRDs annotation for CA Bundle injection
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.name
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: cephconnections.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 1
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.name
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: clientprofiles.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 1
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.name
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: clientprofilemappings.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 1
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.name
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: drivers.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 1
+        create: true
+ - source:
+    kind: Certificate
+    group: cert-manager.io
+    version: v1
+    name: serving-cert
+    fieldPath: .metadata.name
+   targets:
+    - select:
+        kind: CustomResourceDefinition
+        name: operatorconfigs.csi.ceph.io
+      fieldPaths:
+        - .metadata.annotations.[cert-manager.io/inject-ca-from]
+      options:
+        delimiter: "/"
+        index: 1
+        create: true
 endef
 export BUILD_INSTALLER_OVERLAY
 
