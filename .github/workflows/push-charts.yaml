@@ -35,7 +35,7 @@ jobs:
           VERSION=${{ env.VERSION }}
 
           # Clone the ceph-csi-operator-charts repository
-          git clone https://github.com/ceph/ceph-csi-operator-charts
+          git clone https://github.com/Madhu-1/ceph-csi-operator-charts
 
           # Function to push helm charts
           push_helm_charts() {
@@ -62,7 +62,7 @@ jobs:
             git config user.name "${GITHUB_USER}"
             git config user.email "${GITHUB_EMAIL}"
             git add --all :/ && git commit -m "Update for helm charts ${PACKAGE}-${VERSION}"
-            git push https://"${GITHUB_TOKEN}"@github.com/ceph/ceph-csi-operator-charts
+            git push https://"${GITHUB_TOKEN}"@github.com/Madhu-1/ceph-csi-operator-charts
             popd >/dev/null
           }
 
@@ -71,7 +71,7 @@ jobs:
 
           # Clone the ceph-csi-operator-charts repository
           pushd "${CSI_CHARTS_DIR}" >/dev/null
-          git clone https://github.com/ceph/ceph-csi-operator-charts
+          git clone https://github.com/Madhu-1/ceph-csi-operator-charts
           mkdir -p ceph-csi-operator-charts/docs
           popd >/dev/null
 
