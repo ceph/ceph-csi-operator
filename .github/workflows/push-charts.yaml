@@ -1,0 +1,83 @@
+name: Publish Helm Charts
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: read
+
+jobs:
+  push-charts:
+    runs-on: ubuntu-latest
+    if: github.repository == 'ceph/ceph-csi-operator'  
+    steps:
+      # Step 1: Checkout the ceph-csi-operator repository
+      - name: Clone the code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      # Step 2: Set version
+      - name: Set release version
+        id: release_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      # Step 3: Set up Helm
+      - name: Set up Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      # Step 4: Prepare the Helm charts and update version in Chart.yaml
+      - name: Push Helm charts
+        run: |
+          set -xe
+
+          GITHUB_TOKEN=${{ secrets.CEPH_CSI_BOT_TOKEN }}
+          GITHUB_USER=${{ secrets.CEPH_CSI_BOT_USER }}
+          GITHUB_EMAIL=${{ secrets.CEPH_CSI_BOT_EMAIL }}
+          VERSION=${{ env.VERSION }}
+
+          # Function to push helm charts
+          push_helm_charts() {
+            PACKAGE=$1
+            CHARTDIR=$2
+            VERSION=${VERSION}  # Set version
+
+            # Update version in Chart.yaml
+            sed -i "s/^version:.*/version: ${VERSION}/" "deploy/charts/ceph-csi-${PACKAGE}/Chart.yaml"
+
+            mkdir -p "${CHARTDIR}/ceph-csi-operator-charts/docs/${PACKAGE}"
+
+            # Use rsync to remove files from destination when source file is deleted
+            rsync -avh "./deploy/charts/ceph-csi-${PACKAGE}" "${CHARTDIR}/ceph-csi-operator-charts/docs/ceph-csi-${PACKAGE}" --delete
+
+            pushd "${CHARTDIR}/ceph-csi-operator-charts/docs/ceph-csi-${PACKAGE}" >/dev/null
+            helm package "ceph-csi-${PACKAGE}"
+            popd >/dev/null
+
+            # Update the Helm repo index
+            pushd "${CHARTDIR}/ceph-csi-operator-charts/docs" >/dev/null
+            helm repo index . --url "https://ceph.github.io/ceph-csi-operator-charts/"
+
+            git config user.name "${GITHUB_USER}"
+            git config user.email "${GITHUB_EMAIL}"
+            git add --all :/ && git commit -m "Update for helm charts ${PACKAGE}-${VERSION}"
+            git push https://"${GITHUB_TOKEN}"@github.com/ceph/ceph-csi-operator-charts
+            popd >/dev/null
+          }
+
+          # Temporary directory for processing
+          CSI_CHARTS_DIR=$(mktemp -d)
+
+          # Clone the ceph-csi-operator-charts repository
+          pushd "${CSI_CHARTS_DIR}" >/dev/null
+          git clone https://github.com/ceph/ceph-csi-operator-charts
+          mkdir -p ceph-csi-operator-charts/docs
+          popd >/dev/null
+
+          # Push Helm charts for "operator" and "drivers"
+          push_helm_charts operator "${CSI_CHARTS_DIR}"
+          push_helm_charts drivers "${CSI_CHARTS_DIR}"
+
+          # Clean up temporary directory
+          rm -rf "${CSI_CHARTS_DIR}"
