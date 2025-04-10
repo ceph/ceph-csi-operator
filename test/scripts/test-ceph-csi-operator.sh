@@ -23,10 +23,10 @@ export IMAGE_TAG="test"
 # sufficient information to debug deployment problems
 function log_errors() {
     kubectl get nodes
-    kubectl -n ${OPERATOR_NAMESPACE} get events
-    kubectl -n ${OPERATOR_NAMESPACE} describe pods
-    kubectl -n ${OPERATOR_NAMESPACE} logs -l ${OPERATOR_POD_LABEL} --tail=-1
-    kubectl -n ${OPERATOR_NAMESPACE} get deployment -oyaml
+    kubectl -n "${OPERATOR_NAMESPACE}" get events
+    kubectl -n "${OPERATOR_NAMESPACE}" describe pods
+    kubectl -n "${OPERATOR_NAMESPACE}" logs -l "${OPERATOR_POD_LABEL}" --tail=-1
+    kubectl -n "${OPERATOR_NAMESPACE}" get deployment -oyaml
 
     # this function should not return, a fatal error was caught!
     exit 1
@@ -46,8 +46,8 @@ function check_operator_health() {
     for ((retry = 0; retry <= OPERATOR_DEPLOY_TIMEOUT; retry = retry + 5)); do
         echo "Waiting for ceph-csi-operator pod... ${retry}s" && sleep 5
 
-        OPERATOR_POD_NAME=$(kubectl_retry -n ${OPERATOR_NAMESPACE} get pods -l ${OPERATOR_POD_LABEL} -o jsonpath='{.items[0].metadata.name}')
-        OPERATOR_POD_STATUS=$(kubectl_retry -n ${OPERATOR_NAMESPACE} get pod "$OPERATOR_POD_NAME" -ojsonpath='{.status.phase}')
+        OPERATOR_POD_NAME=$(kubectl_retry -n "${OPERATOR_NAMESPACE}" get pods -l "${OPERATOR_POD_LABEL}" -o jsonpath='{.items[0].metadata.name}')
+        OPERATOR_POD_STATUS=$(kubectl_retry -n "${OPERATOR_NAMESPACE}" get pod "$OPERATOR_POD_NAME" -ojsonpath='{.status.phase}')
         [[ "$OPERATOR_POD_STATUS" = "Running" ]] && break
     done
 
