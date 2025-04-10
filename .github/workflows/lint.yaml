@@ -23,24 +23,19 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 1
-      - name: codespell
-        uses: codespell-project/actions-codespell@fad9339798e1ee3fe979ae0a022c931786a408b8 # master
-        with:
-          skip: .git,*.sum,vendor
-          ignore_words_list: AfterAll,NotIn,notin,immediatedly
-          check_filenames: true
-          check_hidden: true
-  misspell:
-    name: misspell
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 1
-      - name: misspell
-        uses: reviewdog/action-misspell@9daa94af4357dddb6fd3775de806bc0a8e98d3e4 # v1.26.3
-        with:
-          exclude: ./vendor/*
+      - name: Set up Python
+        run: |
+          sudo apt install -y python3 python3-pip
+
+      - name: Install specific version of codespell
+        run: |
+          pip3 install codespell==2.4.1
+
+      - name: Run codespell
+        run: |
+          codespell \
+            --ignore-words-list="AfterAll,NotIn,notin,immediatedly" \
+            --skip=".git,*.sum,vendor"
 
   golangci:
     name: golangci-lint
@@ -84,14 +79,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-    - name: Run ShellCheck
-      uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca # master
-      with:
-        severity: warning
-        check_together: 'yes'
-        ignore_paths: 'vendor'
-        disable_matcher: false
-        format: gcc
+    - name: Install shellcheck via apt
+      run: |
+        sudo apt update
+        sudo apt install -y shellcheck
+        shellcheck --version
+
+    - name: Run shellcheck on all .sh files
+      run: |
+        find . -type f -name "*.sh" \
+          ! -path "./vendor/*" \
+          -exec shellcheck {} +
 
   modcheck:
     name: modcheck
