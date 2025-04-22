@@ -553,6 +553,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			utils.LeaderElectionRetryPeriodContainerArg(leaderElectionSpec.RetryPeriod),
 		}
 
+		// TODO: Move the Topology field from NodePlugin to Driver.Spec
+		nodePluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1a1.NodePluginSpec{})
+		topology := r.isRdbDriver() && nodePluginSpec.Topology != nil
+
 		deploy.Spec = appsv1.DeploymentSpec{
 			Replicas: pluginSpec.Replicas,
 			Selector: &appSelector,
@@ -662,7 +666,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.PreventVolumeModeConversionContainerArg,
 										utils.HonorPVReclaimPolicyContainerArg,
 										utils.If(r.isRdbDriver(), utils.DefaultFsTypeContainerArg, ""),
-										utils.If(r.isRdbDriver(), utils.ImmediateTopologyContainerArg, ""),
+										utils.TopologyContainerArg(topology),
 										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 									),
 								),
