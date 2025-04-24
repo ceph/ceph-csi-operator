@@ -395,7 +395,6 @@ var PoolTimeContainerArg = "--polltime=60s"
 var ExtraCreateMetadataContainerArg = "--extra-create-metadata=true"
 var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=true"
 var HonorPVReclaimPolicyContainerArg = "--feature-gates=HonorPVReclaimPolicy=true"
-var ImmediateTopologyContainerArg = "--immediate-topology=false"
 var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
 var EnableVolumeGroupSnapshotsContainerArg = "--feature-gates=CSIVolumeGroupSnapshot=true"
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
@@ -472,4 +471,7 @@ func DomainLabelsContainerArg(options []string) string {
 		fmt.Sprintf("--domainlabels=%s", strings.Join(options, ",")),
 		"",
 	)
+}
+func TopologyContainerArg(topology bool) string {
+	return fmt.Sprintf("--feature-gates=Topology=%t", topology)
 }
