@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,19 +26,19 @@ type BlockPoolIdPair []string
 
 // MappingsSpec define a mapping between a local and remote profiles
 type MappingsSpec struct {
-	//+kubebuilder:validation:Required
+	// +kubebuilder:validation:Required
 	LocalClientProfile string `json:"localClientProfile,omitempty"`
 
-	//+kubebuilder:validation:Required
+	// +kubebuilder:validation:Required
 	RemoteClientProfile string `json:"remoteClientProfile,omitempty"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	BlockPoolIdMapping []BlockPoolIdPair `json:"blockPoolIdMapping,omitempty"`
 }
 
 // ClientProfileMappingSpec defines the desired state of ClientProfileMapping
 type ClientProfileMappingSpec struct {
-	//+kubebuilder:validation:Required
+	// +kubebuilder:validation:Required
 	Mappings []MappingsSpec `json:"mappings,omitempty"`
 }
 
@@ -46,9 +46,9 @@ type ClientProfileMappingSpec struct {
 type ClientProfileMappingStatus struct {
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:deprecatedversion:warning="v1alpha1 is deprecated, please use v1beta1"
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:storageversion
+// +kubebuilder:subresource:status
 
 // ClientProfileMapping is the Schema for the clientprofilemappings API
 type ClientProfileMapping struct {
@@ -59,7 +59,7 @@ type ClientProfileMapping struct {
 	Status ClientProfileMappingStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // ClientProfileMappingList contains a list of ClientProfileMapping
 type ClientProfileMappingList struct {
