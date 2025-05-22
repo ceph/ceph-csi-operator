@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,22 +22,22 @@ import (
 
 // ReadAffinitySpec capture Ceph CSI read affinity settings
 type ReadAffinitySpec struct {
-	//+kubebuilder:validation:Required
-	//+kubebuilder:validation:MinItems:=1
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems:=1
 	CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`
 }
 
 // CephConnectionSpec defines the desired state of CephConnection
 type CephConnectionSpec struct {
-	//+kubebuilder:validation:Required
-	//+kubebuilder:validation:MinItems:=1
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems:=1
 	Monitors []string `json:"monitors"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	ReadAffinity *ReadAffinitySpec `json:"readAffinity,omitempty"`
 
-	//+kubebuilder:validation:Optional
-	//+kubebuilder:validation:Minimum:=1
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum:=1
 	RbdMirrorDaemonCount int `json:"rbdMirrorDaemonCount,omitempty"`
 }
 
@@ -45,9 +45,9 @@ type CephConnectionSpec struct {
 type CephConnectionStatus struct {
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:deprecatedversion:warning="v1alpha1 is deprecated, please use v1beta1"
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:storageversion
+// +kubebuilder:subresource:status
 
 // CephConnection is the Schema for the cephconnections API
 type CephConnection struct {
@@ -58,7 +58,7 @@ type CephConnection struct {
 	Status CephConnectionStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // CephConnectionList contains a list of CephConnections
 type CephConnectionList struct {
