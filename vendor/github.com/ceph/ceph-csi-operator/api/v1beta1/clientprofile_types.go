@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -23,24 +23,24 @@ import (
 
 // CephFsConfigSpec defines the desired CephFs configuration
 type CephFsConfigSpec struct {
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	SubVolumeGroup string `json:"subVolumeGroup,omitempty"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	KernelMountOptions map[string]string `json:"kernelMountOptions,omitempty"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	FuseMountOptions map[string]string `json:"fuseMountOptions,omitempty"`
 
-	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
+	// +kubebuilder:validation:Optional
 	RadosNamespace *string `json:"radosNamespace,omitempty"`
 }
 
 // RbdConfigSpec defines the desired RBD configuration
 type RbdConfigSpec struct {
-	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
+	// +kubebuilder:validation:Optional
 	RadosNamespace string `json:"radosNamespace,omitempty"`
 }
 
@@ -52,17 +52,17 @@ type NfsConfigSpec struct {
 // configuration for volumes and snapshots configured to use
 // this profile
 type ClientProfileSpec struct {
-	//+kubebuilder:validation:Required
-	//+kubebuilder:validation:XValidation:rule=self.name != "",message="'.name' cannot be empty"
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule=self.name != "",message="'.name' cannot be empty"
 	CephConnectionRef corev1.LocalObjectReference `json:"cephConnectionRef"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	CephFs *CephFsConfigSpec `json:"cephFs,omitempty"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	Rbd *RbdConfigSpec `json:"rbd,omitempty"`
 
-	//+kubebuilder:validation:Optional
+	// +kubebuilder:validation:Optional
 	Nfs *NfsConfigSpec `json:"nfs,omitempty"`
 }
 
@@ -72,9 +72,9 @@ type ClientProfileSpec struct {
 type ClientProfileStatus struct {
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:deprecatedversion:warning="v1alpha1 is deprecated, please use v1beta1"
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:storageversion
+// +kubebuilder:subresource:status
 
 // ClientProfile is the Schema for the clientprofiles API
 type ClientProfile struct {
@@ -85,7 +85,7 @@ type ClientProfile struct {
 	Status ClientProfileStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // ClientProfileList contains a list of ClientProfile
 type ClientProfileList struct {
