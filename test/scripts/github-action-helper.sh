@@ -2,6 +2,10 @@
 
 set -xeEo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+# shellcheck disable=SC1091
+[ ! -e "${SCRIPT_DIR}"/utils.sh ] || source "${SCRIPT_DIR}"/utils.sh
+
 #############
 # VARIABLES #
 #############
@@ -38,19 +42,20 @@ use_local_disk() {
 
 deploy_rook() {
   rook_version="v1.16.1"
-  kubectl create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/common.yaml
-  kubectl create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/crds.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/common.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/crds.yaml
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/operator.yaml -o operator.yaml
   sed -i 's|ROOK_CSI_DISABLE_DRIVER: "false"|ROOK_CSI_DISABLE_DRIVER: "true"|g' operator.yaml
-  kubectl create -f operator.yaml
+  kubectl_retry create -f operator.yaml
   wait_for_operator_pod_to_be_ready_state
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/cluster-test.yaml -o cluster-test.yaml
   sed -i "s|#deviceFilter:|deviceFilter: ${BLOCK/\/dev\//}|g" cluster-test.yaml
   cat cluster-test.yaml
   kubectl create -f cluster-test.yaml
+  kubectl_retry create -f cluster-test.yaml
   wait_for_mon
   wait_for_pod_to_be_ready_state
-  kubectl create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
 }
 
 wait_for_pod_to_be_ready_state() {
