@@ -2,6 +2,10 @@
 
 set -xeEo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+# shellcheck disable=SC1091
+[ ! -e "${SCRIPT_DIR}"/utils.sh ] || source "${SCRIPT_DIR}"/utils.sh
+
 #############
 # VARIABLES #
 #############
@@ -37,20 +41,21 @@ use_local_disk() {
 }
 
 deploy_rook() {
-  rook_version="v1.15.1"
-  kubectl create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/common.yaml
-  kubectl create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/crds.yaml
+  rook_version="v1.16.1"
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/common.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/crds.yaml
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/operator.yaml -o operator.yaml
   sed -i 's|ROOK_CSI_DISABLE_DRIVER: "false"|ROOK_CSI_DISABLE_DRIVER: "true"|g' operator.yaml
-  kubectl create -f operator.yaml
+  kubectl_retry create -f operator.yaml
   wait_for_operator_pod_to_be_ready_state
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/cluster-test.yaml -o cluster-test.yaml
   sed -i "s|#deviceFilter:|deviceFilter: ${BLOCK/\/dev\//}|g" cluster-test.yaml
-  sed -i '0,/count: 1/ s/count: 1/count: 3/' cluster-test.yaml
+  cat cluster-test.yaml
   kubectl create -f cluster-test.yaml
-  wait_for_three_mons
+  kubectl_retry create -f cluster-test.yaml
+  wait_for_mon
   wait_for_pod_to_be_ready_state
-  kubectl create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
 }
 
 wait_for_pod_to_be_ready_state() {
@@ -73,10 +78,10 @@ EOF
   timeout_command_exit_code
 }
 
-wait_for_three_mons() {
+wait_for_mon() {
   timeout 150 bash <<-'EOF'
-    until [ $(kubectl -n rook-ceph get deploy -l app=rook-ceph-mon,mon_canary!=true | grep rook-ceph-mon | wc -l | awk '{print $1}' ) -eq 3 ]; do
-      echo "$(date) waiting for three mon deployments to exist"
+    until [ $(kubectl -n rook-ceph get deploy -l app=rook-ceph-mon,mon_canary!=true | grep rook-ceph-mon | wc -l | awk '{print $1}' ) -eq 1 ]; do
+      echo "$(date) waiting for one mon deployment to exist"
       sleep 2
     done
 EOF
