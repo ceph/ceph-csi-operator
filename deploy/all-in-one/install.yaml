@@ -28791,6 +28791,31 @@ rules:
   - update
   - patch
 - apiGroups:
+  - groupsnapshot.storage.openshift.io
+  resources:
+  - volumegroupsnapshotclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - groupsnapshot.storage.openshift.io
+  resources:
+  - volumegroupsnapshotcontents
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - groupsnapshot.storage.openshift.io
+  resources:
+  - volumegroupsnapshotcontents/status
+  verbs:
+  - update
+  - patch
+- apiGroups:
   - ""
   resources:
   - serviceaccounts
@@ -29478,6 +29503,31 @@ rules:
   - patch
 - apiGroups:
   - groupsnapshot.storage.k8s.io
+  resources:
+  - volumegroupsnapshotcontents/status
+  verbs:
+  - update
+  - patch
+- apiGroups:
+  - groupsnapshot.storage.openshift.io
+  resources:
+  - volumegroupsnapshotclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - groupsnapshot.storage.openshift.io
+  resources:
+  - volumegroupsnapshotcontents
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - groupsnapshot.storage.openshift.io
   resources:
   - volumegroupsnapshotcontents/status
   verbs:
