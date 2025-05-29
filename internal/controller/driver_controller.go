@@ -756,6 +756,41 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								),
 							})
 						}
+						// Extended Snapshotter Sidecar Container
+						if r.images["ex-snapshotter"] != "" && snPolicy != csiv1.NoneSnapshotPolicy && r.driverType == CephFsDriverType {
+							containers = append(containers, corev1.Container{
+								Name:            "ex-csi-snapshotter",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["ex-snapshotter"],
+								// This is necessary only for systems with SELinux, where
+								// non-privileged sidecar containers cannot access unix domain socket
+								// created by privileged CSI driver container.
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Args: utils.DeleteZeroValues(
+									append(
+										slices.Clone(leaderElectionSettingsArg),
+										utils.LeaderElectionContainerArg,
+										utils.LogVerbosityContainerArg(logVerbosity),
+										utils.CsiAddressContainerArg,
+										utils.TimeoutContainerArg(grpcTimeout),
+										utils.ExtraCreateMetadataContainerArg,
+										utils.EnableVolumeGroupSnapshotsContainerArg,
+									),
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SocketDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Snapshotter,
+									corev1.ResourceRequirements{},
+								),
+							})
+						}
 						// Addons Sidecar Container
 						if !r.isNfsDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
 							port := r.controllerPluginCsiAddonsContainerPort()
