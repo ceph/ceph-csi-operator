@@ -3796,6 +3796,13 @@ spec:
                   Not all users might be interested in getting volume/snapshot details as metadata on CephFS subvolume and RBD images.
                   Hence enable metadata is false by default.
                 type: boolean
+              enableSnapshotMetadata:
+                default: false
+                description: |-
+                  Set to true to enable the snapshot metadata sidecar container in the controller plugin deployment.
+                  This is required to enable the snapshot-metadata feature in the driver.
+                  If the snapshotPolicy is set to none, this will be ignored.
+                type: boolean
               encryption:
                 description: Driver's encryption settings
                 properties:
@@ -10776,6 +10783,13 @@ spec:
                       Not all users might be interested in getting volume/snapshot details as metadata on CephFS subvolume and RBD images.
                       Hence enable metadata is false by default.
                     type: boolean
+                  enableSnapshotMetadata:
+                    default: false
+                    description: |-
+                      Set to true to enable the snapshot metadata sidecar container in the controller plugin deployment.
+                      This is required to enable the snapshot-metadata feature in the driver.
+                      If the snapshotPolicy is set to none, this will be ignored.
+                    type: boolean
                   encryption:
                     description: Driver's encryption settings
                     properties:
@@ -14858,6 +14872,27 @@ rules:
   - ""
   resources:
   - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - services
   verbs:
   - create
@@ -14871,13 +14906,34 @@ rules:
   - apps
   resources:
   - daemonsets
-  - deployments
   verbs:
   - create
   - delete
   - get
   - list
   - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - cbt.storage.k8s.io
+  resources:
+  - snapshotmetadataservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
   - update
   - watch
 - apiGroups:
@@ -15358,7 +15414,27 @@ rules:
   resources:
   - tokenreviews
   verbs:
+  - get
   - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - cbt.storage.k8s.io
+  resources:
+  - snapshotmetadataservices
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
