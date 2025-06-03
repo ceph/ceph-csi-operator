@@ -28,6 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 )
 
@@ -48,17 +49,17 @@ var _ = Describe("ClientProfile Controller", func() {
 			Name:      cephConnectionName,
 			Namespace: namespaceName,
 		}
-		cephConn := &csiv1alpha1.CephConnection{}
+		cephConn := &csiv1.CephConnection{}
 
 		BeforeEach(func() {
 			err := k8sClient.Get(ctx, typeCephConnectionName, cephConn)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &csiv1alpha1.CephConnection{
+				resource := &csiv1.CephConnection{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      cephConnectionName,
 						Namespace: namespaceName,
 					},
-					Spec: csiv1alpha1.CephConnectionSpec{
+					Spec: csiv1.CephConnectionSpec{
 						Monitors: []string{"10.98.44.171:6789"},
 					},
 				}
@@ -93,7 +94,7 @@ var _ = Describe("ClientProfile Controller", func() {
 			By("Cleanup the specific resource instance ClientProfile")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
-			cephConnection := &csiv1alpha1.CephConnection{}
+			cephConnection := &csiv1.CephConnection{}
 			err = k8sClient.Get(ctx, typeCephConnectionName, cephConnection)
 			Expect(err).NotTo(HaveOccurred())
 
