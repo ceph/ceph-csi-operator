@@ -44,6 +44,7 @@ type OperatorConfigStatus struct {
 }
 
 //+kubebuilder:object:root=true
+//+kubebuilder:deprecatedversion:warning="v1alpha1 is deprecated, please use v1"
 //+kubebuilder:subresource:status
 
 // OperatorConfig is the Schema for the operatorconfigs API

@@ -1,0 +1,9 @@
+apiVersion: csi.ceph.io/v1
+kind: Driver
+metadata:
+  labels:
+    app.kubernetes.io/name: ceph-csi-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: driver-sample
+spec:
+  # TODO(user): Add fields here

@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/ptr"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
@@ -44,7 +44,7 @@ const (
 	defaultLogRotateMaxFiles = 7
 )
 
-var defaultLeaderElection = csiv1a1.LeaderElectionSpec{
+var defaultLeaderElection = csiv1.LeaderElectionSpec{
 	LeaseDuration: 137,
 	RenewDeadline: 107,
 	RetryPeriod:   26,
