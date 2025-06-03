@@ -42,6 +42,7 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(GroupVersion,
 		&CephConnection{}, &CephConnectionList{},
 		&ClientProfile{}, &ClientProfileList{},
+		&ClientProfileMapping{}, &ClientProfileMappingList{},
 	)
 	metav1.AddToGroupVersion(scheme, GroupVersion)
 	return nil

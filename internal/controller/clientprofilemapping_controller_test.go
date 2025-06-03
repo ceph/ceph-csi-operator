@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 )
 
 var _ = Describe("ClientProfileMapping Controller", func() {
@@ -40,19 +40,19 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		clientprofilemapping := &csiv1alpha1.ClientProfileMapping{}
+		clientprofilemapping := &csiv1.ClientProfileMapping{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind ClientProfileMapping")
 			err := k8sClient.Get(ctx, typeNamespacedName, clientprofilemapping)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &csiv1alpha1.ClientProfileMapping{
+				resource := &csiv1.ClientProfileMapping{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					Spec: csiv1alpha1.ClientProfileMappingSpec{
-						Mappings: []csiv1alpha1.MappingsSpec{
+					Spec: csiv1.ClientProfileMappingSpec{
+						Mappings: []csiv1.MappingsSpec{
 							{
 								LocalClientProfile:  "test",
 								RemoteClientProfile: "test",
@@ -66,7 +66,7 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &csiv1alpha1.ClientProfileMapping{}
+			resource := &csiv1.ClientProfileMapping{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 

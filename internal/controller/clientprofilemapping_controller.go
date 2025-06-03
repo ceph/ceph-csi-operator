@@ -30,7 +30,7 @@ import (
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	csiv1a1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
@@ -52,7 +52,7 @@ type ClientProfileMappingReconcile struct {
 	ctx                      context.Context
 	log                      logr.Logger
 	req                      ctrl.Request
-	clientProfileMappingList csiv1a1.ClientProfileMappingList
+	clientProfileMappingList csiv1.ClientProfileMappingList
 }
 
 // csiClusterMappingRecord represents the structure to serialize a csi mapping
@@ -67,7 +67,7 @@ func (r *ClientProfileMappingReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	genChangedPredicate := predicate.GenerationChangedPredicate{}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&csiv1a1.ClientProfileMapping{}).
+		For(&csiv1.ClientProfileMapping{}).
 		// TODO: This watch is probalematic, it will trigger a reconcile for each
 		// mapping resource that exists in the configmap namespace whenever the configmap
 		// is changed. This is unnececary as this reconile build its desired state based
@@ -128,7 +128,7 @@ func (r *ClientProfileMappingReconcile) reconcileCephCsiBlockPoolMapping() error
 	log.Info("Reconciling Ceph CSI Cluster mapping")
 
 	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, &csiConfigMap, func() error {
-		var owner *csiv1a1.ClientProfileMapping
+		var owner *csiv1.ClientProfileMapping
 		for i := range r.clientProfileMappingList.Items {
 			item := &r.clientProfileMappingList.Items[i]
 			if item.Name == r.req.Name && item.Namespace == r.req.Namespace {
