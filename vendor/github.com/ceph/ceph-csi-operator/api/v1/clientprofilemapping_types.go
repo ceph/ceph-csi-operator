@@ -1,5 +1,5 @@
 /*
-Copyright 2024.
+Copyright 2025.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,7 +47,7 @@ type ClientProfileMappingStatus struct {
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:deprecatedversion:warning="v1alpha1 is deprecated, please use v1"
+//+kubebuilder:storageversion
 //+kubebuilder:subresource:status
 
 // ClientProfileMapping is the Schema for the clientprofilemappings API

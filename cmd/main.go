@@ -39,6 +39,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 	"github.com/ceph/ceph-csi-operator/internal/controller"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
@@ -54,6 +55,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(csiv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(csiv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

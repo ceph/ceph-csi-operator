@@ -51,4 +51,44 @@ resources:
   kind: ClientProfileMapping
   path: github.com/ceph/ceph-csi-operator/api/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: CephConnection
+  path: github.com/ceph/ceph-csi-operator/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: ClientProfile
+  path: github.com/ceph/ceph-csi-operator/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: ClientProfileMapping
+  path: github.com/ceph/ceph-csi-operator/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: OperatorConfig
+  path: github.com/ceph/ceph-csi-operator/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ceph.io
+  group: csi
+  kind: Driver
+  path: github.com/ceph/ceph-csi-operator/api/v1
+  version: v1
 version: "3"

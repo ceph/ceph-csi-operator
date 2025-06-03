@@ -28,7 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
+	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 )
 
 var _ = Describe("ClientProfile Controller", func() {
@@ -43,22 +43,22 @@ var _ = Describe("ClientProfile Controller", func() {
 			Name:      resourceName,
 			Namespace: namespaceName, // TODO(user):Modify as needed
 		}
-		clientProfile := &csiv1alpha1.ClientProfile{}
+		clientProfile := &csiv1.ClientProfile{}
 		typeCephConnectionName := types.NamespacedName{
 			Name:      cephConnectionName,
 			Namespace: namespaceName,
 		}
-		cephConn := &csiv1alpha1.CephConnection{}
+		cephConn := &csiv1.CephConnection{}
 
 		BeforeEach(func() {
 			err := k8sClient.Get(ctx, typeCephConnectionName, cephConn)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &csiv1alpha1.CephConnection{
+				resource := &csiv1.CephConnection{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      cephConnectionName,
 						Namespace: namespaceName,
 					},
-					Spec: csiv1alpha1.CephConnectionSpec{
+					Spec: csiv1.CephConnectionSpec{
 						Monitors: []string{"10.98.44.171:6789"},
 					},
 				}
@@ -68,13 +68,13 @@ var _ = Describe("ClientProfile Controller", func() {
 			By("creating the custom resource for the Kind ClientProfile")
 			err = k8sClient.Get(ctx, typeNamespacedName, clientProfile)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &csiv1alpha1.ClientProfile{
+				resource := &csiv1.ClientProfile{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
 					// TODO(user): Specify other spec details if needed.
-					Spec: csiv1alpha1.ClientProfileSpec{
+					Spec: csiv1.ClientProfileSpec{
 						CephConnectionRef: corev1.LocalObjectReference{
 							Name: "foo",
 						},
@@ -86,14 +86,14 @@ var _ = Describe("ClientProfile Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &csiv1alpha1.ClientProfile{}
+			resource := &csiv1.ClientProfile{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
 			By("Cleanup the specific resource instance ClientProfile")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 
-			cephConnection := &csiv1alpha1.CephConnection{}
+			cephConnection := &csiv1.CephConnection{}
 			err = k8sClient.Get(ctx, typeCephConnectionName, cephConnection)
 			Expect(err).NotTo(HaveOccurred())
 
