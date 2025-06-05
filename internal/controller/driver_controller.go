@@ -19,7 +19,9 @@ package controller
 import (
 	"cmp"
 	"context"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"maps"
@@ -27,12 +29,14 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -47,6 +51,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1alpha1"
+
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
@@ -56,10 +62,12 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers/finalizers,verbs=update
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update
+//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="cbt.storage.k8s.io",resources=snapshotmetadataservices,verbs=get;list;watch;create;update;delete
 
 type DriverType string
 
@@ -83,6 +91,8 @@ var nameRegExp, _ = regexp.Compile(fmt.Sprintf(
 	NfsDriverType,
 ))
 
+var snapshotMetadataServiceCRDInstalled = false
+
 // DriverReconciler reconciles a Driver object
 type DriverReconciler struct {
 	client.Client
@@ -93,11 +103,33 @@ type DriverReconciler struct {
 type driverReconcile struct {
 	DriverReconciler
 
-	ctx        context.Context
-	log        logr.Logger
-	driver     csiv1.Driver
-	driverType DriverType
-	images     map[string]string
+	ctx                        context.Context
+	log                        logr.Logger
+	driver                     csiv1.Driver
+	driverType                 DriverType
+	images                     map[string]string
+	snapshotMetadataCertExpiry time.Time
+}
+
+func checkSnapshotMetadataServiceCRDInstalled(mgr ctrl.Manager) error {
+	log := ctrllog.FromContext(context.Background())
+	smsCRD := &metav1.PartialObjectMetadata{}
+	smsCRD.SetGroupVersionKind(
+		sm.SchemeGroupVersion.WithKind("SnapshotMetadataService"),
+	)
+	_, err := mgr.GetRESTMapper().RESTMapping(smsCRD.GroupVersionKind().GroupKind(), smsCRD.GroupVersionKind().Version)
+	if err != nil {
+		if !meta.IsNoMatchError(err) {
+			log.Error(err, "failed to check for SnapshotMetadataService CRD existence")
+			return err
+		}
+
+		log.Info("SnapshotMetadataService CRD is not installed, will be skipping snapshot metadata service setup")
+		snapshotMetadataServiceCRDInstalled = false
+		return nil
+	}
+	snapshotMetadataServiceCRDInstalled = true
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -164,6 +196,9 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		},
 	)
 
+	// Check if the SnapshotMetadataService CRD is installed
+	checkSnapshotMetadataServiceCRDInstalled(mgr)
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&csiv1.Driver{}).
 		Owns(
@@ -220,6 +255,14 @@ func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	} else {
 		log.Info("CSI Driver reconciliation completed successfully")
 	}
+
+	if !reconcileHandler.snapshotMetadataCertExpiry.IsZero() {
+		return ctrl.Result{
+			Requeue:      true,
+			RequeueAfter: time.Until(reconcileHandler.snapshotMetadataCertExpiry.Add(-7 * 24 * time.Hour)), // Requeue 7 days before expiry
+		}, err
+	}
+
 	return ctrl.Result{}, err
 }
 
@@ -503,6 +546,219 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 	}
 }
 
+func (r *driverReconcile) canSnapshotMetadataBeDeployed() bool {
+	// Check if the driver is RBD and snapshot metadata is enabled
+	enableSnapshotMetadata := ptr.Deref(r.driver.Spec.EnableSnapshotMetadata, false)
+	snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1.VolumeSnapshotSnapshotPolicy)
+
+	return (r.isRdbDriver() && snapshotMetadataServiceCRDInstalled && enableSnapshotMetadata && snPolicy != csiv1.NoneSnapshotPolicy)
+}
+
+// createCAandServerCerts creates a CA certificate and a server certificate signed by the CA.
+func (r *driverReconcile) createCAandServerCerts() (*x509.Certificate, []byte, []byte, error) {
+	r.log.Info("Creating CA and Server certs for snapshot metadata")
+	// create self signed certs
+	caCert, caPrivateKey, err := utils.CreateCACertificate()
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("Failed to create CA certificate: %w", err)
+	}
+	// create the server certificate and private key
+	serverCertBytes, serverKeyBytes, err := utils.CreateServerCertificate(caCert, caPrivateKey, r.driver.Namespace)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("Failed to create server certificate: %w", err)
+	}
+
+	return caCert, serverCertBytes, serverKeyBytes, nil
+}
+
+// createTLSSecret creates a TLS secret with the given certificate and key bytes.
+func (r *driverReconcile) createTLSSecret(caCert *x509.Certificate, certBytes, keyBytes []byte) error {
+	r.log.Info("Creating TLS secret")
+	// Encode the certificate and key as PEM
+	caCertPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caCert.Raw})
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certBytes})
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: keyBytes})
+
+	// Create the TLS secret object
+	tlsSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      utils.SnapshotMetadataTLSSecretName(r.driver.Name),
+			Namespace: r.driver.Namespace,
+		},
+		Type: corev1.SecretTypeTLS,
+		Data: map[string][]byte{},
+	}
+
+	// Ensure the TLS secret is created or updated
+	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, tlsSecret, func() error {
+		// Set owner reference to ensure cleanup when the driver is deleted
+		if err := ctrlutil.SetControllerReference(&r.driver, tlsSecret, r.Scheme); err != nil {
+			return err
+		}
+
+		tlsSecret.Type = corev1.SecretTypeTLS
+		if tlsSecret.Data == nil {
+			tlsSecret.Data = map[string][]byte{}
+		}
+		tlsSecret.Data["ca.crt"] = caCertPEM
+		tlsSecret.Data["tls.crt"] = certPEM
+		tlsSecret.Data["tls.key"] = keyPEM
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to create or update TLS secret: %w", err)
+	}
+
+	return nil
+}
+
+func (r *driverReconcile) createSnapshotMetadataServiceCR(caCert *x509.Certificate) error {
+	r.log.Info("Creating snapshot metadata service CR")
+	caCertPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caCert.Raw})
+	sms := &sm.SnapshotMetadataService{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: r.driver.Name,
+		},
+		Spec: sm.SnapshotMetadataServiceSpec{},
+	}
+
+	_, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, sms, func() error {
+		// TODO: set owner reference to ensure cleanup when the driver is deleted
+		// cluster-scoped resource must not have a namespace-scoped owner,
+
+		sms.Spec.CACert = caCertPEM
+		sms.Spec.Audience = "ceph-csi-operator-snapshot-metadata"
+		sms.Spec.Address = fmt.Sprintf("%s.%s:%d", utils.CommonName, r.driver.Namespace, utils.SnapshotMetadataServiceExposePort)
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to create or update SMS CR: %w", err)
+	}
+
+	return nil
+}
+
+func (r *driverReconcile) createCertsAndSecrets() (*corev1.Secret, error) {
+	// create the CA & Server certificate
+	caCert, serverCertBytes, serverKeyBytes, err := r.createCAandServerCerts()
+	if err != nil {
+		return nil, err
+	}
+	// create TLS secret
+	err = r.createTLSSecret(caCert, serverCertBytes, serverKeyBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	tlsSecret := &corev1.Secret{}
+	tlsSecret.Name = utils.SnapshotMetadataTLSSecretName(r.driver.Name)
+	tlsSecret.Namespace = r.driver.Namespace
+	err = r.Get(r.ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return nil, fmt.Errorf("TLS secret %s not found in namespace %s", tlsSecret.Name, r.driver.Namespace)
+		}
+		return nil, fmt.Errorf("failed to get TLS secret: %w", err)
+	}
+
+	return tlsSecret, nil
+}
+
+// createResourcesForSnapshotMetadata creates the necessary resources for snapshot metadata.
+// 1. Create CA and server certificates.
+// 2. Create TLS secret.
+// 3. Create a Kubernetes service for snapshot metadata.
+// 4. Create a snapshotMetadataServiceCR.
+func (r *driverReconcile) createResourcesForSnapshotMetadata() error {
+	if !r.canSnapshotMetadataBeDeployed() {
+		r.log.Info("Snapshot metadata service is not enabled or not supported for driver", "driverType", r.driverType)
+		return nil
+	}
+
+	tlsSecret := &corev1.Secret{}
+	tlsSecret.Name = utils.SnapshotMetadataTLSSecretName(r.driver.Name)
+	tlsSecret.Namespace = r.driver.Namespace
+
+	// Check if the TLS secret already exists
+	// If it does not exist, create it with new CA and server certificates.
+	err := r.Get(r.ctx, client.ObjectKeyFromObject(tlsSecret), tlsSecret)
+	if err != nil && k8serrors.IsNotFound(err) {
+		tlsSecret, err = r.createCertsAndSecrets()
+		if err != nil {
+			return fmt.Errorf("failed to create TLS secret: %w", err)
+		}
+	}
+
+	// If the TLS secret exists, check if the certificates are expired.
+	// If the certificates are expired, create new CA and server certificates
+	// and update the TLS secret.
+	if certExpiry, err := utils.GetCertificateExpiry(tlsSecret); err != nil {
+		return fmt.Errorf("failed to get certificate expiry: %w", err)
+	} else {
+		r.snapshotMetadataCertExpiry = certExpiry
+	}
+
+	if r.snapshotMetadataCertExpiry.Before(time.Now().Add(-7 * 24 * time.Hour)) {
+		r.log.Info("certificates are expired, renew snapshot metadata certificates")
+		tlsSecret, err = r.createCertsAndSecrets()
+		if err != nil {
+			return fmt.Errorf("failed to renew CA and server certificates: %w", err)
+		}
+
+		if certExpiry, err := utils.GetCertificateExpiry(tlsSecret); err != nil {
+			return fmt.Errorf("failed to get certificate expiry: %w", err)
+		} else {
+			r.snapshotMetadataCertExpiry = certExpiry
+		}
+	}
+
+	// create snapshotMetadataServiceCR
+	caCert, err := utils.GetCACertFromSecret(tlsSecret)
+	if err != nil {
+		return fmt.Errorf("failed to get CA certificate from TLS secret: %w", err)
+	}
+	err = r.createSnapshotMetadataServiceCR(caCert)
+	if err != nil {
+		return fmt.Errorf("failed to create SnapshotMetadataService CR: %w", err)
+	}
+
+	// create k8s service for snapshot metadata
+	r.log.Info("Creating k8s service for snapshot metadata")
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      utils.CommonName,
+			Namespace: r.driver.Namespace,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "snapshot-metadata-port",
+					Port:       utils.SnapshotMetadataServiceExposePort,
+					Protocol:   "TCP",
+					TargetPort: intstr.FromInt(utils.SnapshotMetadatagRPCServicePort),
+				},
+			},
+			Selector: map[string]string{
+				"app": r.generateName("ctrlplugin"),
+			},
+		},
+	}
+	_, err = ctrlutil.CreateOrUpdate(r.ctx, r.Client, svc, func() error {
+		// Set owner reference to ensure cleanup when the driver is deleted
+		if err := ctrlutil.SetControllerReference(&r.driver, svc, r.Scheme); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create or update SVC: %w", err)
+	}
+
+	return nil
+}
+
 func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	deploy := &appsv1.Deployment{}
 	deploy.Name = r.generateName("ctrlplugin")
@@ -510,6 +766,13 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 
 	log := r.log.WithValues("deploymentName", deploy.Name)
 	log.Info("Reconciling controller plugin deployment")
+
+	// Create required resources for snapshot metadata
+	// This is a no-op if the driver is not RBD or if the snapshot policy is not set to "none"
+	err := r.createResourcesForSnapshotMetadata()
+	if err != nil {
+		return err
+	}
 
 	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
 		if err := ctrlutil.SetControllerReference(&r.driver, deploy, r.Scheme); err != nil {
@@ -726,6 +989,31 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								),
 							},
 						}
+
+						// Snapshot Metadata Sidecar Container
+						// This container is only needed if the driver is RBD and the snapshot policy is not None.
+						if r.canSnapshotMetadataBeDeployed() {
+							containers = append(containers, corev1.Container{
+								Name:            "csi-snapshot-metadata",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["metadata"],
+								Args: utils.DeleteZeroValues(
+									[]string{
+										utils.LogVerbosityContainerArg(logVerbosity),
+										utils.SnapshotMetadatagRPCServicePortArg,
+										utils.CsiAddressContainerArg,
+										utils.TimeoutContainerArg(grpcTimeout),
+										utils.SnapshotMetadataTLSCertArg(),
+										utils.SnapshotMetadataTLSKeyArg(),
+									},
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SnapshotMetadataServerCertsVolumeMount,
+									utils.SocketDirVolumeMount,
+								},
+							})
+						}
+
 						// Snapshotter Sidecar Container
 						if snPolicy != csiv1.NoneSnapshotPolicy {
 							containers = append(containers, corev1.Container{
@@ -896,6 +1184,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							utils.OidcTokenVolume,
 							utils.CsiConfigVolume,
 						)
+						if r.canSnapshotMetadataBeDeployed() {
+							volumes = append(volumes, utils.SnapshotMetadataServerCertsVolume(r.driver.Name))
+						}
 						if r.driver.Spec.Encryption != nil {
 							volumes = append(
 								volumes,
@@ -923,17 +1214,14 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 }
 
 func (r *driverReconcile) controllerPluginCsiAddonsContainerPort() corev1.ContainerPort {
-
 	// the cephFS and rbd drivers need to use different ports
 	// to avoid port collisions with host network.
 	port := utils.ControllerPluginCsiAddonsContainerRbdPort
 	if r.isCephFsDriver() {
 		port = utils.ControllerPluginCsiAddonsContainerCephFsPort
-
 	}
 
 	return port
-
 }
 
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {

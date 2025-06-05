@@ -41,6 +41,11 @@ const (
 
 	logsDirVolumeName      = "logs-dir"
 	logRotateDirVolumeName = "log-rotate-dir"
+
+	snapshotMetadataServerCertsVolumeName = "snapshot-metadata-server-certs"
+	snapshotMetadataServerCertsMountPath  = "/tmp/certificates"
+	SnapshotMetadatagRPCServicePort       = 50051
+	SnapshotMetadataServiceExposePort     = 6443
 )
 
 // Ceph CSI common volumes
@@ -125,6 +130,21 @@ var EtcSelinuxVolume = corev1.Volume{
 			Path: "/etc/selinux",
 		},
 	},
+}
+
+func SnapshotMetadataTLSSecretName(driverName string) string {
+	return fmt.Sprintf("%s-metadata-tls", driverName)
+}
+
+func SnapshotMetadataServerCertsVolume(driverName string) corev1.Volume {
+	return corev1.Volume{
+		Name: snapshotMetadataServerCertsVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			Secret: &corev1.SecretVolumeSource{
+				SecretName: SnapshotMetadataTLSSecretName(driverName),
+			},
+		},
+	}
 }
 
 func CsiMountInfoVolume(kubeletDirPath string, driverName string) corev1.Volume {
@@ -288,6 +308,11 @@ var LogRotateDirVolumeMount = corev1.VolumeMount{
 	MountPath: "/logrotate-config",
 }
 
+var SnapshotMetadataServerCertsVolumeMount = corev1.VolumeMount{
+	Name:      snapshotMetadataServerCertsVolumeName,
+	MountPath: snapshotMetadataServerCertsMountPath,
+}
+
 func PodsMountDirVolumeMount(kubletDirPath string) corev1.VolumeMount {
 	return corev1.VolumeMount{
 		Name:             podsMountDirVolumeName,
@@ -374,6 +399,7 @@ func ContainerPortArg(port corev1.ContainerPort) string {
 
 // Ceph CSI common container arguments
 var CsiAddressContainerArg = fmt.Sprintf("--csi-address=%s", csiEndpoint)
+var SnapshotMetadatagRPCServicePortArg = fmt.Sprintf("--port=%d", SnapshotMetadatagRPCServicePort)
 var EndpointContainerArg = fmt.Sprintf("--endpoint=%s", csiEndpoint)
 var CsiAddonsEndpointContainerArg = fmt.Sprintf("--csi-addons-endpoint=%s", csiAddonsEndpoint)
 var CsiAddonsAddressContainerArg = fmt.Sprintf("--csi-addons-address=%s", csiAddonsEndpoint)
@@ -414,6 +440,12 @@ func TypeContainerArg(t string) string {
 	default:
 		return ""
 	}
+}
+func SnapshotMetadataTLSCertArg() string {
+	return fmt.Sprintf("--tls-cert=%s/tls.crt", snapshotMetadataServerCertsMountPath)
+}
+func SnapshotMetadataTLSKeyArg() string {
+	return fmt.Sprintf("--tls-key=%s/tls.key", snapshotMetadataServerCertsMountPath)
 }
 func SetMetadataContainerArg(on bool) string {
 	return If(on, "--setmetadata=true", "")
