@@ -29041,6 +29041,14 @@ rules:
   - update
   - watch
 - apiGroups:
+  - cbt.storage.k8s.io
+  resources:
+  - snapshotmetadataservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - csi.ceph.io
   resources:
   - cephconnections
@@ -29518,7 +29526,23 @@ rules:
   resources:
   - tokenreviews
   verbs:
+  - get
   - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - cbt.storage.k8s.io
+  resources:
+  - snapshotmetadataservices
+  verbs:
+  - get
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
