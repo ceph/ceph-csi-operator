@@ -289,6 +289,14 @@ rules:
   - update
   - watch
 - apiGroups:
+  - cbt.storage.k8s.io
+  resources:
+  - snapshotmetadataservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - csi.ceph.io
   resources:
   - cephconnections

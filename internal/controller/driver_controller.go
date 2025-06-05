@@ -60,6 +60,7 @@ import (
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="cbt.storage.k8s.io",resources=snapshotmetadataservices,verbs=get;list;watch
 
 type DriverType string
 
@@ -503,6 +504,14 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 	}
 }
 
+func (r *driverReconcile) canSnapshotMetadataBeDeployed() bool {
+	// Check if the driver is RBD and snapshot metadata is enabled
+	enableSnapshotMetadata := ptr.Deref(r.driver.Spec.EnableSnapshotMetadata, false)
+	snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1.VolumeSnapshotSnapshotPolicy)
+
+	return (r.isRdbDriver() && enableSnapshotMetadata && snPolicy != csiv1.NoneSnapshotPolicy)
+}
+
 func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	deploy := &appsv1.Deployment{}
 	deploy.Name = r.generateName("ctrlplugin")
@@ -726,6 +735,31 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								),
 							},
 						}
+
+						// Snapshot Metadata Sidecar Container
+						// This container is only needed if the driver is RBD and the snapshot policy is not None.
+						if r.canSnapshotMetadataBeDeployed() {
+							containers = append(containers, corev1.Container{
+								Name:            "csi-snapshot-metadata",
+								ImagePullPolicy: imagePullPolicy,
+								Image:           r.images["metadata"],
+								Args: utils.DeleteZeroValues(
+									[]string{
+										utils.LogVerbosityContainerArg(logVerbosity),
+										utils.SnapshotMetadatagRPCServicePortArg,
+										utils.CsiAddressContainerArg,
+										utils.TimeoutContainerArg(grpcTimeout),
+										utils.SnapshotMetadataTLSCertArg(),
+										utils.SnapshotMetadataTLSKeyArg(),
+									},
+								),
+								VolumeMounts: []corev1.VolumeMount{
+									utils.SnapshotMetadataServerCertsVolumeMount,
+									utils.SocketDirVolumeMount,
+								},
+							})
+						}
+
 						// Snapshotter Sidecar Container
 						if snPolicy != csiv1.NoneSnapshotPolicy {
 							containers = append(containers, corev1.Container{
@@ -931,6 +965,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							utils.OidcTokenVolume,
 							utils.CsiConfigVolume,
 						)
+						if r.canSnapshotMetadataBeDeployed() {
+							volumes = append(volumes, utils.SnapshotMetadataServerCertsVolume(r.driver.Name))
+						}
 						if r.driver.Spec.Encryption != nil {
 							volumes = append(
 								volumes,
