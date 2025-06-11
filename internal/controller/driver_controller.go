@@ -229,16 +229,23 @@ func (r *driverReconcile) reconcile() error {
 		return err
 	}
 
-	// Concurrently reconcile different aspects of the clusters actual state to meet
-	// the desired state defined on the driver object
-	errChan := utils.RunConcurrently(
+	reconcilers := []func() error{
 		r.reconcileCsiConfigMap,
 		r.reconcileLogRotateConfigMap,
 		r.reconcileK8sCsiDriver,
 		r.reconcileControllerPluginDeployment,
 		r.reconcileNodePluginDeamonSet,
 		r.reconcileLivenessService,
-	)
+	}
+
+	// Deploy csi-addons sidecar in its own daemon set which doesn't use host network
+	if r.isRdbDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+		reconcilers = append(reconcilers, r.reconcileNodePluginDeamonSetForCsiAddons)
+	}
+
+	// Concurrently reconcile different aspects of the clusters actual state to meet
+	// the desired state defined on the driver object
+	errChan := utils.RunConcurrently(reconcilers...)
 
 	// Check if any reconcilatin error where raised during the concurrent execution
 	// of the reconciliation steps.
@@ -971,6 +978,195 @@ func (r *driverReconcile) controllerPluginCsiAddonsContainerPort() corev1.Contai
 
 }
 
+func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
+	daemonSet := &appsv1.DaemonSet{}
+	daemonSet.Name = r.generateName("nodeplugin-csi-addons")
+	daemonSet.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("csiAddonsDaemonSetName", daemonSet.Name)
+	log.Info("Reconciling csi addons nodeplugin deployment")
+
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
+		if err := ctrlutil.SetControllerReference(&r.driver, daemonSet, r.Scheme); err != nil {
+			log.Error(err, "Failed to set owner reference on csi addons nodeplugin deployment")
+
+			return err
+		}
+
+		appName := daemonSet.Name
+		pluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1.NodePluginSpec{})
+		serviceAccountName := cmp.Or(
+			ptr.Deref(pluginSpec.ServiceAccountName, ""),
+			fmt.Sprintf("%s%s-nodeplugin-sa", serviceAccountPrefix, r.driverType),
+		)
+		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
+		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1.LogSpec{}).Verbosity
+		kubeletDirPath := cmp.Or(pluginSpec.KubeletDirPath, defaultKubeletDirPath)
+		port := utils.NodePluginCsiAddonsContainerPort
+
+		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1.LogSpec{}).Rotation
+		logRotationEnabled := logRotationSpec != nil
+
+		daemonSet.Spec = appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{"app": appName},
+			},
+			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defaultDaemonSetUpdateStrategy),
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: utils.Call(func() map[string]string {
+						podLabels := map[string]string{}
+						maps.Copy(podLabels, pluginSpec.Labels)
+						podLabels["app"] = appName
+						if r.driver.Spec.Liveness != nil {
+							podLabels["contains"] = fmt.Sprintf("%s-metrics", appName)
+						}
+						return podLabels
+					}),
+					Annotations: maps.Clone(pluginSpec.Annotations),
+				},
+				Spec: corev1.PodSpec{
+					ServiceAccountName: serviceAccountName,
+					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					HostPID:            r.isRdbDriver(),
+					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
+					// resolved through k8s service, set dns policy to cluster first
+					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
+					Tolerations: pluginSpec.Tolerations,
+					Containers: utils.Call(func() []corev1.Container {
+						containers := []corev1.Container{
+							{
+								Name:            "csi-addons",
+								Image:           r.images["addons"],
+								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Args: utils.DeleteZeroValues(
+									[]string{
+										utils.CsiAddonsNodeIdContainerArg,
+										utils.LogVerbosityContainerArg(logVerbosity),
+										utils.CsiAddonsAddressContainerArg,
+										utils.ContainerPortArg(port),
+										utils.PodContainerArg,
+										utils.NamespaceContainerArg,
+										utils.PodUidContainerArg,
+										utils.StagingPathContainerArg(kubeletDirPath),
+										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+									},
+								),
+								Ports: []corev1.ContainerPort{
+									port,
+								},
+								Env: []corev1.EnvVar{
+									utils.NodeIdEnvVar,
+									utils.PodNameEnvVar,
+									utils.PodNamespaceEnvVar,
+									utils.PodUidEnvVar,
+								},
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
+									mounts := []corev1.VolumeMount{
+										utils.PluginDirVolumeMount,
+									}
+									if logRotationEnabled {
+										mounts = append(mounts, utils.LogsDirVolumeMount)
+									}
+									return mounts
+								}),
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Addons,
+									corev1.ResourceRequirements{},
+								),
+							},
+						}
+						// Liveness Sidecar Container
+						if r.driver.Spec.Liveness != nil {
+							containers = append(containers, corev1.Container{
+								Name:            "liveness-prometheus",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Args: utils.DeleteZeroValues(
+									[]string{
+										utils.TypeContainerArg("liveness"),
+										utils.EndpointContainerArg,
+										utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
+										utils.MetricsPathContainerArg,
+										utils.PoolTimeContainerArg,
+										utils.TimeoutContainerArg(3),
+									},
+								),
+								Env: []corev1.EnvVar{
+									utils.PodIpEnvVar,
+								},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.PluginDirVolumeMount,
+								},
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Liveness,
+									corev1.ResourceRequirements{},
+								),
+							})
+						}
+						// CSI LogRotate Container
+						if logRotationEnabled {
+							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
+							containers = append(containers, corev1.Container{
+								Name:            "log-rotator",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Resources:       resources,
+								SecurityContext: &corev1.SecurityContext{
+									Privileged: ptr.To(true),
+									Capabilities: &corev1.Capabilities{
+										Drop: []corev1.Capability{"All"},
+									},
+								},
+								Command: []string{"/bin/bash", "-c", logRotateCmd},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.LogsDirVolumeMount,
+									utils.LogRotateDirVolumeMount,
+								},
+							})
+						}
+						return containers
+					}),
+					Volumes: utils.Call(func() []corev1.Volume {
+						volumes := []corev1.Volume{
+							utils.PluginDirVolume(kubeletDirPath, r.driver.Name),
+						}
+
+						if logRotationEnabled {
+							logHostPath := cmp.Or(logRotationSpec.LogHostPath, defaultLogHostPath)
+							volumes = append(
+								volumes,
+								utils.LogsDirVolume(logHostPath, daemonSet.Name),
+								utils.LogRotateDirVolumeName(r.driver.Name),
+							)
+						}
+						return volumes
+					}),
+				},
+			},
+		}
+
+		return nil
+	})
+
+	logCreateOrUpdateResult(log, "csi addons node plugin daemonset", daemonSet, opResult, err)
+	return err
+}
+
 func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 	daemonSet := &appsv1.DaemonSet{}
 	daemonSet.Name = r.generateName("nodeplugin")
@@ -1156,92 +1352,6 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									corev1.ResourceRequirements{},
 								),
 							},
-						}
-						// CSI Addons Sidecar Container
-						if r.isRdbDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
-							port := utils.NodePluginCsiAddonsContainerPort
-							containers = append(containers, corev1.Container{
-								Name:            "csi-addons",
-								Image:           r.images["addons"],
-								ImagePullPolicy: imagePullPolicy,
-								SecurityContext: &corev1.SecurityContext{
-									Privileged: ptr.To(true),
-									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
-									},
-								},
-								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.CsiAddonsNodeIdContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddonsAddressContainerArg,
-										utils.ContainerPortArg(port),
-										utils.PodContainerArg,
-										utils.NamespaceContainerArg,
-										utils.PodUidContainerArg,
-										utils.StagingPathContainerArg(kubeletDirPath),
-										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
-									},
-								),
-								Ports: []corev1.ContainerPort{
-									port,
-								},
-								Env: []corev1.EnvVar{
-									utils.NodeIdEnvVar,
-									utils.PodNameEnvVar,
-									utils.PodNamespaceEnvVar,
-									utils.PodUidEnvVar,
-								},
-								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
-									mounts := []corev1.VolumeMount{
-										utils.PluginDirVolumeMount,
-									}
-									if logRotationEnabled {
-										mounts = append(mounts, utils.LogsDirVolumeMount)
-									}
-									return mounts
-								}),
-								Resources: ptr.Deref(
-									pluginSpec.Resources.Addons,
-									corev1.ResourceRequirements{},
-								),
-							})
-							// Liveness Sidecar Container
-							if r.driver.Spec.Liveness != nil {
-								containers = append(containers, corev1.Container{
-									Name:            "liveness-prometheus",
-									Image:           r.images["plugin"],
-									ImagePullPolicy: imagePullPolicy,
-									SecurityContext: &corev1.SecurityContext{
-										Privileged: ptr.To(true),
-										Capabilities: &corev1.Capabilities{
-											Drop: []corev1.Capability{"All"},
-										},
-									},
-									Args: utils.DeleteZeroValues(
-										[]string{
-											utils.TypeContainerArg("liveness"),
-											utils.EndpointContainerArg,
-											utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
-											utils.MetricsPathContainerArg,
-											utils.PoolTimeContainerArg,
-											utils.TimeoutContainerArg(3),
-										},
-									),
-									Env: []corev1.EnvVar{
-										utils.PodIpEnvVar,
-									},
-									VolumeMounts: []corev1.VolumeMount{
-										utils.PluginDirVolumeMount,
-									},
-									Resources: ptr.Deref(
-										pluginSpec.Resources.Liveness,
-										corev1.ResourceRequirements{},
-									),
-								})
-							}
 						}
 						// CSI LogRotate Container
 						if logRotationEnabled {
