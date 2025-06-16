@@ -1,0 +1,80 @@
+name: Publish Helm Charts to GitHub Pages
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Package and Release Helm Charts
+    runs-on: ubuntu-latest
+    if: github.repository == 'ceph/ceph-csi-operator'
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set release version
+        id: release_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+
+      - name: Install helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Install chart-releaser
+        run: |
+          echo "Installing chart-releaser..."
+          curl -sSL https://github.com/helm/chart-releaser/releases/download/v1.8.1/chart-releaser_1.8.1_linux_amd64.tar.gz -o /tmp/cr-linux-amd64.tar.gz
+          tar -xzf /tmp/cr-linux-amd64.tar.gz -C /tmp
+          sudo chmod +x /tmp/cr
+          sudo mv /tmp/cr /usr/local/bin/cr
+          echo "chart-releaser installed."
+
+      - name: Package Helm charts
+        run: |
+          echo "Packaging Helm charts..."
+          mkdir -p .csi-op-release-packages
+
+          sed -i "s/^version:.*/version: ${VERSION}/" "deploy/charts/ceph-csi-operator/Chart.yaml"
+          sed -i "s/^version:.*/version: ${VERSION}/" "deploy/charts/ceph-csi-drivers/Chart.yaml"
+
+          helm package deploy/charts/ceph-csi-operator -d .csi-op-release-packages
+          helm package deploy/charts/ceph-csi-drivers -d .csi-op-release-packages
+
+      - name: Upload chart packages to GitHub Releases
+        run: |
+          echo "uploading the package to the release"
+          cr upload \
+            --owner=${{ github.repository_owner }} \
+            --git-repo=ceph-csi-operator \
+            --token=${{ secrets.CEPH_CSI_BOT_TOKEN }} \
+            --package-path=.csi-op-release-packages
+
+      - name: Update Helm repo index and push to gh-pages
+        run: |
+          git remote set-url origin https://github.com/${{ github.repository }}.git
+          git config user.name ${{ secrets.CEPH_CSI_BOT_USER }}
+          git config user.email ${{ secrets.CEPH_CSI_BOT_EMAIL }}
+          git checkout deploy/charts/ceph-csi-operator/Chart.yaml deploy/charts/ceph-csi-drivers/Chart.yaml
+          git checkout gh-pages
+
+          mkdir -p .cr-index
+
+          cr index \
+            --owner=${{ github.repository_owner }} \
+            --git-repo=ceph-csi-operator \
+            --package-path=.csi-op-release-packages \
+            --token=${{ secrets.CSI_GITHUB_TOKEN }} \
+            --index-path=.cr-index/index.yaml
+
+
+          cp -r .cr-index/* .
+          git add .
+          git commit -m "Update Helm repo index from release ${{ github.event.release.tag_name }}"
+          git push origin gh-pages -f
