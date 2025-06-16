@@ -238,9 +238,17 @@ func (r *driverReconcile) reconcile() error {
 		r.reconcileLivenessService,
 	}
 
-	// Deploy csi-addons sidecar in its own daemon set which doesn't use host network
-	if r.isRdbDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
-		reconcilers = append(reconcilers, r.reconcileNodePluginDeamonSetForCsiAddons)
+	// Reconcile daemonset and deployment for CSI Addons
+	if ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+		// CSI Addons deployment
+		if !r.isNfsDriver() {
+			reconcilers = append(reconcilers, r.reconcileCsiAddonsDeployment)
+		}
+
+		// CSI Addons daemonset
+		if r.isRdbDriver() {
+			reconcilers = append(reconcilers, r.reconcileNodePluginDeamonSetForCsiAddons)
+		}
 	}
 
 	// Concurrently reconcile different aspects of the clusters actual state to meet
@@ -508,6 +516,164 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 		logCreateOrUpdateResult(log, "CSIDriver", csiDriver, opResult, err)
 		return err
 	}
+}
+
+func (r *driverReconcile) reconcileCsiAddonsDeployment() error {
+	deploy := &appsv1.Deployment{}
+	deploy.Name = r.generateName("ctrlplugin-csi-addons")
+	deploy.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("csiAddonsDeploymentName", deploy.Name)
+	log.Info("Reconciling controller plugin csi addons deployment")
+
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
+		if err := ctrlutil.SetControllerReference(&r.driver, deploy, r.Scheme); err != nil {
+			log.Error(err, "Failed to set an owner reference on csi addons deployment")
+			return err
+		}
+
+		appName := deploy.Name
+		appSelector := metav1.LabelSelector{
+			MatchLabels: map[string]string{"app": appName},
+		}
+
+		leaderElectionSpec := cmp.Or(r.driver.Spec.LeaderElection, &defaultLeaderElection)
+		pluginSpec := cmp.Or(r.driver.Spec.ControllerPlugin, &csiv1.ControllerPluginSpec{})
+		serviceAccountName := cmp.Or(
+			ptr.Deref(pluginSpec.ServiceAccountName, ""),
+			fmt.Sprintf("%s%s-ctrlplugin-sa", serviceAccountPrefix, r.driverType),
+		)
+		imagePullPolicy := cmp.Or(pluginSpec.ImagePullPolicy, corev1.PullIfNotPresent)
+		logVerbosity := ptr.Deref(r.driver.Spec.Log, csiv1.LogSpec{}).Verbosity
+		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1.LogSpec{}).Rotation
+		logRotationEnabled := logRotationSpec != nil
+		logRotateSecurityContext := utils.If(
+			pluginSpec.Privileged != nil && logRotationEnabled,
+			&corev1.SecurityContext{
+				Privileged: pluginSpec.Privileged,
+				Capabilities: &corev1.Capabilities{
+					Drop: []corev1.Capability{"All"},
+				},
+			},
+			nil,
+		)
+
+		leaderElectionSettingsArg := []string{
+			utils.LeaderElectionNamespaceContainerArg(r.driver.Namespace),
+			utils.LeaderElectionLeaseDurationContainerArg(leaderElectionSpec.LeaseDuration),
+			utils.LeaderElectionRenewDeadlineContainerArg(leaderElectionSpec.RenewDeadline),
+			utils.LeaderElectionRetryPeriodContainerArg(leaderElectionSpec.RetryPeriod),
+		}
+
+		port := r.controllerPluginCsiAddonsContainerPort()
+
+		deploy.Spec = appsv1.DeploymentSpec{
+			// Number of replicas for CSI Addons deployment must be equal to that of ctrlplugin's
+			Replicas: pluginSpec.Replicas,
+			Selector: &appSelector,
+			Strategy: ptr.Deref(pluginSpec.DeploymentStrategy, defaultDeploymentStrategy),
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: utils.Call(func() map[string]string {
+						podLabels := map[string]string{}
+						maps.Copy(podLabels, pluginSpec.Labels)
+						podLabels["app"] = appName
+						return podLabels
+					}),
+					Annotations: maps.Clone(pluginSpec.Annotations),
+				},
+				Spec: corev1.PodSpec{
+					ServiceAccountName: serviceAccountName,
+					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					Affinity:           getCSIAddonsDeploymentAffinity(r.generateName("ctrlplugin"), &appSelector),
+					Tolerations:        pluginSpec.Tolerations,
+					Containers: utils.Call(func() []corev1.Container {
+						containers := []corev1.Container{
+							{
+								Name:            "csi-addons",
+								Image:           r.images["addons"],
+								ImagePullPolicy: imagePullPolicy,
+								SecurityContext: logRotateSecurityContext,
+								Args: utils.DeleteZeroValues(
+									append(
+										slices.Clone(leaderElectionSettingsArg),
+										utils.LogVerbosityContainerArg(logVerbosity),
+										utils.CsiAddonsNodeIdContainerArg,
+										utils.PodContainerArg,
+										utils.PodUidContainerArg,
+										utils.CsiAddonsAddressContainerArg,
+										utils.ContainerPortArg(port),
+										utils.NamespaceContainerArg,
+										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+									),
+								),
+								Ports: []corev1.ContainerPort{
+									port,
+								},
+								Env: []corev1.EnvVar{
+									utils.NodeIdEnvVar,
+									utils.PodUidEnvVar,
+									utils.PodNameEnvVar,
+									utils.PodNamespaceEnvVar,
+								},
+								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
+									mounts := []corev1.VolumeMount{
+										utils.PluginDirHostVolumeMount,
+									}
+									if logRotationEnabled {
+										mounts = append(mounts, utils.LogsDirVolumeMount)
+									}
+									return mounts
+								}),
+								Resources: ptr.Deref(
+									pluginSpec.Resources.Addons,
+									corev1.ResourceRequirements{},
+								),
+							},
+						}
+						// CSI LogRotate Container
+						if logRotationEnabled {
+							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
+							containers = append(containers, corev1.Container{
+								Name:            "log-rotator",
+								Image:           r.images["plugin"],
+								ImagePullPolicy: imagePullPolicy,
+								Resources:       resources,
+								SecurityContext: logRotateSecurityContext,
+								Command:         []string{"/bin/bash", "-c", logRotateCmd},
+								VolumeMounts: []corev1.VolumeMount{
+									utils.LogsDirVolumeMount,
+									utils.LogRotateDirVolumeMount,
+								},
+							})
+						}
+						return containers
+					}),
+					Volumes: utils.Call(func() []corev1.Volume {
+						volumes := []corev1.Volume{
+							utils.PluginDirHostVolume(defaultKubeletDirPath, r.driver.Name),
+						}
+						if logRotationEnabled {
+							logHostPath := cmp.Or(logRotationSpec.LogHostPath, defaultLogHostPath)
+							volumes = append(
+								volumes,
+								utils.LogsDirVolume(logHostPath, deploy.Name),
+								utils.LogRotateDirVolumeName(r.driver.Name),
+							)
+						}
+						return volumes
+					}),
+				},
+			},
+		}
+
+		return nil
+	})
+
+	logCreateOrUpdateResult(log, "controller plugin csi addons deployment", deploy, opResult, err)
+	return err
 }
 
 func (r *driverReconcile) reconcileControllerPluginDeployment() error {
@@ -794,53 +960,6 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Snapshotter,
-									corev1.ResourceRequirements{},
-								),
-							})
-						}
-						// Addons Sidecar Container
-						if !r.isNfsDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
-							port := r.controllerPluginCsiAddonsContainerPort()
-							containers = append(containers, corev1.Container{
-								Name:            "csi-addons",
-								Image:           r.images["addons"],
-								ImagePullPolicy: imagePullPolicy,
-								SecurityContext: logRotateSecurityContext,
-								Args: utils.DeleteZeroValues(
-									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddonsNodeIdContainerArg,
-										utils.PodContainerArg,
-										utils.PodUidContainerArg,
-										utils.CsiAddonsAddressContainerArg,
-										utils.ContainerPortArg(port),
-										utils.NamespaceContainerArg,
-										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
-									),
-								),
-								Ports: []corev1.ContainerPort{
-									port,
-								},
-								Env: []corev1.EnvVar{
-									utils.NodeIdEnvVar,
-									utils.PodUidEnvVar,
-									utils.PodNameEnvVar,
-									utils.PodNamespaceEnvVar,
-								},
-								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
-									mounts := []corev1.VolumeMount{
-										utils.PluginDirHostVolumeMount,
-									}
-									if logRotationEnabled {
-										mounts = append(mounts, utils.LogsDirVolumeMount)
-									}
-									return mounts
-								}),
-								Resources: ptr.Deref(
-									pluginSpec.Resources.Addons,
 									corev1.ResourceRequirements{},
 								),
 							})
@@ -1509,6 +1628,32 @@ func (r *driverReconcile) generateServiceName(suffix string) string {
 	re := regexp.MustCompile(`[^a-z0-9-]`)
 	// Replace all special characters with a hyphen
 	return re.ReplaceAllString(name, "-")
+}
+
+func getCSIAddonsDeploymentAffinity(ctrllabel string, selector *metav1.LabelSelector) *corev1.Affinity {
+	affinity := &corev1.Affinity{}
+
+	// Pod should be deployed on a node that has provisioner pods running
+	affinity.PodAffinity = &corev1.PodAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{{
+			LabelSelector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": ctrllabel,
+				},
+			},
+			TopologyKey: corev1.LabelHostname,
+		}},
+	}
+
+	// Pod should not be scheduled on the same node twice
+	affinity.PodAntiAffinity = &corev1.PodAntiAffinity{
+		RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{{
+			LabelSelector: selector,
+			TopologyKey:   corev1.LabelHostname,
+		}},
+	}
+
+	return affinity
 }
 
 func getControllerPluginPodAffinity(
