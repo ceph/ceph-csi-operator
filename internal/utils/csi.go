@@ -33,6 +33,7 @@ const (
 	csiMountInfoVolumeName   = "ceph-csi-mountinfo"
 	registrationVolumeName   = "registration-dir"
 	pluginDirVolumeName      = "plugin-dir"
+	pluginDirHostVolumeName  = "host-plugin-dir"
 	podsMountDirVolumeName   = "pods-mount-dir"
 	pluginMountDirVolumeName = "plugin-mount-dir"
 
@@ -44,14 +45,6 @@ const (
 )
 
 // Ceph CSI common volumes
-var SocketDirVolume = corev1.Volume{
-	Name: "socket-dir",
-	VolumeSource: corev1.VolumeSource{
-		EmptyDir: &corev1.EmptyDirVolumeSource{
-			Medium: corev1.StorageMediumMemory,
-		},
-	},
-}
 var HostDevVolume = corev1.Volume{
 	Name: "host-dev",
 	VolumeSource: corev1.VolumeSource{
@@ -165,6 +158,17 @@ func PluginMountDirVolume(kubeletDirPath string) corev1.Volume {
 		},
 	}
 }
+func PluginDirHostVolume(kubeletDirPath string, driverNamePrefix string) corev1.Volume {
+	return corev1.Volume{
+		Name: pluginDirHostVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			HostPath: &corev1.HostPathVolumeSource{
+				Path: fmt.Sprintf("%s/plugins/%s/provisioner", kubeletDirPath, driverNamePrefix),
+				Type: ptr.To(corev1.HostPathDirectoryOrCreate),
+			},
+		},
+	}
+}
 func PluginDirVolume(kubeletDirPath string, driverNamePrefix string) corev1.Volume {
 	return corev1.Volume{
 		Name: pluginDirVolumeName,
@@ -223,10 +227,6 @@ func LogRotateDirVolumeName(driverName string) corev1.Volume {
 }
 
 // Ceph CSI common volume Mounts
-var SocketDirVolumeMount = corev1.VolumeMount{
-	Name:      SocketDirVolume.Name,
-	MountPath: SocketDir,
-}
 var HostDevVolumeMount = corev1.VolumeMount{
 	Name:      HostDevVolume.Name,
 	MountPath: "/dev",
@@ -268,6 +268,10 @@ var KmsConfigVolumeMount = corev1.VolumeMount{
 }
 var PluginDirVolumeMount = corev1.VolumeMount{
 	Name:      pluginDirVolumeName,
+	MountPath: "/csi",
+}
+var PluginDirHostVolumeMount = corev1.VolumeMount{
+	Name:      pluginDirHostVolumeName,
 	MountPath: "/csi",
 }
 var RegistrationDirVolumeMount = corev1.VolumeMount{

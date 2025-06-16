@@ -633,7 +633,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 												return v.Mount
 											},
 										),
-										utils.SocketDirVolumeMount,
+										utils.PluginDirHostVolumeMount,
 										utils.HostDevVolumeMount,
 										utils.HostSysVolumeMount,
 										utils.LibModulesVolumeMount,
@@ -678,7 +678,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
+									utils.PluginDirHostVolumeMount,
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Provisioner,
@@ -702,7 +702,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
+									utils.PluginDirHostVolumeMount,
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Resizer,
@@ -725,7 +725,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
+									utils.PluginDirHostVolumeMount,
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Attacher,
@@ -755,7 +755,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
+									utils.PluginDirHostVolumeMount,
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Snapshotter,
@@ -790,7 +790,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
+									utils.PluginDirHostVolumeMount,
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Snapshotter,
@@ -832,7 +832,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := []corev1.VolumeMount{
-										utils.SocketDirVolumeMount,
+										utils.PluginDirHostVolumeMount,
 									}
 									if logRotationEnabled {
 										mounts = append(mounts, utils.LogsDirVolumeMount)
@@ -894,7 +894,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.PodIpEnvVar,
 								},
 								VolumeMounts: []corev1.VolumeMount{
-									utils.SocketDirVolumeMount,
+									utils.PluginDirHostVolumeMount,
 								},
 								Resources: ptr.Deref(
 									pluginSpec.Resources.Liveness,
@@ -933,7 +933,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							utils.HostDevVolume,
 							utils.HostSysVolume,
 							utils.LibModulesVolume,
-							utils.SocketDirVolume,
+							utils.PluginDirHostVolume(defaultKubeletDirPath, r.driver.Name),
 							utils.KeysTmpDirVolume,
 							utils.OidcTokenVolume,
 							utils.CsiConfigVolume,
