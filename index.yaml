@@ -1,0 +1,25 @@
+apiVersion: v1
+entries:
+  ceph-csi-drivers:
+  - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2025-06-17T15:05:11.866923092+02:00"
+    description: A Helm chart for Ceph CSI drivers
+    digest: 5dbd50ea215e0c7065325912d435a3e800cceb7e89da2c35ac4b2ba5caacb341
+    name: ceph-csi-drivers
+    type: application
+    urls:
+    - https://github.com/ceph/ceph-csi-operator/releases/download/ceph-csi-drivers-0.3.0/ceph-csi-drivers-0.3.0.tgz
+    version: 0.3.0
+  ceph-csi-operator:
+  - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2025-06-17T15:05:12.142249323+02:00"
+    description: A Helm chart to distribute the project ceph-csi-operator
+    digest: f9d470bca52e1077392e56811aef512a2bb956ed347ae85f2c9115e7a2a871b8
+    name: ceph-csi-operator
+    type: application
+    urls:
+    - https://github.com/ceph/ceph-csi-operator/releases/download/ceph-csi-operator-0.3.0/ceph-csi-operator-0.3.0.tgz
+    version: 0.3.0
+generated: "2025-06-17T15:05:12.14226032+02:00"
