@@ -1,0 +1,10 @@
+apiVersion: csi.ceph.io/v1
+kind: ClientProfile
+metadata:
+  name: rook-ceph
+  namespace: csi-driver
+spec:
+  cephConnectionRef:
+    name: cephcluster
+  cephFs:
+    subVolumeGroup: csi
