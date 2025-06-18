@@ -33,6 +33,10 @@ runs:
       shell: bash
       run: test/scripts/github-action-helper.sh deploy_rook
 
+    - name: Install snapshot controller
+      shell: bash
+      run: test/scripts/install-snapshot.sh install
+
     - name: Prepare ceph-csi-operator
       shell: bash
       run: IMAGE_TAG=test make docker-build
