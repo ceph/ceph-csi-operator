@@ -107,6 +107,6 @@ runs:
         kubectl get pods,deployment,daemonset,replicaset -oyaml -n csi-driver
         kubectl get pods,deployment,daemonset,replicaset -n csi-driver
         kubectl describe pods,deployment,daemonset,replicaset -n csi-driver
-        kubectl logs -l app.kubernetes.io/instance=ceph-csi-operator -n ceph-csi-operator-system
+        kubectl logs -l app.kubernetes.io/name=ceph-csi-operator -n ceph-csi-operator-system
         echo "Pod(s) not running after 3 minutes"
         exit 1
