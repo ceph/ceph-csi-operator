@@ -53,6 +53,9 @@ deploy_rook() {
   cat cluster-test.yaml
   kubectl create -f cluster-test.yaml
   kubectl_retry create -f cluster-test.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/pool-test.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/filesystem-test.yaml
+  kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/nfs-test.yaml
   wait_for_mon
   wait_for_pod_to_be_ready_state
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
