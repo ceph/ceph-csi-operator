@@ -68,7 +68,7 @@ spec:
       plugin: {{ $driver.nodePlugin.resources.plugin | toYaml | nindent 4 }}
     {{- end }}
     kubeletDirPath: {{ $driver.nodePlugin.kubeletDirPath }}
-    EnableSeLinuxHostMount: {{ $driver.nodePlugin.enableSeLinuxHostMount }}
+    enableSeLinuxHostMount: {{ $driver.nodePlugin.enableSeLinuxHostMount }}
     priorityClassName: {{ $driver.nodePlugin.priorityClassName }}
     labels: {{ $driver.nodePlugin.labels | toYaml | nindent 8 }}
     annotations: {{ $driver.nodePlugin.annotations | toYaml | nindent 8 }}
