@@ -1,7 +1,6 @@
 # Configuration for Ceph Connections
 cephConnections:
-  -
-    # Name for the Ceph connection
+  - # Name for the Ceph connection
     name: ""
 
     # Ceph monitors (key-value pairs, typically IP addresses of the Ceph monitors)
@@ -15,8 +14,7 @@ cephConnections:
 
 # Configuration for Client Profiles
 clientProfiles:
-  -
-    # Name of the client profile
+  - # Name of the client profile
     name: ""
 
     cephConnection:
@@ -153,9 +151,10 @@ operatorConfig:
 
 # Drivers configuration
 drivers:
-  -
-    # Driver name for RBD
+  - # Driver name for RBD
     name: "rbd.csi.ceph.com"
+
+    enabled: true
 
     log:
       # Log verbosity level (0-5)
@@ -259,9 +258,10 @@ drivers:
       # List of tolerations for the controller plugin
       tolerations: []
 
-  -
-    # Driver name for CephFS
+  - # Driver name for CephFS
     name: "cephfs.csi.ceph.com"
+
+    enabled: true
 
     log:
       # Log verbosity level (0-5)
@@ -365,9 +365,10 @@ drivers:
       # List of tolerations for the controller plugin
       tolerations: []
 
-  -
-    # Driver name for NFS
+  - # Driver name for NFS
     name: "nfs.csi.ceph.com"
+
+    enabled: true
 
     log:
       # Log verbosity level (0-5)
