@@ -61,10 +61,10 @@ deploy_rook() {
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
 }
 
-wait_for_pod_to_be_ready_state() {
+wait_for_osd_pod_to_be_ready_state() {
   timeout 200 bash <<-'EOF'
     until [ $(kubectl get pod -l app=rook-ceph-osd -n rook-ceph -o jsonpath='{.items[*].metadata.name}' -o custom-columns=READY:status.containerStatuses[*].ready | grep -c true) -eq 1 ]; do
-      echo "waiting for the pods to be in ready state"
+      echo "waiting for the osd pods to be in ready state"
       sleep 1
     done
 EOF
