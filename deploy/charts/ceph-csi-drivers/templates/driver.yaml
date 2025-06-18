@@ -3,7 +3,7 @@
 {{- if  $driver.enabled }}
 {{- $normalizedDriverName := include "normalizeDriverName" $driver.name }}
 ---
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: Driver
 metadata:
   name: {{ $driver.name }}

@@ -2,7 +2,7 @@
 {{- $config := .Values.operatorConfig -}}
 {{- if $config.create }}
 ---
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: OperatorConfig
 metadata:
   name: {{ $config.name }}
