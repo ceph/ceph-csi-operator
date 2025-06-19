@@ -33,7 +33,7 @@ jobs:
 
       - name: Prepare ceph-csi-operator
         run: |
-          make docker-build
+          IMAGE_TAG=test make docker-build
 
       - name: Install helm
         run: |
@@ -48,7 +48,7 @@ jobs:
 
       - name: Install operator helm chart
         run: |
-          helm install csi-operator ./deploy/charts/ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system
+          helm install csi-operator ./deploy/charts/ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system --set controllerManager.manager.image.tag=test
 
       - name: Check operator helm release status
         run: |
