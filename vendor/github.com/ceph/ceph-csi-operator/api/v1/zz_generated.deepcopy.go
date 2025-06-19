@@ -558,6 +558,11 @@ func (in *DriverSpec) DeepCopyInto(out *DriverSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.EnableSnapshotMetadata != nil {
+		in, out := &in.EnableSnapshotMetadata, &out.EnableSnapshotMetadata
+		*out = new(bool)
+		**out = **in
+	}
 	if in.GenerateOMapInfo != nil {
 		in, out := &in.GenerateOMapInfo, &out.GenerateOMapInfo
 		*out = new(bool)
