@@ -19,7 +19,7 @@ controllerManager:
       watchNamespace: ""
     image:
       repository: quay.io/cephcsi/ceph-csi-operator
-      tag: latest
+      tag: v0.3.1
     resources:
       limits:
         cpu: 500m
