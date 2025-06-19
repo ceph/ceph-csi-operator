@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
 
       - name: Set release version
         id: release_version
@@ -48,13 +50,10 @@ jobs:
           helm package deploy/charts/ceph-csi-drivers -d .csi-op-release-packages
 
       - name: Upload chart packages to GitHub Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.CSI_GITHUB_TOKEN }}
         run: |
-          echo "uploading the package to the release"
-          cr upload \
-            --owner=${{ github.repository_owner }} \
-            --git-repo=ceph-csi-operator \
-            --token=${{ secrets.CEPH_CSI_BOT_TOKEN }} \
-            --package-path=.csi-op-release-packages
+          gh release upload "${{ github.event.release.tag_name }}" .csi-op-release-packages/* --clobber
 
       - name: Update Helm repo index and push to gh-pages
         run: |
@@ -71,10 +70,13 @@ jobs:
             --git-repo=ceph-csi-operator \
             --package-path=.csi-op-release-packages \
             --token=${{ secrets.CSI_GITHUB_TOKEN }} \
-            --index-path=.cr-index/index.yaml
+            --index-path=.cr-index/index.yaml \
+            --release-name-template=${{ github.event.release.tag_name }}
 
 
           cp -r .cr-index/* .
-          git add .
+          git add index.yaml
+          rm -rf .cr-index/ .csi-op-release-packages/
+
           git commit -m "Update Helm repo index from release ${{ github.event.release.tag_name }}"
           git push origin gh-pages -f
