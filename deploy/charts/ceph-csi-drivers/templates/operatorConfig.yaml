@@ -2,7 +2,7 @@
 {{- $config := .Values.operatorConfig -}}
 {{- if $config.create }}
 ---
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: OperatorConfig
 metadata:
   name: {{ $config.name }}
@@ -71,7 +71,7 @@ spec:
         plugin: {{ $config.driverSpecDefaults.nodePlugin.resources.plugin | toYaml | nindent 4 }}
       {{- end }}
       kubeletDirPath: {{ $config.driverSpecDefaults.nodePlugin.kubeletDirPath }}
-      EnableSeLinuxHostMount: {{ $config.driverSpecDefaults.nodePlugin.enableSeLinuxHostMount }}
+      enableSeLinuxHostMount: {{ $config.driverSpecDefaults.nodePlugin.enableSeLinuxHostMount }}
       priorityClassName: {{ $config.driverSpecDefaults.nodePlugin.priorityClassName }}
       labels: {{ $config.driverSpecDefaults.nodePlugin.labels | toYaml | nindent 8 }}
       annotations: {{ $config.driverSpecDefaults.nodePlugin.annotations | toYaml | nindent 8 }}

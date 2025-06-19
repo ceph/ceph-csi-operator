@@ -1,0 +1,112 @@
+name: Deploy Charts Composite Action
+description: Deploy Helm charts for Ceph CSI operator and drivers
+
+inputs:
+  driverType:
+    description: "The CSI driver to deploy (cephfs, rbd, nfs)"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Setup Go
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      with:
+        go-version-file: go.mod
+
+    - name: Setup Minikube
+      shell: bash
+      run: test/scripts/github-action-helper.sh install_minikube_with_none_driver
+
+    - name: Print k8s cluster status
+      shell: bash
+      run: kubectl get nodes
+
+    - name: Use local disk
+      shell: bash
+      run: test/scripts/github-action-helper.sh use_local_disk
+
+    - name: Create ceph cluster
+      shell: bash
+      run: test/scripts/github-action-helper.sh deploy_rook
+
+    - name: Install snapshot controller
+      shell: bash
+      run: test/scripts/install-snapshot.sh install
+
+    - name: Prepare ceph-csi-operator
+      shell: bash
+      run: IMAGE_TAG=test make docker-build
+
+    - name: Install Helm
+      shell: bash
+      run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: Verify Helm installation
+      shell: bash
+      run: helm version
+
+    - name: Lint operator helm chart
+      shell: bash
+      run: helm lint ./deploy/charts/ceph-csi-operator
+
+    - name: Install operator helm chart
+      shell: bash
+      run: helm install csi-operator ./deploy/charts/ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system --set controllerManager.manager.image.tag=test
+
+    - name: Check operator helm release status
+      shell: bash
+      run: helm status csi-operator --namespace ceph-csi-operator-system
+
+    - name: Check operator is running
+      shell: bash
+      run: |
+        for i in {1..180}; do
+          kubectl get pods -l app.kubernetes.io/name=ceph-csi-operator -n ceph-csi-operator-system -o jsonpath='{.items[0].status.phase}' | grep -q "Running" && exit 0 || sleep 1
+        done
+        echo "Pod not running after 3 minutes"
+        exit 1
+
+    - name: Patch operator to watch csi driver namespace
+      shell: bash
+      run: |
+        kubectl patch deployment csi-operator-ceph-csi-operator-controller-manager -n ceph-csi-operator-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/env/2/value", "value": "csi-driver"}]'
+
+    - name: Lint csi driver helm chart
+      shell: bash
+      run: helm lint ./deploy/charts/ceph-csi-drivers
+
+    - name: Enable only the specified driver
+      shell: bash
+      run: |
+        DRIVER_NAME="${{ inputs.driverType }}.csi.ceph.com" yq eval '.drivers |= map(.enabled = (.name == strenv(DRIVER_NAME)))' -i ./deploy/charts/ceph-csi-drivers/values.yaml
+
+    - name: Install csi driver helm chart
+      shell: bash
+      run: helm install csi-driver ./deploy/charts/ceph-csi-drivers --create-namespace --namespace csi-driver
+
+    - name: Check csi driver helm release status
+      shell: bash
+      run: helm status csi-driver --namespace csi-driver
+
+    - name: Check csi pods are running
+      shell: bash
+      run: |
+        for i in {1..180}; do
+          if [ $(kubectl get pods -n csi-driver --field-selector=status.phase=Running --no-headers | wc -l) -eq 2 ]; then
+            echo "All CSI pods are running"
+            kubectl get pods,deployment,daemonset,replicaset -n csi-driver
+            exit 0
+          fi
+          kubectl get pods,deployment,daemonset,replicaset -n csi-driver
+          sleep 1
+        done
+        kubectl get pods,deployment,daemonset,replicaset -oyaml -n csi-driver
+        kubectl get pods,deployment,daemonset,replicaset -n csi-driver
+        kubectl describe pods,deployment,daemonset,replicaset -n csi-driver
+        kubectl logs -l app.kubernetes.io/name=ceph-csi-operator -n ceph-csi-operator-system
+        echo "Pod(s) not running after 3 minutes"
+        exit 1

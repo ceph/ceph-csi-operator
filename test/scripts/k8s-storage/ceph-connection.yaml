@@ -1,0 +1,7 @@
+apiVersion: csi.ceph.io/v1
+kind: CephConnection
+metadata:
+  name: cephcluster
+  namespace: csi-driver
+spec:
+  monitors:
