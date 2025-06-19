@@ -239,9 +239,11 @@ func (r *driverReconcile) reconcile() error {
 	}
 
 	// Reconcile daemonset and deployment for CSI Addons
+	// The deployment is created for CephFS and RBD driver types
+	// While the Daemonset is created only for CephFS driver
 	if ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
 		// CSI Addons deployment
-		if !r.isNfsDriver() {
+		if r.isCephFsDriver() || r.isRdbDriver() {
 			reconcilers = append(reconcilers, r.reconcileCsiAddonsDeployment)
 		}
 
@@ -524,6 +526,15 @@ func (r *driverReconcile) reconcileCsiAddonsDeployment() error {
 	deploy.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("csiAddonsDeploymentName", deploy.Name)
+
+	if !ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+		if err := r.Delete(r.ctx, deploy); client.IgnoreNotFound(err) != nil {
+			log.Error(err, "failed to delete csi addons deployment")
+			return err
+		}
+		return nil
+	}
+
 	log.Info("Reconciling controller plugin csi addons deployment")
 
 	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, deploy, func() error {
@@ -1103,6 +1114,15 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 	daemonSet.Namespace = r.driver.Namespace
 
 	log := r.log.WithValues("csiAddonsDaemonSetName", daemonSet.Name)
+
+	if !ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+		if err := r.Delete(r.ctx, daemonSet); client.IgnoreNotFound(err) != nil {
+			log.Error(err, "failed to delete csi addons daemonset")
+			return err
+		}
+		return nil
+	}
+
 	log.Info("Reconciling csi addons nodeplugin deployment")
 
 	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, daemonSet, func() error {
@@ -1137,9 +1157,6 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
 						podLabels["app"] = appName
-						if r.driver.Spec.Liveness != nil {
-							podLabels["contains"] = fmt.Sprintf("%s-metrics", appName)
-						}
 						return podLabels
 					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
@@ -1147,7 +1164,6 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
-					HostPID:            r.isRdbDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
@@ -1158,6 +1174,9 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 								Name:            "csi-addons",
 								Image:           r.images["addons"],
 								ImagePullPolicy: imagePullPolicy,
+								// We need this in order for this container to be able to access
+								// the sockets created by the privileged provisioner container
+								// on systems with enforcing selinux.
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
@@ -1202,40 +1221,6 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 									corev1.ResourceRequirements{},
 								),
 							},
-						}
-						// Liveness Sidecar Container
-						if r.driver.Spec.Liveness != nil {
-							containers = append(containers, corev1.Container{
-								Name:            "liveness-prometheus",
-								Image:           r.images["plugin"],
-								ImagePullPolicy: imagePullPolicy,
-								SecurityContext: &corev1.SecurityContext{
-									Privileged: ptr.To(true),
-									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
-									},
-								},
-								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.TypeContainerArg("liveness"),
-										utils.EndpointContainerArg,
-										utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
-										utils.MetricsPathContainerArg,
-										utils.PoolTimeContainerArg,
-										utils.TimeoutContainerArg(3),
-									},
-								),
-								Env: []corev1.EnvVar{
-									utils.PodIpEnvVar,
-								},
-								VolumeMounts: []corev1.VolumeMount{
-									utils.PluginDirVolumeMount,
-								},
-								Resources: ptr.Deref(
-									pluginSpec.Resources.Liveness,
-									corev1.ResourceRequirements{},
-								),
-							})
 						}
 						// CSI LogRotate Container
 						if logRotationEnabled {

@@ -163,7 +163,7 @@ func PluginDirHostVolume(kubeletDirPath string, driverNamePrefix string) corev1.
 		Name: pluginDirHostVolumeName,
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: fmt.Sprintf("%s/plugins/%s/provisioner", kubeletDirPath, driverNamePrefix),
+				Path: fmt.Sprintf("%s/plugins/%s/ctrl-plugin", kubeletDirPath, driverNamePrefix),
 				Type: ptr.To(corev1.HostPathDirectoryOrCreate),
 			},
 		},
