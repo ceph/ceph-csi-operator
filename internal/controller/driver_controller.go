@@ -57,6 +57,7 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=operatorconfigs,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
@@ -163,6 +164,14 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}}
 		},
 	)
+
+	if err := utils.AddNodeNameIndexerForPods(mgr); err != nil {
+		return err
+	}
+
+	if err := utils.AddEventHandlerForPodDeletion(r.Client, mgr); err != nil {
+		return err
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&csiv1.Driver{}).
@@ -589,6 +598,7 @@ func (r *driverReconcile) reconcileCsiAddonsDeployment() error {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
 						podLabels["app"] = appName
+						podLabels[utils.CSIAddonsDeploymentLabel] = string(r.driverType)
 						return podLabels
 					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
@@ -751,6 +761,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
 						podLabels["app"] = appName
+						podLabels[utils.CSICtrlpluginDeploymentLabel] = string(r.driverType)
 						return podLabels
 					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
