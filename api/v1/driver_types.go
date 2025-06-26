@@ -307,6 +307,13 @@ type DriverSpec struct {
 	//+kubebuilder:validation:Enum:=none;volumeGroupSnapshot;volumeSnapshot
 	SnapshotPolicy SnapshotPolicyType `json:"snapshotPolicy,omitempty"`
 
+	// Set to true to enable the snapshot metadata sidecar container in the controller plugin deployment.
+	// This is required to enable the snapshot-metadata feature in the driver.
+	// If the snapshotPolicy is set to none, this will be ignored.
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:default:=false
+	EnableSnapshotMetadata *bool `json:"enableSnapshotMetadata,omitempty"`
+
 	// OMAP generator will generate the omap mapping between the PV name and the RBD image.
 	// Need to be enabled when we are using rbd mirroring feature.
 	// By default OMAP generator sidecar is not deployed with Csi controller plugin pod, to enable
