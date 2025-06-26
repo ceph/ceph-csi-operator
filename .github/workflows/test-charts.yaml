@@ -1,0 +1,70 @@
+name: Run external-storage e2e tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release-*
+
+# cancel the in-progress workflow when PR is refreshed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  run-e2e-tests:
+    name: ${{ matrix.driver }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        driver:
+          - cephfs
+          - rbd
+          - nfs
+    steps:
+
+      - name: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Deploy helm charts
+        uses: ./.github/actions/deploy-charts
+        with:
+          driverType: ${{ matrix.driver }}
+
+      - name: Create cephConnection and clientProfile
+        run: |
+            MONITOR=$(kubectl -n rook-ceph get svc -l app=rook-ceph-mon \
+            -o=jsonpath='{.items[0].spec.clusterIP}:{.items[0].spec.ports[0].port}')
+
+            yq eval '.spec.monitors = ["'"$MONITOR"'"]' -i ./test/scripts/k8s-storage/ceph-connection.yaml
+
+            kubectl apply -f ./test/scripts/k8s-storage/ceph-connection.yaml
+            kubectl apply -f ./test/scripts/k8s-storage/client-profile.yaml
+
+
+      - name: Create StorageClass and SnapshotClass
+        run: |
+            kubectl apply -f ./test/scripts/k8s-storage/sc-${{ matrix.driver }}.yaml || echo "No StorageClass file for ${{ matrix.driver }}"
+            kubectl apply -f ./test/scripts/k8s-storage/vsclass-${{ matrix.driver }}.yaml || echo "No VolumeSnapshotClass file for ${{ matrix.driver }}"
+
+      - name: Download kubernetes e2e binary
+        env:
+         KUBE_VERSION: v1.33.0
+        run: |
+            curl -LO "https://dl.k8s.io/${KUBE_VERSION}/kubernetes-test-linux-amd64.tar.gz"
+            tar xzf kubernetes-test-linux-amd64.tar.gz kubernetes/test/bin/ginkgo kubernetes/test/bin/e2e.test
+
+      - name: Run E2E tests for ${{ matrix.driver }}
+        run: |
+            # e2e depends on a self-contained KUBECONFIG for some reason
+            KUBECONFIG_TMP="$(mktemp -t kubeconfig.XXXXXXXX)"
+            kubectl config view --raw --flatten > "${KUBECONFIG_TMP}"
+            export KUBECONFIG="${KUBECONFIG_TMP}"
+
+            ./kubernetes/test/bin/ginkgo \
+            --vv \
+            -focus="External.Storage.*${{ matrix.driver }}.csi.ceph.com" \
+            -skip='\[Feature:|\[Disruptive\]|Generic Ephemeral-volume' \
+            ./kubernetes/test/bin/e2e.test \
+            -- \
+            -storage.testdriver="$(pwd)/test/scripts/k8s-storage/driver-${{ matrix.driver }}.yaml"

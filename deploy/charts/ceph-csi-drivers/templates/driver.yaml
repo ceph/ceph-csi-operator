@@ -1,8 +1,9 @@
 {{- $root := . -}}
 {{- range $driver := .Values.drivers -}}
+{{- if  $driver.enabled }}
 {{- $normalizedDriverName := include "normalizeDriverName" $driver.name }}
 ---
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: Driver
 metadata:
   name: {{ $driver.name }}
@@ -67,7 +68,7 @@ spec:
       plugin: {{ $driver.nodePlugin.resources.plugin | toYaml | nindent 4 }}
     {{- end }}
     kubeletDirPath: {{ $driver.nodePlugin.kubeletDirPath }}
-    EnableSeLinuxHostMount: {{ $driver.nodePlugin.enableSeLinuxHostMount }}
+    enableSeLinuxHostMount: {{ $driver.nodePlugin.enableSeLinuxHostMount }}
     priorityClassName: {{ $driver.nodePlugin.priorityClassName }}
     labels: {{ $driver.nodePlugin.labels | toYaml | nindent 8 }}
     annotations: {{ $driver.nodePlugin.annotations | toYaml | nindent 8 }}
@@ -118,4 +119,5 @@ spec:
       {{- end }}
     imagePullPolicy: {{ $driver.controllerPlugin.imagePullPolicy }}
   {{- end }}
+{{- end }}
 {{- end }}
