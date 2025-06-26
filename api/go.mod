@@ -3,8 +3,8 @@ module github.com/ceph/ceph-csi-operator/api
 go 1.24.0
 
 require (
-	k8s.io/api v0.33.1
-	k8s.io/apimachinery v0.33.1
+	k8s.io/api v0.33.2
+	k8s.io/apimachinery v0.33.2
 )
 
 require (
