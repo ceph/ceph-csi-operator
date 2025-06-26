@@ -43,8 +43,8 @@ jobs:
           echo "Packaging Helm charts..."
           mkdir -p .csi-op-release-packages
 
-          sed -i "s/^version:.*/version: ${VERSION}/" "deploy/charts/ceph-csi-operator/Chart.yaml"
-          sed -i "s/^version:.*/version: ${VERSION}/" "deploy/charts/ceph-csi-drivers/Chart.yaml"
+          sed -i "s/^version:.*/version: ${VERSION}/; s/^appVersion:.*/appVersion: v${VERSION}/" "deploy/charts/ceph-csi-operator/Chart.yaml"
+          sed -i "s/^version:.*/version: ${VERSION}/; s/^appVersion:.*/appVersion: v${VERSION}/" "deploy/charts/ceph-csi-drivers/Chart.yaml"
 
           helm package deploy/charts/ceph-csi-operator -d .csi-op-release-packages
           helm package deploy/charts/ceph-csi-drivers -d .csi-op-release-packages
