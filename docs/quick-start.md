@@ -8,6 +8,7 @@
   - [4. Verify Installation](#4-verify-installation)
   - [5. Create CephConnection](#5-create-cephconnection)
   - [6. Create ClientProfile](#6-create-clientprofile)
+  - [7. Clean Up Resources](#7-clean-up-resources)
 
 # Quick Start Guide for Ceph-CSI-Operator
 
@@ -130,7 +131,6 @@ spec:
 
 Use the ClientProfile Name as the ClusterID in the required classes (StrorageClass,VolumeSnapshotClass etc).
 
-```console
 
 ## 7. Clean Up Resources
 

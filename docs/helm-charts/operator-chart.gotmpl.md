@@ -30,8 +30,8 @@ ceph-csi-operator currently publishes builds of the ceph-csi operator to tagged 
 
 
 ```console
-helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator-charts
-helm install --create-namespace --namespace ceph-csi-operator-system ceph-csi-operator/operator -f values.yaml
+helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/
+helm install ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system ceph-csi-operator/ceph-csi-operator
 ```
 
 For example settings, see the next section or [values.yaml](https://github.com/ceph/ceph-csi-operator/tree/main/deploy/charts/ceph-csi-operator/values.yaml)
@@ -57,7 +57,7 @@ helm install --create-namespace --namespace ceph-csi-operator-system ceph-csi-op
 
 ## Uninstalling the Chart
 
-To see the currently installed Rook chart:
+To see the currently installed ceph-csi-operator chart:
 
 ```console
 helm ls --namespace ceph-csi-operator-system

@@ -12,7 +12,6 @@
   - [Overview](#overview)
   - [Quick Start](#quick-start)
   - [Installation](#installation)
-  - [Usage](#usage)
   - [Contributing](#contributing)
     - [Reporting Issues](#reporting-issues)
     - [Pull Requests](#pull-requests)
@@ -31,9 +30,6 @@ For those eager to get started quickly, follow the steps outlined in the [Quick 
 
 For detailed installation instructions, including methods using Helm and manual deployment, please visit the [Installation Guide](docs/installation.md).
 
-## Usage
-
-To learn how to use the Ceph CSI Operator, refer to the [Usage Guide](docs/usage.md).
 
 ## Contributing
 

@@ -229,6 +229,10 @@ generate-helm-docs: helm-docs
 		-t docs/helm-charts/operator-chart.gotmpl.md \
 		-t docs/helm-charts/_templates.gotmpl \
 		-o ../../../docs/helm-charts/operator-chart.md
+	$(HELM_DOCS) -c deploy/charts/ceph-csi-drivers \
+               -t docs/helm-charts/drivers-chart.gotmpl.md \
+                -t docs/helm-charts/_templates.gotmpl \
+                -o ../../../docs/helm-charts/drivers-chart.md
 
 ##@ Deployment
 
