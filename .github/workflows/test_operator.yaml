@@ -4,6 +4,10 @@ on:
     branches:
       - main
       - release-*
+    paths-ignore:
+      - 'docs/**' # ignore all the documents
+      - '*.md' # Ignore the Readme and PendingReleaseNote file
+      - '.*' # Ignore the config files
 
 defaults:
   run:
