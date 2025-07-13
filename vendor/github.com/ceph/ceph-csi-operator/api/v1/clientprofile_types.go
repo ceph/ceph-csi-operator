@@ -35,6 +35,9 @@ type CephFsConfigSpec struct {
 	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
 	//+kubebuilder:validation:Optional
 	RadosNamespace *string `json:"radosNamespace,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	ControllerPublishSecretRef corev1.SecretReference `json:"controllerPublishSecretRef,omitempty"`
 }
 
 // RbdConfigSpec defines the desired RBD configuration
@@ -42,6 +45,9 @@ type RbdConfigSpec struct {
 	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
 	//+kubebuilder:validation:Optional
 	RadosNamespace string `json:"radosNamespace,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	ControllerPublishSecretRef corev1.SecretReference `json:"controllerPublishSecretRef,omitempty"`
 }
 
 // NfsConfigSpec cdefines the desired NFS configuration
