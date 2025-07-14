@@ -83,6 +83,7 @@ runs:
       shell: bash
       run: |
         DRIVER_NAME="${{ inputs.driverType }}.csi.ceph.com" yq eval '.drivers |= map(.enabled = (.name == strenv(DRIVER_NAME)))' -i ./deploy/charts/ceph-csi-drivers/values.yaml
+        yq eval '.drivers |= map(.deployCsiAddons = (.name == "rbd.csi.ceph.com"))' -i ./deploy/charts/ceph-csi-drivers/values.yaml
 
     - name: Install csi driver helm chart
       shell: bash
@@ -94,9 +95,15 @@ runs:
 
     - name: Check csi pods are running
       shell: bash
+      env:
+        DRIVER_TYPE: ${{ inputs.driverType }}
       run: |
+        podCount=2
+        if [ "$DRIVER_TYPE" = "rbd" ]; then
+          podCount=3
+        fi
         for i in {1..180}; do
-          if [ $(kubectl get pods -n csi-driver --field-selector=status.phase=Running --no-headers | wc -l) -eq 2 ]; then
+          if [ $(kubectl get pods -n csi-driver --field-selector=status.phase=Running --no-headers | wc -l) -eq $podCount ]; then
             echo "All CSI pods are running"
             kubectl get pods,deployment,daemonset,replicaset -n csi-driver
             exit 0
