@@ -43,6 +43,7 @@ import (
 	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 	"github.com/ceph/ceph-csi-operator/internal/controller"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
+	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -56,6 +57,7 @@ func init() {
 
 	utilruntime.Must(csiv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(csiv1.AddToScheme(scheme))
+	utilruntime.Must(sm.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

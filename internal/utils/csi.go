@@ -366,6 +366,11 @@ var NodePluginCsiAddonsContainerPort = corev1.ContainerPort{
 	ContainerPort: int32(9071),
 }
 
+// CSI snapshot-metadata sidecar container port definitions
+var SnapshotMetadataGrpcPort = corev1.ContainerPort{
+	ContainerPort: int32(50051),
+}
+
 func ContainerPortArg(port corev1.ContainerPort) string {
 
 	return fmt.Sprintf("--controller-port=%d", port.ContainerPort)
@@ -401,6 +406,9 @@ var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
 var LogToStdErrContainerArg = "--logtostderr=false"
 var AlsoLogToStdErrContainerArg = "--alsologtostderr=true"
 var CsiAddonsVolumeConditionArg = "--enable-volume-condition=true"
+var SnapshotMetadataGrpcServicePortArg = fmt.Sprintf("--port=%d", SnapshotMetadataGrpcPort.ContainerPort)
+var SnapshotMetadataTlsCertArg = "--tls-cert=/tmp/certificates/tls.crt"
+var SnapshotMetadataTlsKeyArg = "--tls-key=/tmp/certificates/tls.key"
 
 func LogVerbosityContainerArg(level int) string {
 	return fmt.Sprintf("--v=%d", Clamp(level, 0, 5))
