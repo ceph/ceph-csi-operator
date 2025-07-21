@@ -1259,7 +1259,15 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 									utils.PodNamespaceEnvVar,
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
-									mounts := []corev1.VolumeMount{
+									mounts := append(
+										// Add user defined volume mounts at the start to make sure they do not
+										// overwrite built in volumes mounts.
+										utils.MapSlice(
+											pluginSpec.Volumes,
+											func(v csiv1.VolumeSpec) corev1.VolumeMount {
+												return v.Mount
+											},
+										),
 										utils.HostDevVolumeMount,
 										utils.HostSysVolumeMount,
 										utils.HostRunMountVolumeMount,
@@ -1269,7 +1277,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										utils.CsiConfigVolumeMount,
 										utils.PluginMountDirVolumeMount(kubeletDirPath),
 										utils.PodsMountDirVolumeMount(kubeletDirPath),
-									}
+									)
 									if ptr.Deref(pluginSpec.EnableSeLinuxHostMount, false) {
 										mounts = append(mounts, utils.EtcSelinuxVolumeMount)
 									}
