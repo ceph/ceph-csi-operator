@@ -602,6 +602,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.DriverNameContainerArg(r.driver.Name),
 										utils.PidlimitContainerArg,
 										utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
+										utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
 										utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
 										utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
 										utils.If(
@@ -1263,6 +1264,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
 										utils.NodeServerContainerArg,
 										utils.NodeIdContainerArg,
 										utils.DriverNameContainerArg(r.driver.Name),
+										utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
 										utils.EndpointContainerArg,
 										utils.PidlimitContainerArg,
 										utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),

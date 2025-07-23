@@ -297,6 +297,11 @@ type DriverSpec struct {
 	//+kubebuilder:validation:Optional
 	EnableMetadata *bool `json:"enableMetadata,omitempty"`
 
+	// Set to true to enable fencing for the driver.
+	// Fencing is a feature that allows the driver to fence a node when it is tainted with node.kubernetes.io/out-of-service.
+	//+kubebuilder:validation:Optional
+	EnableFencing *bool `json:"enableFencing,omitempty"`
+
 	// Set the gRPC timeout for gRPC call issued by the driver components
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:validation:Minimum:=0

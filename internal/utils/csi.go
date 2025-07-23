@@ -419,6 +419,9 @@ func TypeContainerArg(t string) string {
 func SetMetadataContainerArg(on bool) string {
 	return If(on, "--setmetadata=true", "")
 }
+func SetFencingContainerArg(on bool) string {
+	return If(on, "--enable-fencing=true", "")
+}
 func TimeoutContainerArg(timeout int) string {
 	return fmt.Sprintf("--timeout=%ds", timeout)
 }
