@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -72,7 +73,10 @@ const (
 const (
 	// Annotation name for ownerref information
 	ownerRefAnnotationKey = "csi.ceph.io/ownerref"
-	logRotateCmd          = `while true; do logrotate --verbose /logrotate-config/csi; sleep 15m; done`
+	// Annotation to enable CSI-Addons volume condition reporter
+	driverCSIAddonsFeatureVolumeCondition = "addons.csi.ceph.io/volume-condition"
+
+	logRotateCmd = `while true; do logrotate --verbose /logrotate-config/csi; sleep 15m; done`
 )
 
 // A regexp used to parse driver's prefix and type from the full name
@@ -236,10 +240,7 @@ func (r *driverReconcile) reconcile() error {
 		r.reconcileControllerPluginDeployment,
 		r.reconcileNodePluginDeamonSet,
 		r.reconcileLivenessService,
-	}
-
-	if r.isRbdDriver() {
-		reconcilers = append(reconcilers, r.reconcileNodePluginDeamonSetForCsiAddons)
+		r.reconcileNodePluginDeamonSetForCsiAddons,
 	}
 
 	// Concurrently reconcile different aspects of the clusters actual state to meet
@@ -981,7 +982,38 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 
 	log := r.log.WithValues("csiAddonsDaemonSetName", daemonSet.Name)
 
-	if !ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+	withCsiAddonsDaemonSet := false
+	withCsiAddonsVolumeCondition := false
+
+	if r.isRbdDriver() {
+		withCsiAddonsDaemonSet = ptr.Deref(r.driver.Spec.DeployCsiAddons, false)
+	}
+
+	// check if the driver wants CSI-Addons features
+	if feature := r.driver.GetAnnotations()[driverCSIAddonsFeatureVolumeCondition]; feature != "" {
+		enabled, err := strconv.ParseBool(feature)
+		if err != nil {
+			r.log.Error(
+				err,
+				"Unable to parse annotation on driver.csi.ceph.io",
+				"name",
+				client.ObjectKeyFromObject(&r.driver),
+				driverCSIAddonsFeatureVolumeCondition,
+				feature,
+			)
+			return err
+		}
+
+		withCsiAddonsVolumeCondition = enabled
+		// if the feature is enabled, enable the daemonset too
+		withCsiAddonsDaemonSet = withCsiAddonsDaemonSet || withCsiAddonsVolumeCondition
+	}
+
+	if r.isNfsDriver() {
+		withCsiAddonsDaemonSet = false
+	}
+
+	if !withCsiAddonsDaemonSet {
 		if err := r.Delete(r.ctx, daemonSet); client.IgnoreNotFound(err) != nil {
 			log.Error(err, "failed to delete csi addons daemonset")
 			return err
@@ -1062,6 +1094,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
 										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
 										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+										utils.If(withCsiAddonsVolumeCondition, utils.CsiAddonsVolumeConditionArg, ""),
 									},
 								),
 								Ports: []corev1.ContainerPort{
@@ -1079,6 +1112,12 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 									}
 									if logRotationEnabled {
 										mounts = append(mounts, utils.LogsDirVolumeMount)
+									}
+									if withCsiAddonsVolumeCondition {
+										mounts = append(mounts,
+											utils.PluginMountDirVolumeMount(kubeletDirPath),
+											utils.PodsMountDirVolumeMount(kubeletDirPath),
+										)
 									}
 									return mounts
 								}),
@@ -1122,6 +1161,14 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 								volumes,
 								utils.LogsDirVolume(logHostPath, daemonSet.Name),
 								utils.LogRotateDirVolumeName(r.driver.Name),
+							)
+						}
+
+						if withCsiAddonsVolumeCondition {
+							volumes = append(
+								volumes,
+								utils.PluginMountDirVolume(kubeletDirPath),
+								utils.PodsMountDirVolume(kubeletDirPath),
 							)
 						}
 						return volumes
