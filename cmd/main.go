@@ -28,6 +28,7 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -56,6 +57,7 @@ func init() {
 
 	utilruntime.Must(csiv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(csiv1.AddToScheme(scheme))
+	utilruntime.Must(sm.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
