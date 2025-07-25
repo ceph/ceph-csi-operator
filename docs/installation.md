@@ -2,7 +2,7 @@
 
 - [Ceph-CSI Installation Methods](#ceph-csi-installation-methods)
   - [2. Choose Your Installation Method](#2-choose-your-installation-method)
-    - [Method 1: Helm Chart Installation](#method-1-helm-chart-installation)
+    - [⚠️ Method 1: Helm Chart Installation (Experimental)](#️-method-1-helm-chart-installation-experimental)
     - [Method 2: Kubernetes YAML Installation](#method-2-kubernetes-yaml-installation)
   - [3. Summary](#3-summary)
 
@@ -16,7 +16,12 @@ Both methods achieve the same goal deploying Ceph-CSI drivers and operators in y
 
 ## 2. Choose Your Installation Method
 
-### Method 1: Helm Chart Installation
+### ⚠️ Method 1: Helm Chart Installation (Experimental)
+
+> **🚧 Experimental Feature**
+> The Helm-based installation of the Ceph-CSI Operator and drivers is currently **experimental**.
+> It simplifies deployment and supports automation, but may not support all production use cases yet.
+> Use it with caution and test thoroughly before adopting in critical environments.
 
 Using Helm for installation allows you to quickly deploy the Ceph-CSI Operator and drivers with minimal configuration. This method is ideal if you want to automate the deployment and benefit from Helm's management features.
 

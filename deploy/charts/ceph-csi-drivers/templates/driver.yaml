@@ -1,5 +1,5 @@
 {{- $root := . -}}
-{{- range $driver := .Values.drivers -}}
+{{- range  $driver := .Values.drivers -}}
 {{- if  $driver.enabled }}
 {{- $normalizedDriverName := include "normalizeDriverName" $driver.name }}
 ---
