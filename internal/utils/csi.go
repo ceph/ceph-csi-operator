@@ -400,6 +400,7 @@ var EnableVolumeGroupSnapshotsContainerArg = "--feature-gates=CSIVolumeGroupSnap
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
 var LogToStdErrContainerArg = "--logtostderr=false"
 var AlsoLogToStdErrContainerArg = "--alsologtostderr=true"
+var CsiAddonsVolumeConditionArg = "--enable-volume-condition=true"
 
 func LogVerbosityContainerArg(level int) string {
 	return fmt.Sprintf("--v=%d", Clamp(level, 0, 5))
