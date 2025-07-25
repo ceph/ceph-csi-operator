@@ -65,6 +65,21 @@ spec:
               cephFs:
                 description: CephFsConfigSpec defines the desired CephFs configuration
                 properties:
+                  controllerPublishSecretRef:
+                    description: |-
+                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                      in any namespace
+                    properties:
+                      name:
+                        description: name is unique within a namespace to reference
+                          a secret resource.
+                        type: string
+                      namespace:
+                        description: namespace defines the space within which the secret
+                          name must be unique.
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
                   fuseMountOptions:
                     additionalProperties:
                       type: string
@@ -87,6 +102,21 @@ spec:
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
                 properties:
+                  controllerPublishSecretRef:
+                    description: |-
+                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                      in any namespace
+                    properties:
+                      name:
+                        description: name is unique within a namespace to reference
+                          a secret resource.
+                        type: string
+                      namespace:
+                        description: namespace defines the space within which the secret
+                          name must be unique.
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
                   radosNamespace:
                     type: string
                     x-kubernetes-validations:

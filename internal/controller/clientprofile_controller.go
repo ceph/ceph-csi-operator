@@ -67,14 +67,16 @@ type csiClusterInfoRecord struct {
 	ClusterId string   `json:"clusterID,omitempty"`
 	Monitors  []string `json:"monitors,omitempty"`
 	CephFs    struct {
-		SubvolumeGroup     string `json:"subvolumeGroup,omitempty"`
-		KernelMountOptions string `json:"kernelMountOptions"`
-		FuseMountOptions   string `json:"fuseMountOptions"`
-		RadosNamespace     string `json:"radosNamespace,omitempty"`
+		SubvolumeGroup             string                 `json:"subvolumeGroup,omitempty"`
+		KernelMountOptions         string                 `json:"kernelMountOptions"`
+		FuseMountOptions           string                 `json:"fuseMountOptions"`
+		RadosNamespace             string                 `json:"radosNamespace,omitempty"`
+		ControllerPublishSecretRef corev1.SecretReference `json:"controllerPublishSecretRef,omitempty"`
 	} `json:"cephFS,omitempty"`
 	Rbd struct {
-		RadosNamespace string `json:"radosNamespace,omitempty"`
-		MirrorCount    int    `json:"mirrorCount,omitempty"`
+		RadosNamespace             string                 `json:"radosNamespace,omitempty"`
+		MirrorCount                int                    `json:"mirrorCount,omitempty"`
+		ControllerPublishSecretRef corev1.SecretReference `json:"controllerPublishSecretRef,omitempty"`
 	} `json:"rbd,omitempty"`
 	Nfs          struct{} `json:"nfs,omitempty"`
 	ReadAffinity struct {
@@ -315,6 +317,7 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *c
 	record.Monitors = cephConn.Spec.Monitors
 	if cephFs := clientProfile.Spec.CephFs; cephFs != nil {
 		record.CephFs.SubvolumeGroup = cephFs.SubVolumeGroup
+		record.CephFs.ControllerPublishSecretRef = cephFs.ControllerPublishSecretRef
 		record.CephFs.RadosNamespace = ptr.Deref(cephFs.RadosNamespace, "")
 		if mountOpt := cephFs.KernelMountOptions; mountOpt != nil {
 			record.CephFs.KernelMountOptions = utils.MapToString(mountOpt, "=", ",")
@@ -326,6 +329,7 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *c
 	if rbd := clientProfile.Spec.Rbd; rbd != nil {
 		record.Rbd.RadosNamespace = rbd.RadosNamespace
 		record.Rbd.MirrorCount = cephConn.Spec.RbdMirrorDaemonCount
+		record.Rbd.ControllerPublishSecretRef = rbd.ControllerPublishSecretRef
 	}
 	if readAffinity := cephConn.Spec.ReadAffinity; readAffinity != nil {
 		record.ReadAffinity.Enabled = true
