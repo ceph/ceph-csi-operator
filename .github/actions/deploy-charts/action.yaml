@@ -82,8 +82,13 @@ runs:
     - name: Enable only the specified driver
       shell: bash
       run: |
-        DRIVER_NAME="${{ inputs.driverType }}.csi.ceph.com" yq eval '.drivers |= map(.enabled = (.name == strenv(DRIVER_NAME)))' -i ./deploy/charts/ceph-csi-drivers/values.yaml
-        yq eval '.drivers |= map(.deployCsiAddons = (.name == "rbd.csi.ceph.com"))' -i ./deploy/charts/ceph-csi-drivers/values.yaml
+        DRIVER_NAME="${{ inputs.driverType }}.csi.ceph.com" yq eval --inplace '
+        .drivers |=
+        with_entries(
+          .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
+          .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com")
+        )
+        ' ./deploy/charts/ceph-csi-drivers/values.yaml
 
     - name: Install csi driver helm chart
       shell: bash
