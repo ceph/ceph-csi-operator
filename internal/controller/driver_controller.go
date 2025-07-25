@@ -250,9 +250,9 @@ func (r *driverReconcile) reconcile() error {
 		r.reconcileLogRotateConfigMap,
 		r.reconcileK8sCsiDriver,
 		r.reconcileControllerPluginDeployment,
-		r.reconcileNodePluginDeamonSet,
+		r.reconcileNodePluginDaemonSet,
 		r.reconcileLivenessService,
-		r.reconcileNodePluginDeamonSetForCsiAddons,
+		r.reconcileNodePluginDaemonSetForCsiAddons,
 	}
 
 	// Concurrently reconcile different aspects of the clusters actual state to meet
@@ -1026,7 +1026,7 @@ func (r *driverReconcile) controllerPluginCsiAddonsContainerPort() corev1.Contai
 	return port
 }
 
-func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
+func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 	daemonSet := &appsv1.DaemonSet{}
 	daemonSet.Name = r.generateName("nodeplugin-csi-addons")
 	daemonSet.Namespace = r.driver.Namespace
@@ -1235,7 +1235,7 @@ func (r *driverReconcile) reconcileNodePluginDeamonSetForCsiAddons() error {
 	return err
 }
 
-func (r *driverReconcile) reconcileNodePluginDeamonSet() error {
+func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 	daemonSet := &appsv1.DaemonSet{}
 	daemonSet.Name = r.generateName("nodeplugin")
 	daemonSet.Namespace = r.driver.Namespace
