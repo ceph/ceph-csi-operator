@@ -1,6 +1,6 @@
 {{- $root := . -}}
-{{- range $driver := .Values.drivers -}}
-{{- if and (hasSuffix  "cephfs.csi.ceph.com" $driver.name) ($driver.enabled) }}
+{{- $driver := .Values.drivers.cephfs -}}
+{{- if $driver.enabled }}
 {{- $normalizedDriverName := include "normalizeDriverName" $driver.name }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -54,5 +54,4 @@ rules:
   - tokenreviews
   verbs:
   - create
-{{- end }}
 {{- end }}
