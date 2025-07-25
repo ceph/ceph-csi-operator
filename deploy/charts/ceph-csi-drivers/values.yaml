@@ -151,7 +151,7 @@ operatorConfig:
 
 # Drivers configuration
 drivers:
-  - # Driver name for RBD
+  rbd: # Driver name for RBD
     name: "rbd.csi.ceph.com"
 
     enabled: true
@@ -258,7 +258,7 @@ drivers:
       # List of tolerations for the controller plugin
       tolerations: []
 
-  - # Driver name for CephFS
+  cephfs: # Driver name for CephFS
     name: "cephfs.csi.ceph.com"
 
     enabled: true
@@ -365,7 +365,7 @@ drivers:
       # List of tolerations for the controller plugin
       tolerations: []
 
-  - # Driver name for NFS
+  nfs: # Driver name for NFS
     name: "nfs.csi.ceph.com"
 
     enabled: true

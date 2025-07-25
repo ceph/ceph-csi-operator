@@ -1,6 +1,6 @@
 {{- $root := . -}}
-{{- range $driver := .Values.drivers -}}
-{{- if and (hasSuffix  "rbd.csi.ceph.com" $driver.name) ($driver.enabled) }}
+{{- $driver := .Values.drivers.rbd -}}
+{{- if $driver.enabled }}
 {{- $normalizedDriverName := include "normalizeDriverName" $driver.name }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -183,5 +183,4 @@ rules:
   - get
   - list
   - watch
-{{- end }}
 {{- end }}
