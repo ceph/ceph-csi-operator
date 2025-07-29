@@ -21,6 +21,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// CephCsiSecretsSpec defines the secrets used by the client profile
+// to access the Ceph cluster and perform operations
+// on volumes.
+type CephCsiSecretsSpec struct {
+	//+kubebuilder:validation:Optional
+	ControllerPublishSecret corev1.SecretReference `json:"controllerPublishSecret,omitempty"`
+}
+
 // CephFsConfigSpec defines the desired CephFs configuration
 type CephFsConfigSpec struct {
 	//+kubebuilder:validation:Optional
@@ -35,6 +43,9 @@ type CephFsConfigSpec struct {
 	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
 	//+kubebuilder:validation:Optional
 	RadosNamespace *string `json:"radosNamespace,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	CephCsiSecrets *CephCsiSecretsSpec `json:"cephCsiSecrets,omitempty"`
 }
 
 // RbdConfigSpec defines the desired RBD configuration
@@ -42,6 +53,9 @@ type RbdConfigSpec struct {
 	//+kubebuilder:validation:XValidation:rule="self == oldSelf",message="field is immutable"
 	//+kubebuilder:validation:Optional
 	RadosNamespace string `json:"radosNamespace,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	CephCsiSecrets *CephCsiSecretsSpec `json:"cephCsiSecrets,omitempty"`
 }
 
 // NfsConfigSpec cdefines the desired NFS configuration

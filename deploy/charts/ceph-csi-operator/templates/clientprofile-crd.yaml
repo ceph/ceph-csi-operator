@@ -65,6 +65,28 @@ spec:
               cephFs:
                 description: CephFsConfigSpec defines the desired CephFs configuration
                 properties:
+                  cephCsiSecrets:
+                    description: |-
+                      CephCsiSecretsSpec defines the secrets used by the client profile
+                      to access the Ceph cluster and perform operations
+                      on volumes.
+                    properties:
+                      controllerPublishSecret:
+                        description: |-
+                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                          in any namespace
+                        properties:
+                          name:
+                            description: name is unique within a namespace to reference
+                              a secret resource.
+                            type: string
+                          namespace:
+                            description: namespace defines the space within which the
+                              secret name must be unique.
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
                   fuseMountOptions:
                     additionalProperties:
                       type: string
@@ -87,6 +109,28 @@ spec:
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
                 properties:
+                  cephCsiSecrets:
+                    description: |-
+                      CephCsiSecretsSpec defines the secrets used by the client profile
+                      to access the Ceph cluster and perform operations
+                      on volumes.
+                    properties:
+                      controllerPublishSecret:
+                        description: |-
+                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                          in any namespace
+                        properties:
+                          name:
+                            description: name is unique within a namespace to reference
+                              a secret resource.
+                            type: string
+                          namespace:
+                            description: namespace defines the space within which the
+                              secret name must be unique.
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
                   radosNamespace:
                     type: string
                     x-kubernetes-validations:
