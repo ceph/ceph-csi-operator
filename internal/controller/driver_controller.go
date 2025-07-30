@@ -1690,6 +1690,9 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 	if dest.GenerateOMapInfo == nil {
 		dest.GenerateOMapInfo = src.GenerateOMapInfo
 	}
+	if dest.EnableFencing == nil {
+		dest.EnableFencing = src.EnableFencing
+	}
 	if dest.FsGroupPolicy == "" {
 		dest.FsGroupPolicy = src.FsGroupPolicy
 	}
