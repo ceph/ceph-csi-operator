@@ -8,7 +8,7 @@ Logroate configuration,
 
 ```yaml
 kind: OperatorConfig 
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 ….
 spec: 
     log:
@@ -28,7 +28,7 @@ Similar settings will be overridden by `Driver CRD`:
 
 ```yaml
 kind: Driver 
-apiVersion: csi.ceph.io/v1alpha1 
+apiVersion: csi.ceph.io/v1
 metadata: 
     name: "<prefix>.<driver_type>.csi.ceph.com" 
     namespace:  <operator-namespace> 

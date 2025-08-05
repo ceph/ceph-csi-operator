@@ -78,7 +78,7 @@ The configurations are categorized into 2 different types
 ```yaml
 ---
 kind: OperatorConfig
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 metadata:
   name: ceph-csi-operator-config
   namespace: <operator-namespace>
@@ -259,7 +259,7 @@ RBD, and NFS CSI drivers within namespaces.
 ```yaml
 ---
 kind: Driver
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 metadata:
   name: "<prefix>.<driver_type>.csi.ceph.com"
   namespace: <operator-namespace>
@@ -311,7 +311,7 @@ provide the information to be used by multiple CSI drivers.
 ```yaml
 ---
 kind: CephConnection
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 metadata:
   name: ceph-cluster-1
   namespace: <operator-namespace>
@@ -338,7 +338,7 @@ the connection information for the target Ceph cluster.
 ```yaml
 ---
 kind: ClientProfile
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 metadata:
   name: storage
   namespace: <operator-namespace>
