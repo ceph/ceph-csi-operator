@@ -135,7 +135,7 @@ Once the operator is installed, deploy the Ceph-CSI drivers:
 
 ```console
 echo '
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: Driver
 metadata:
   name: rbd.csi.ceph.com
@@ -147,7 +147,7 @@ metadata:
 
 ```console
 echo '
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: Driver
 metadata:
   name: cephfs.csi.ceph.com
@@ -159,7 +159,7 @@ metadata:
 
 ```console
 echo '
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: Driver
 metadata:
   name: nfs.csi.ceph.com
@@ -189,7 +189,7 @@ Create a CephConnection CR to connect to the Ceph cluster:
 
 ```console
 echo '
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: CephConnection
 metadata:
   name: ceph-connection
@@ -207,7 +207,7 @@ the CephConnection CR and the CephFS and RBD configurations:
 
 ```console
 echo '
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: ClientProfile
 metadata:
   name: storage

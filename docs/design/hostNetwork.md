@@ -22,7 +22,7 @@ Example:
 
 ```yaml
 kind: OperatorConfig 
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 metadata:
   name: ceph-csi-operator-config
   namespace: <operator-namespace>
@@ -34,7 +34,7 @@ spec:
 ## Driver CR
 
 ```yaml
-apiVersion: csi.ceph.io/v1alpha1
+apiVersion: csi.ceph.io/v1
 kind: Driver
 metadata:
   name: rbd.csi.ceph.com
