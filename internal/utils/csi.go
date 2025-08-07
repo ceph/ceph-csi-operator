@@ -425,7 +425,7 @@ func TypeContainerArg(t string) string {
 	}
 }
 func SetMetadataContainerArg(on bool) string {
-	return If(on, "--setmetadata=true", "")
+	return If(on, "--setmetadata=true", "--setmetadata=false")
 }
 func SetFencingContainerArg(on bool) string {
 	return If(on, "--enable-fencing=true", "")
