@@ -53,7 +53,7 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.manager.env.csiServiceAccountPrefix` |  | `"ceph-csi-operator-"` |
 | `controllerManager.manager.env.watchNamespace` |  | `""` |
 | `controllerManager.manager.image.repository` |  | `"quay.io/cephcsi/ceph-csi-operator"` |
-| `controllerManager.manager.image.tag` |  | `"latest"` |
+| `controllerManager.manager.image.tag` |  | `"v0.4.0"` |
 | `controllerManager.manager.resources.limits.cpu` |  | `"500m"` |
 | `controllerManager.manager.resources.limits.memory` |  | `"128Mi"` |
 | `controllerManager.manager.resources.requests.cpu` |  | `"10m"` |

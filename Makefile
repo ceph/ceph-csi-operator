@@ -1,7 +1,7 @@
 # Image URL to use all building/pushing image targets
 IMAGE_REGISTRY ?= quay.io
 REGISTRY_NAMESPACE ?= cephcsi
-IMAGE_TAG ?= latest
+IMAGE_TAG ?= v0.4.0
 IMAGE_NAME ?= ceph-csi-operator
 
 # Allow customization of the name prefix and/or namespace
