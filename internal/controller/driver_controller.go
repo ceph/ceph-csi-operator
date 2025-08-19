@@ -34,6 +34,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -232,7 +233,7 @@ func (r *DriverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 func (r *driverReconcile) hasSnapshotMetadataServiceCr() (bool, error) {
 	sms := &sm.SnapshotMetadataService{}
 	sms.Name = r.driver.Name
-	if err := r.Get(r.ctx, client.ObjectKeyFromObject(sms), sms); client.IgnoreNotFound(err) != nil {
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(sms), sms); !meta.IsNoMatchError(err) && client.IgnoreNotFound(err) != nil {
 		return false, fmt.Errorf("failed to get SnapshotMetadataService resource: %w", err)
 	}
 
