@@ -370,6 +370,9 @@ spec:
               nfs:
                 description: NfsConfigSpec cdefines the desired NFS configuration
                 type: object
+              nvmeof:
+                description: NvmeofConfigSpec cdefines the desired NVMe-oF configuration
+                type: object
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
                 properties:
@@ -7450,8 +7453,8 @@ spec:
             type: object
         type: object
         x-kubernetes-validations:
-        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'''
-          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$')
+        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs|nvmeof).csi.ceph.com'''
+          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs|nvmeof)?\\.csi\\.ceph\\.com$')
     served: true
     storage: true
     subresources:

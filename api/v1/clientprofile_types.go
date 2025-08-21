@@ -62,6 +62,10 @@ type RbdConfigSpec struct {
 type NfsConfigSpec struct {
 }
 
+// NvmeofConfigSpec cdefines the desired NVMe-oF configuration
+type NvmeofConfigSpec struct {
+}
+
 // ClientProfileSpec defines the desired state of Ceph CSI
 // configuration for volumes and snapshots configured to use
 // this profile
@@ -78,6 +82,9 @@ type ClientProfileSpec struct {
 
 	//+kubebuilder:validation:Optional
 	Nfs *NfsConfigSpec `json:"nfs,omitempty"`
+
+	//+kubebuilder:validation:Optional
+	Nvmeof *NvmeofConfigSpec `json:"nvmeof,omitempty"`
 }
 
 // ClientProfileStatus defines the observed state of Ceph CSI

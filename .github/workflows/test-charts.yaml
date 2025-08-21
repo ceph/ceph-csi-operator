@@ -25,6 +25,7 @@ jobs:
           - cephfs
           - rbd
           - nfs
+          - nvmeof
     steps:
 
       - name: checkout

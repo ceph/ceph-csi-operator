@@ -106,6 +106,9 @@ spec:
               nfs:
                 description: NfsConfigSpec cdefines the desired NFS configuration
                 type: object
+              nvmeof:
+                description: NvmeofConfigSpec cdefines the desired NVMe-oF configuration
+                type: object
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
                 properties:
