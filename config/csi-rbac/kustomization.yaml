@@ -17,6 +17,16 @@ resources:
 - nfs_nodeplugin_cluster_role.yaml
 - nfs_nodeplugin_cluster_role_binding.yaml
 - nfs_nodeplugin_service_account.yaml
+- nvmeof_ctrlplugin_cluster_role_binding.yaml
+- nvmeof_ctrlplugin_cluster_role.yaml
+- nvmeof_ctrlplugin_role_binding.yaml
+- nvmeof_ctrlplugin_role.yaml
+- nvmeof_ctrlplugin_service_account.yaml
+- nvmeof_nodeplugin_cluster_role_binding.yaml
+- nvmeof_nodeplugin_cluster_role.yaml
+- nvmeof_nodeplugin_role_binding.yaml
+- nvmeof_nodeplugin_role.yaml
+- nvmeof_nodeplugin_service_account.yaml
 - rbd_ctrlplugin_service_account.yaml
 - rbd_ctrlplugin_cluster_role.yaml
 - rbd_ctrlplugin_cluster_role_binding.yaml

@@ -85,6 +85,7 @@ type csiClusterInfoRecord struct {
 		} `json:"controllerPublishSecretRef,omitempty"`
 	} `json:"rbd,omitempty"`
 	Nfs          struct{} `json:"nfs,omitempty"`
+	Nvmeof       struct{} `json:"nvmeof,omitempty"`
 	ReadAffinity struct {
 		Enabled             bool     `json:"enabled,omitempty"`
 		CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`

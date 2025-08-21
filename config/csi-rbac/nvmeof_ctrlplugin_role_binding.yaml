@@ -1,0 +1,12 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nvmeof-ctrlplugin-rb
+subjects:
+  - kind: ServiceAccount
+    name: nvmeof-ctrlplugin-sa
+    namespace: system
+roleRef:
+  kind: Role
+  name: nvmeof-ctrlplugin-r
+  apiGroup: rbac.authorization.k8s.io
