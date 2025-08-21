@@ -84,7 +84,14 @@ type csiClusterInfoRecord struct {
 			Namespace string `json:"namespace,omitempty"`
 		} `json:"controllerPublishSecretRef,omitempty"`
 	} `json:"rbd,omitempty"`
-	Nfs          struct{} `json:"nfs,omitempty"`
+	Nfs    struct{} `json:"nfs,omitempty"`
+	Nvmeof struct {
+		RadosNamespace             string `json:"radosNamespace,omitempty"`
+		ControllerPublishSecretRef struct {
+			Name      string `json:"name,omitempty"`
+			Namespace string `json:"namespace,omitempty"`
+		} `json:"controllerPublishSecretRef,omitempty"`
+	} `json:"nvmeof,omitempty"`
 	ReadAffinity struct {
 		Enabled             bool     `json:"enabled,omitempty"`
 		CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`
@@ -341,6 +348,13 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *c
 		if cephCsiSecrets := rbd.CephCsiSecrets; cephCsiSecrets != nil {
 			record.Rbd.ControllerPublishSecretRef.Name = cephCsiSecrets.ControllerPublishSecret.Name
 			record.Rbd.ControllerPublishSecretRef.Namespace = cephCsiSecrets.ControllerPublishSecret.Namespace
+		}
+	}
+	if nvmeof := clientProfile.Spec.Nvmeof; nvmeof != nil {
+		record.Nvmeof.RadosNamespace = nvmeof.RadosNamespace
+		if cephCsiSecrets := nvmeof.CephCsiSecrets; cephCsiSecrets != nil {
+			record.Nvmeof.ControllerPublishSecretRef.Name = cephCsiSecrets.ControllerPublishSecret.Name
+			record.Nvmeof.ControllerPublishSecretRef.Namespace = cephCsiSecrets.ControllerPublishSecret.Namespace
 		}
 	}
 	if readAffinity := cephConn.Spec.ReadAffinity; readAffinity != nil {

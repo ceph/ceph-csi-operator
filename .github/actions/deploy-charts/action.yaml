@@ -3,7 +3,7 @@ description: Deploy Helm charts for Ceph CSI operator and drivers
 
 inputs:
   driverType:
-    description: "The CSI driver to deploy (cephfs, rbd, nfs)"
+    description: "The CSI driver to deploy (cephfs, rbd, nfs, nvmeof)"
     required: true
 
 runs:
