@@ -1,0 +1,12 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nvmeof-nodeplugin-rb
+subjects:
+  - kind: ServiceAccount
+    name: nvmeof-nodeplugin-sa
+    namespace: system
+roleRef:
+  kind: Role
+  name: nvmeof-nodeplugin-r
+  apiGroup: rbac.authorization.k8s.io

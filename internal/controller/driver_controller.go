@@ -71,6 +71,7 @@ const (
 	RbdDriverType    = "rbd"
 	CephFsDriverType = "cephfs"
 	NfsDriverType    = "nfs"
+	NvmeofDriverType = "nvmeof"
 )
 
 const (
@@ -84,10 +85,11 @@ const (
 
 // A regexp used to parse driver's prefix and type from the full name
 var nameRegExp, _ = regexp.Compile(fmt.Sprintf(
-	`^(?:.+\.)?(%s|%s|%s)\.csi\.ceph\.com$`,
+	`^(?:.+\.)?(%s|%s|%s|%s)\.csi\.ceph\.com$`,
 	RbdDriverType,
 	CephFsDriverType,
 	NfsDriverType,
+	NvmeofDriverType,
 ))
 
 // DriverReconciler reconciles a Driver object
@@ -691,7 +693,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.DefaultFsTypeContainerArg,
 										utils.PreventVolumeModeConversionContainerArg,
 										utils.HonorPVReclaimPolicyContainerArg,
-										utils.If(r.isRbdDriver(), utils.DefaultFsTypeContainerArg, ""),
+										utils.If(r.isBlockStorageDriver(), utils.DefaultFsTypeContainerArg, ""),
 										utils.TopologyContainerArg(topology),
 										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 									),
@@ -740,7 +742,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddressContainerArg,
 										utils.TimeoutContainerArg(grpcTimeout),
-										utils.If(r.isRbdDriver(), utils.DefaultFsTypeContainerArg, ""),
+										utils.If(r.isBlockStorageDriver(), utils.DefaultFsTypeContainerArg, ""),
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -1292,7 +1294,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
 					HostNetwork:        true,
-					HostPID:            r.isRbdDriver(),
+					HostPID:            r.isBlockStorageDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
@@ -1330,7 +1332,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 											"",
 										),
 										utils.If(
-											r.isRbdDriver(),
+											r.isBlockStorageDriver(),
 											utils.StagingPathContainerArg(kubeletDirPath),
 											"",
 										),
@@ -1384,7 +1386,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									if r.isCephFsDriver() {
 										mounts = append(mounts, utils.CsiMountInfoVolumeMount)
 									}
-									if r.isRbdDriver() {
+									if r.isBlockStorageDriver() {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
 									}
 									if logRotationEnabled {
@@ -1529,7 +1531,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 								utils.KmsConfigVolume(&r.driver.Spec.Encryption.ConfigMapRef),
 							)
 						}
-						if r.isRbdDriver() {
+						if r.isBlockStorageDriver() {
 							volumes = append(
 								volumes,
 								utils.OidcTokenVolume,
@@ -1620,6 +1622,14 @@ func (r *driverReconcile) isCephFsDriver() bool {
 
 func (r *driverReconcile) isNfsDriver() bool {
 	return r.driverType == NfsDriverType
+}
+
+func (r *driverReconcile) isNvmeofDriver() bool {
+	return r.driverType == NvmeofDriverType
+}
+
+func (r *driverReconcile) isBlockStorageDriver() bool {
+	return r.isRbdDriver() || r.isNvmeofDriver()
 }
 
 func (r *driverReconcile) generateName(suffix string) string {
