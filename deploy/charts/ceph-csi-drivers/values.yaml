@@ -146,6 +146,9 @@ operatorConfig:
       # Flag to indicate if the container should be privileged
       privileged: false
 
+      # Affinity settings for the pod
+      affinity: {}
+
       # List of tolerations for the controller plugin
       tolerations: []
 

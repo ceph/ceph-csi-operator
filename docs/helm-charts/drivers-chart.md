@@ -160,6 +160,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.attachRequired` |  | `true` |
 | `operatorConfig.driverSpecDefaults.cephFsClientType` |  | `"kernel"` |
 | `operatorConfig.driverSpecDefaults.clusterName` |  | `""` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.affinity` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` |  | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` |  | `"IfNotPresent"` |
