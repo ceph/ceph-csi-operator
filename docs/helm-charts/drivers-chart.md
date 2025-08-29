@@ -160,8 +160,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.attachRequired` |  | `true` |
 | `operatorConfig.driverSpecDefaults.cephFsClientType` |  | `"kernel"` |
 | `operatorConfig.driverSpecDefaults.clusterName` |  | `""` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.affinity` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` |  | `false` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` |  | `"IfNotPresent"` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` |  | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.replicas` |  | `1` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.resources` |  | `{}` |
@@ -183,9 +185,11 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.nodePlugin.affinity` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.annotations` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath` |  | `"/var/lib/kubelet"` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.labels` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName` |  | `""` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` |  | `[]` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.volumes` |  | `[]` |
 | `operatorConfig.driverSpecDefaults.snapshotPolicy` |  | `"none"` |
 | `operatorConfig.name` |  | `"ceph-csi-operator-config"` |
