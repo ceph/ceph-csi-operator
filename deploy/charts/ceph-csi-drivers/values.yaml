@@ -149,6 +149,9 @@ operatorConfig:
       # List of tolerations for the controller plugin
       tolerations: []
 
+      # Image pull policy (default is "IfNotPresent")
+      imagePullPolicy: "IfNotPresent"
+
 # Drivers configuration
 drivers:
   rbd: # Driver name for RBD

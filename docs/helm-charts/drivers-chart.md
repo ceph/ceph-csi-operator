@@ -162,6 +162,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.clusterName` |  | `""` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` |  | `false` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` |  | `"IfNotPresent"` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` |  | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.replicas` |  | `1` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.resources` |  | `{}` |
