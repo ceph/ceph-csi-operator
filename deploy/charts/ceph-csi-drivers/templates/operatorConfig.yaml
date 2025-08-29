@@ -35,7 +35,7 @@ spec:
     grpcTimeout: {{ $config.driverSpecDefaults.grpcTimeout }}
     snapshotPolicy: {{ $config.driverSpecDefaults.snapshotPolicy }}
     generateOMapInfo: {{ $config.driverSpecDefaults.generateOMapInfo }}
-    fsGroupPolicy: {{ $config.driverSpecDefaultsfsGroupPolicy }}
+    fsGroupPolicy: {{ $config.driverSpecDefaults.fsGroupPolicy }}
     {{- if $config.driverSpecDefaults.encryption }}
       {{- if $config.driverSpecDefaults.encryption.configMapRef.name }}
     encryption:
