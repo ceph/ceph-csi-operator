@@ -61,7 +61,9 @@ spec:
     # Node Plugin Configuration
     nodePlugin:
       {{- if $config.driverSpecDefaults.nodePlugin }}
+      {{- if $config.driverSpecDefaults.nodePlugin.updateStrategy }}
       updateStrategy: {{ $config.driverSpecDefaults.nodePlugin.updateStrategy | toYaml | nindent 8 }}
+      {{- end }}
       {{- if $config.driverSpecDefaults.nodePlugin.resources }}
       resources:
         registrar: {{ $config.driverSpecDefaults.nodePlugin.resources.registrar | toYaml | nindent 4 }}

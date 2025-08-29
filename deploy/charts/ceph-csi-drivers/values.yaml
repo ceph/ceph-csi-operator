@@ -123,6 +123,9 @@ operatorConfig:
       # Affinity settings for the pod
       affinity: {}
 
+      # Daemonset update strategy. Default is RollingUpdate with maxUnavailable set to 1
+      updateStrategy: {}
+
       # List of tolerations for the pod
       tolerations: []
 

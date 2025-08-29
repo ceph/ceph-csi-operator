@@ -189,6 +189,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.nodePlugin.labels` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName` |  | `""` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` |  | `[]` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.volumes` |  | `[]` |
 | `operatorConfig.driverSpecDefaults.snapshotPolicy` |  | `"none"` |
 | `operatorConfig.name` |  | `"ceph-csi-operator-config"` |
