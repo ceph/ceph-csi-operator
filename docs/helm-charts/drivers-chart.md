@@ -185,6 +185,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.nodePlugin.affinity` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.annotations` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath` |  | `"/var/lib/kubelet"` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.labels` |  | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName` |  | `""` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` |  | `[]` |

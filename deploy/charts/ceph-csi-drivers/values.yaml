@@ -111,6 +111,9 @@ operatorConfig:
       # Pod's priority class name
       priorityClassName: ""
 
+      # kubelet directory path (default is "/var/lib/kubelet")
+      kubeletDirPath: "/var/lib/kubelet"
+
       # Custom labels for the pod
       labels: {}
 
