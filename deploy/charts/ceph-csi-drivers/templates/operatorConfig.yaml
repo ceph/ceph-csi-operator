@@ -48,13 +48,13 @@ spec:
     cephFsClientType: {{ $config.driverSpecDefaults.cephFsClientType  }}
     kernelMountOptions:
       {{- if $config.driverSpecDefaults.kernelMountOptions }}
-      {{- toYaml $config.driverSpecDefaults.kernelMountOptions | nindent 4 }}
+      {{- toYaml $config.driverSpecDefaults.kernelMountOptions | nindent 6 }}
       {{- else }}
       {}  # Empty map if not defined
       {{- end }}
     fuseMountOptions:
       {{- if $config.driverSpecDefaults.fuseMountOptions }}
-      {{- toYaml $config.driverSpecDefaults.fuseMountOptions | nindent 4 }}
+      {{- toYaml $config.driverSpecDefaults.fuseMountOptions | nindent 6 }}
       {{- else }}
       {}  # Empty map if not defined
       {{- end }}
