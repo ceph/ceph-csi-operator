@@ -5,7 +5,7 @@ metadata:
   labels:
   {{- include "ceph-csi-operator.labels" . | nindent 4 }}
 roleRef:
-  apiGroup: ""
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: '{{ include "ceph-csi-operator.fullname" . }}-nfs-nodeplugin-cr'
 subjects:
