@@ -946,6 +946,7 @@ kind: ClusterRoleBinding
 metadata:
   name: ceph-csi-operator-nfs-nodeplugin-crb
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: ceph-csi-operator-nfs-nodeplugin-cr
 subjects:
