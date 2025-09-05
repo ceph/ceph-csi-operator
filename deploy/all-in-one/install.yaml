@@ -28519,6 +28519,43 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  name: ceph-csi-operator-cephfs-nodeplugin-r
+  namespace: ceph-csi-operator-system
+rules:
+- apiGroups:
+  - csiaddons.openshift.io
+  resources:
+  - csiaddonsnodes
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments/finalizers
+  - daemonsets/finalizers
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: ceph-csi-operator
@@ -29733,6 +29770,20 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: ceph-csi-operator-cephfs-ctrlplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-csi-operator-cephfs-nodeplugin-rb
+  namespace: ceph-csi-operator-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-csi-operator-cephfs-nodeplugin-r
+subjects:
+- kind: ServiceAccount
+  name: ceph-csi-operator-cephfs-nodeplugin-sa
   namespace: ceph-csi-operator-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
