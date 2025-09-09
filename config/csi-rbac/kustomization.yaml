@@ -9,6 +9,8 @@ resources:
 - cephfs_nodeplugin_service_account.yaml
 - cephfs_nodeplugin_cluster_role.yaml
 - cephfs_nodeplugin_cluster_role_binding.yaml
+- cephfs_nodeplugin_role.yaml
+- cephfs_nodeplugin_role_binding.yaml
 - nfs_ctrlplugin_cluster_role.yaml
 - nfs_ctrlplugin_cluster_role_binding.yaml
 - nfs_ctrlplugin_service_account.yaml
