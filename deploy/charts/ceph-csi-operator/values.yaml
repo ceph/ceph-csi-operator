@@ -45,3 +45,5 @@ rbdCtrlpluginSa:
 rbdNodepluginSa:
   serviceAccount:
     annotations: {}
+# List of pull secret names that will be added to all serviceaccounts
+imagePullSecrets: []
