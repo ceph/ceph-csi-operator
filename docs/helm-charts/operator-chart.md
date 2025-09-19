@@ -44,8 +44,6 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `cephfsCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `cephfsNodepluginSa.serviceAccount.annotations` |  | `{}` |
 | `controllerManager.manager.args[0]` |  | `"--leader-elect"` |
 | `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` |  | `false` |
 | `controllerManager.manager.containerSecurityContext.capabilities.drop[0]` |  | `"ALL"` |
@@ -62,10 +60,6 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.replicas` |  | `1` |
 | `controllerManager.serviceAccount.annotations` |  | `{}` |
 | `kubernetesClusterDomain` |  | `"cluster.local"` |
-| `nfsCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `nfsNodepluginSa.serviceAccount.annotations` |  | `{}` |
-| `rbdCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `rbdNodepluginSa.serviceAccount.annotations` |  | `{}` |
 
 ### **Development Build**
 

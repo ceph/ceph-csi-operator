@@ -202,7 +202,7 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 build-helm-installer: manifests generate kustomize helmify ## Generate helm charts for the operator.
 	mkdir -p build deploy
 	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
-	cd build && $(KUSTOMIZE) edit add resource ../config/default/
+	cd build && $(KUSTOMIZE) edit add resource ../config/rbac ../config/manager ../config/crd
 	$(KUSTOMIZE) build build | $(HELMIFY) deploy/charts/ceph-csi-operator
 	rm -rf build
 
