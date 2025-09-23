@@ -59,11 +59,7 @@ var defaultDaemonSetUpdateStrategy = appsv1.DaemonSetUpdateStrategy{
 }
 
 var defaultDeploymentStrategy = appsv1.DeploymentStrategy{
-	Type: appsv1.RollingUpdateDeploymentStrategyType,
-	RollingUpdate: &appsv1.RollingUpdateDeployment{
-		MaxSurge:       ptr.To(intstr.FromString("25%")),
-		MaxUnavailable: ptr.To(intstr.FromString("25%")),
-	},
+	Type: appsv1.RecreateDeploymentStrategyType,
 }
 
 var operatorNamespace = utils.Call(func() string {
