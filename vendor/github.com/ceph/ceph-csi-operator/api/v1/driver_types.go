@@ -89,10 +89,10 @@ type EncryptionSpec struct {
 }
 
 type VolumeSpec struct {
-	//+kubebuilder:validation:Required
+	//+kubebuilder:validation:Optional
 	Volume corev1.Volume `json:"volume,omitempty"`
 
-	//+kubebuilder:validation:Required
+	//+kubebuilder:validation:Optional
 	Mount corev1.VolumeMount `json:"mount,omitempty"`
 }
 
