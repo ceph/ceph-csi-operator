@@ -93,6 +93,19 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 	return out
 }
 
+// MapFilter maps the iteas of a given slice into a new slice using a mapper function
+// The mapper returns a value and a boolean; values for which the boolean is true
+// are included in the output slice.
+func MapFilter[T, K any](in []T, mapper func(item T) (K, bool)) []K {
+	out := make([]K, 0, len(in))
+	for _, v := range in {
+		if mapped, ok := mapper(v); ok {
+			out = append(out, mapped)
+		}
+	}
+	return out
+}
+
 // MapToString serializes the provided map into a a string.
 func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator string) string {
 	if len(m) == 0 {
