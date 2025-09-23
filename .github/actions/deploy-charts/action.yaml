@@ -3,7 +3,7 @@ description: Deploy Helm charts for Ceph CSI operator and drivers
 
 inputs:
   driverType:
-    description: "The CSI driver to deploy (cephfs, rbd, nfs)"
+    description: "The CSI driver to deploy (cephfs, rbd, nfs, nvmeof)"
     required: true
 
 runs:
@@ -86,7 +86,7 @@ runs:
         .drivers |=
         with_entries(
           .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
-          .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com")
+          .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com" || .value.name == "nvmeof.csi.ceph.com")
         )
         ' ./deploy/charts/ceph-csi-drivers/values.yaml
 
@@ -104,7 +104,7 @@ runs:
         DRIVER_TYPE: ${{ inputs.driverType }}
       run: |
         podCount=2
-        if [ "$DRIVER_TYPE" = "rbd" ]; then
+        if [ "$DRIVER_TYPE" = "rbd" -o "$DRIVER_TYPE" = "nvmeof" ]; then
           podCount=3
         fi
         for i in {1..180}; do
