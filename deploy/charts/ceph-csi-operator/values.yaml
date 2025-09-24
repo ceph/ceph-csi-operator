@@ -1,9 +1,3 @@
-cephfsCtrlpluginSa:
-  serviceAccount:
-    annotations: {}
-cephfsNodepluginSa:
-  serviceAccount:
-    annotations: {}
 controllerManager:
   manager:
     args:
@@ -33,15 +27,3 @@ controllerManager:
   serviceAccount:
     annotations: {}
 kubernetesClusterDomain: cluster.local
-nfsCtrlpluginSa:
-  serviceAccount:
-    annotations: {}
-nfsNodepluginSa:
-  serviceAccount:
-    annotations: {}
-rbdCtrlpluginSa:
-  serviceAccount:
-    annotations: {}
-rbdNodepluginSa:
-  serviceAccount:
-    annotations: {}
