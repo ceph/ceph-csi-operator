@@ -9,6 +9,8 @@ NAME_PREFIX ?= ceph-csi-operator-
 NAMESPACE ?= $(NAME_PREFIX)system
 # A comma separated list of namespaces for operator to cache objects from
 WATCH_NAMESPACE ?= ""
+# A comma separated list of imagepullsecret names that will be added to all CSI deployments and daemonsets
+IMAGE_PULL_SECRETS ?=
 
 IMG ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
 
@@ -35,6 +37,8 @@ SHELL = /usr/bin/env bash -o pipefail
 
 # Define the content of the temporary top-most kustomize overlay for the
 # build-installer, build-multifile-installer and deploy targets
+# Awk statement converts comma-separated secrets to JSON array of objects
+# ie, "secret-1,secret-2" -> [{"name": "secret-1", "name": "secret-2"}]
 define BUILD_INSTALLER_OVERLAY
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -55,6 +59,14 @@ patches:
   target:
     kind: Deployment
     name: controller-manager
+$(if $(IMAGE_PULL_SECRETS),
+- patch: |-
+    - op: add
+      path: /imagePullSecrets
+      value: [$(shell echo -n "$(IMAGE_PULL_SECRETS)" | awk -F',' '{for(i=1;i<=NF;i++) printf "%s{\"name\": \"%s\"}", (i>1?", ":""), $$i}')]
+  target:
+    kind: ServiceAccount
+)
 images:
 - name: controller
   newName: ${IMG}
@@ -71,6 +83,15 @@ namespace: $(NAMESPACE)
 namePrefix: $(NAME_PREFIX)
 resources:
 - ../config/csi-rbac
+$(if $(IMAGE_PULL_SECRETS),
+patches:
+- patch: |-
+    - op: add
+      path: /imagePullSecrets
+      value: [$(shell echo -n "$(IMAGE_PULL_SECRETS)" | awk -F',' '{for(i=1;i<=NF;i++) printf "%s{\"name\": \"%s\"}", (i>1?", ":""), $$i}')]
+  target:
+    kind: ServiceAccount
+)
 endef
 export BUILD_CSI_RBAC_OVERLAY
 

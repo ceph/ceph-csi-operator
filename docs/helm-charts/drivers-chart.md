@@ -156,6 +156,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.nodePlugin.tolerations` |  | `[]` |
 | `drivers.rbd.nodePlugin.volumes` |  | `[]` |
 | `drivers.rbd.snapshotPolicy` |  | `"none"` |
+| `imagePullSecrets` |  | `[]` |
 | `operatorConfig.create` |  | `true` |
 | `operatorConfig.driverSpecDefaults.attachRequired` |  | `true` |
 | `operatorConfig.driverSpecDefaults.cephFsClientType` |  | `"kernel"` |
