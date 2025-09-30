@@ -85,6 +85,43 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
+  name: ceph-csi-operator-cephfs-nodeplugin-r
+  namespace: ceph-csi-operator-system
+rules:
+- apiGroups:
+  - csiaddons.openshift.io
+  resources:
+  - csiaddonsnodes
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments/finalizers
+  - daemonsets/finalizers
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
   name: ceph-csi-operator-rbd-ctrlplugin-r
   namespace: ceph-csi-operator-system
 rules:
@@ -179,6 +216,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -877,6 +915,20 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
+  name: ceph-csi-operator-cephfs-nodeplugin-rb
+  namespace: ceph-csi-operator-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-csi-operator-cephfs-nodeplugin-r
+subjects:
+- kind: ServiceAccount
+  name: ceph-csi-operator-cephfs-nodeplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
   name: ceph-csi-operator-rbd-ctrlplugin-rb
   namespace: ceph-csi-operator-system
 roleRef:
@@ -946,6 +998,7 @@ kind: ClusterRoleBinding
 metadata:
   name: ceph-csi-operator-nfs-nodeplugin-crb
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: ceph-csi-operator-nfs-nodeplugin-cr
 subjects:

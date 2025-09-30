@@ -474,3 +474,6 @@ drivers:
 
       # List of tolerations for the controller plugin
       tolerations: []
+
+# List of pull secret names that will be added to all serviceaccounts
+imagePullSecrets: []

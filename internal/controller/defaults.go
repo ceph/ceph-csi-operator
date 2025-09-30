@@ -34,8 +34,8 @@ var imageDefaults = map[string]string{
 	"snapshotter":       "registry.k8s.io/sig-storage/csi-snapshotter:v8.2.0",
 	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.14.0",
 	"snapshot-metadata": "registry.k8s.io/sig-storage/csi-snapshot-metadata:v0.1.0",
-	"plugin":            "quay.io/cephcsi/cephcsi:v3.14.1",
-	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.12.0",
+	"plugin":            "quay.io/cephcsi/cephcsi:v3.15.0",
+	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.13.0",
 }
 
 const (
@@ -59,11 +59,7 @@ var defaultDaemonSetUpdateStrategy = appsv1.DaemonSetUpdateStrategy{
 }
 
 var defaultDeploymentStrategy = appsv1.DeploymentStrategy{
-	Type: appsv1.RollingUpdateDeploymentStrategyType,
-	RollingUpdate: &appsv1.RollingUpdateDeployment{
-		MaxSurge:       ptr.To(intstr.FromString("25%")),
-		MaxUnavailable: ptr.To(intstr.FromString("25%")),
-	},
+	Type: appsv1.RecreateDeploymentStrategyType,
 }
 
 var operatorNamespace = utils.Call(func() string {

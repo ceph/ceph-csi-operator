@@ -203,7 +203,8 @@ build-helm-installer: manifests generate kustomize helmify ## Generate helm char
 	mkdir -p build deploy
 	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
 	cd build && $(KUSTOMIZE) edit add resource ../config/default/
-	$(KUSTOMIZE) build build | $(HELMIFY) deploy/charts/ceph-csi-operator
+	$(KUSTOMIZE) build build | $(HELMIFY) -image-pull-secrets deploy/charts/ceph-csi-operator
+	hack/patch-sa-with-imgpullsecrets.sh deploy/charts/ceph-csi-operator
 	rm -rf build
 
 .PHONY: build-multifile-installer
