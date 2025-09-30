@@ -61,6 +61,7 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.podSecurityContext.runAsNonRoot` |  | `true` |
 | `controllerManager.replicas` |  | `1` |
 | `controllerManager.serviceAccount.annotations` |  | `{}` |
+| `imagePullSecrets` |  | `[]` |
 | `kubernetesClusterDomain` |  | `"cluster.local"` |
 | `nfsCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
 | `nfsNodepluginSa.serviceAccount.annotations` |  | `{}` |
