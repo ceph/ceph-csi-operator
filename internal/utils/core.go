@@ -93,6 +93,56 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 	return out
 }
 
+// MapMergeByKey maps elements from a source slice to a destination slice using a
+// transform function. It merges results into the destination:
+// - If the key exists in destination, it replaces the item.
+// - If not, it appends the item to destination.
+// - Items with empty keys or transform=false are skipped.
+func MapMergeByKey[S comparable, D comparable](
+	dest []D,
+	src []S,
+	transform func(S) (D, bool),
+	getKey func(D) string,
+) []D {
+	// A map of indexes to optimize to lookups to O(1)
+	indexMap := make(map[string]int, len(dest))
+	for i, d := range dest {
+		key := getKey(d)
+		if key != "" {
+			indexMap[key] = i
+		}
+	}
+
+	// Process the items one by one
+	// Skip if transform returns false or if the key is empty
+	// Else replace or append accordingly
+	for _, s := range src {
+		d, ok := transform(s)
+		// Transform returns false, skip
+		if !ok {
+			continue
+		}
+
+		key := getKey(d)
+		// Key is empty, skip
+		if key == "" {
+			continue
+		}
+
+		// Decide whether to replace or to append
+		// If found, replace else append
+		if idx, found := indexMap[key]; found {
+			// Replace
+			dest[idx] = d
+		} else {
+			// Append and store its index in the indexMap
+			indexMap[key] = len(dest)
+			dest = append(dest, d)
+		}
+	}
+	return dest
+}
+
 // MapToString serializes the provided map into a a string.
 func MapToString[K, T ~string](m map[K]T, keyValueSeperator, itemSeperator string) string {
 	if len(m) == 0 {

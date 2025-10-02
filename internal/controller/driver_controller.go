@@ -638,22 +638,14 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									utils.PodNamespaceEnvVar,
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
-									mounts := append(
-										// Add user defined volume mounts at the start to make sure they do not
-										// overwrite built in volumes mounts.
-										utils.MapSlice(
-											pluginSpec.Volumes,
-											func(v csiv1.VolumeSpec) corev1.VolumeMount {
-												return v.Mount
-											},
-										),
+									mounts := []corev1.VolumeMount{
 										utils.SocketDirVolumeMount,
 										utils.HostDevVolumeMount,
 										utils.HostSysVolumeMount,
 										utils.LibModulesVolumeMount,
 										utils.KeysTmpDirVolumeMount,
 										utils.CsiConfigVolumeMount,
-									)
+									}
 									if r.driver.Spec.Encryption != nil {
 										mounts = append(mounts, utils.KmsConfigVolumeMount)
 									}
@@ -663,6 +655,19 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									if logRotationEnabled {
 										mounts = append(mounts, utils.LogsDirVolumeMount)
 									}
+									// Add user defined volume mounts at the end to make sure they
+									// can overwrite built in volumes mounts.
+									mounts = utils.MapMergeByKey(
+										mounts,
+										pluginSpec.Volumes,
+										func(v csiv1.VolumeSpec) (corev1.VolumeMount, bool) {
+											return v.Mount, v.Mount.Name != ""
+										},
+										func(v corev1.VolumeMount) string {
+											return v.Name
+										},
+									)
+
 									return mounts
 								}),
 								Resources: ptr.Deref(
@@ -973,15 +978,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						return containers
 					}),
 					Volumes: utils.Call(func() []corev1.Volume {
-						volumes := append(
-							// Add user defined volumes at the start to make sure they do not
-							// overwrite built in volumes.
-							utils.MapSlice(
-								pluginSpec.Volumes,
-								func(v csiv1.VolumeSpec) corev1.Volume {
-									return v.Volume
-								},
-							),
+						volumes := []corev1.Volume{
 							utils.HostDevVolume,
 							utils.HostSysVolume,
 							utils.LibModulesVolume,
@@ -989,7 +986,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							utils.KeysTmpDirVolume,
 							utils.OidcTokenVolume,
 							utils.CsiConfigVolume,
-						)
+						}
 						if r.driver.Spec.Encryption != nil {
 							volumes = append(
 								volumes,
@@ -1003,6 +1000,18 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								utils.LogRotateDirVolumeName(r.driver.Name),
 							)
 						}
+						// Add user defined volumes at the end to make sure they
+						// can overwrite built in volumes.
+						volumes = utils.MapMergeByKey(volumes,
+							pluginSpec.Volumes,
+							func(v csiv1.VolumeSpec) (corev1.Volume, bool) {
+								return v.Volume, v.Volume.Name != ""
+							},
+							func(v corev1.Volume) string {
+								return v.Name
+							},
+						)
+
 						return volumes
 					}),
 				},
@@ -1359,15 +1368,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									utils.PodNamespaceEnvVar,
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
-									mounts := append(
-										// Add user defined volume mounts at the start to make sure they do not
-										// overwrite built in volumes mounts.
-										utils.MapSlice(
-											pluginSpec.Volumes,
-											func(v csiv1.VolumeSpec) corev1.VolumeMount {
-												return v.Mount
-											},
-										),
+									mounts := []corev1.VolumeMount{
 										utils.HostDevVolumeMount,
 										utils.HostSysVolumeMount,
 										utils.HostRunMountVolumeMount,
@@ -1377,7 +1378,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 										utils.CsiConfigVolumeMount,
 										utils.PluginMountDirVolumeMount(kubeletDirPath),
 										utils.PodsMountDirVolumeMount(kubeletDirPath),
-									)
+									}
 									if ptr.Deref(pluginSpec.EnableSeLinuxHostMount, false) {
 										mounts = append(mounts, utils.EtcSelinuxVolumeMount)
 									}
@@ -1393,6 +1394,19 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									if logRotationEnabled {
 										mounts = append(mounts, utils.LogsDirVolumeMount)
 									}
+									// Add user defined volume mounts at the end to make sure they
+									// can overwrite built in volumes mounts.
+									mounts = utils.MapMergeByKey(
+										mounts,
+										pluginSpec.Volumes,
+										func(v csiv1.VolumeSpec) (corev1.VolumeMount, bool) {
+											return v.Mount, v.Mount.Name != ""
+										},
+										func(v corev1.VolumeMount) string {
+											return v.Name
+										},
+									)
+
 									return mounts
 								}),
 								Resources: ptr.Deref(
@@ -1489,15 +1503,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 						return containers
 					}),
 					Volumes: utils.Call(func() []corev1.Volume {
-						volumes := append(
-							// Add user defined volumes at the start to make sure they do not
-							// overwrite built in volumes.
-							utils.MapSlice(
-								pluginSpec.Volumes,
-								func(v csiv1.VolumeSpec) corev1.Volume {
-									return v.Volume
-								},
-							),
+						volumes := []corev1.Volume{
 							utils.HostDevVolume,
 							utils.HostSysVolume,
 							utils.HostRunMountVolume,
@@ -1508,7 +1514,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 							utils.PluginMountDirVolume(kubeletDirPath),
 							utils.PodsMountDirVolume(kubeletDirPath),
 							utils.RegistrationDirVolume(kubeletDirPath),
-						)
+						}
 						if r.isCephFsDriver() {
 							volumes = append(
 								volumes,
@@ -1541,6 +1547,18 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 								utils.LogRotateDirVolumeName(r.driver.Name),
 							)
 						}
+						// Add user defined volumes at the end to make sure they
+						// can overwrite built in volumes.
+						volumes = utils.MapMergeByKey(
+							volumes,
+							pluginSpec.Volumes,
+							func(v csiv1.VolumeSpec) (corev1.Volume, bool) {
+								return v.Volume, v.Volume.Name != ""
+							},
+							func(v corev1.Volume) string {
+								return v.Name
+							},
+						)
 						return volumes
 					}),
 				},
