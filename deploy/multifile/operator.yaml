@@ -527,7 +527,7 @@ spec:
           value: ceph-csi-operator-
         - name: WATCH_NAMESPACE
           value: ""
-        image: quay.io/cephcsi/ceph-csi-operator:v0.4.0
+        image: quay.io/cephcsi/ceph-csi-operator:v0.4.1
         livenessProbe:
           httpGet:
             path: /healthz
