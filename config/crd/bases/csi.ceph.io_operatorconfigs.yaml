@@ -3656,9 +3656,6 @@ spec:
                               required:
                               - name
                               type: object
-                          required:
-                          - mount
-                          - volume
                           type: object
                         type: array
                     type: object
@@ -7188,9 +7185,6 @@ spec:
                               required:
                               - name
                               type: object
-                          required:
-                          - mount
-                          - volume
                           type: object
                         type: array
                     type: object
