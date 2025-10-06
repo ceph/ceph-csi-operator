@@ -1849,7 +1849,7 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 	if dest.FuseMountOptions == nil {
 		dest.FuseMountOptions = src.FuseMountOptions
 	}
-	if src.CephFsClientType != "" {
+	if dest.CephFsClientType == "" {
 		dest.CephFsClientType = src.CephFsClientType
 	}
 }
