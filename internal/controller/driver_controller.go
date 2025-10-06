@@ -1118,6 +1118,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
 					Tolerations: pluginSpec.Tolerations,
+					Affinity:    pluginSpec.Affinity,
 					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							{
@@ -1293,6 +1294,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
 					Tolerations: pluginSpec.Tolerations,
+					Affinity:    pluginSpec.Affinity,
 					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							// Node Plugin Container
