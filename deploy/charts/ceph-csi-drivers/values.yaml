@@ -141,7 +141,8 @@ operatorConfig:
       resources: {}
 
       # Deployment strategy for the controller plugin
-      deploymentStrategy: {}
+      deploymentStrategy:
+        type: Recreate
 
       # Flag to indicate if the container should be privileged
       privileged: false
@@ -250,7 +251,8 @@ drivers:
       resources: {}
 
       # Deployment strategy for the controller plugin
-      deploymentStrategy: {}
+      deploymentStrategy:
+        type: Recreate
 
       # Flag to indicate if the container should be privileged
       privileged: false
@@ -357,7 +359,8 @@ drivers:
       resources: {}
 
       # Deployment strategy for the controller plugin
-      deploymentStrategy: {}
+      deploymentStrategy:
+        type: Recreate
 
       # Flag to indicate if the container should be privileged
       privileged: false
@@ -467,7 +470,8 @@ drivers:
       resources: {}
 
       # Deployment strategy for the controller plugin
-      deploymentStrategy: {}
+      deploymentStrategy:
+        type: Recreate
 
       # Flag to indicate if the container should be privileged
       privileged: false
