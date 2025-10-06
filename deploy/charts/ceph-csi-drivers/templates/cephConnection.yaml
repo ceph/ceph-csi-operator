@@ -9,7 +9,7 @@ metadata:
 spec:
   monitors:
   {{- range $cephConnection.monitors }}
-  - {{ . }}
+  - {{ . | quote }}
   {{- end }}
   rbdMirrorDaemonCount: {{ $cephConnection.rbdMirrorDaemonCount }}
   readAffinity:
