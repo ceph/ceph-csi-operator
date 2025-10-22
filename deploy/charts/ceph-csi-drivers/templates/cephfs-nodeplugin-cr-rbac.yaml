@@ -37,4 +37,21 @@ rules:
   - serviceaccounts/token
   verbs:
   - create
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  - persistentvolumeclaims
+  verbs:
+  - get
 {{- end }}
