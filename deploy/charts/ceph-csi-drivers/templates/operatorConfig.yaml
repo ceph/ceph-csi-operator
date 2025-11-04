@@ -35,7 +35,7 @@ spec:
     grpcTimeout: {{ $config.driverSpecDefaults.grpcTimeout }}
     snapshotPolicy: {{ $config.driverSpecDefaults.snapshotPolicy }}
     generateOMapInfo: {{ $config.driverSpecDefaults.generateOMapInfo }}
-    fsGroupPolicy: {{ $config.driverSpecDefaultsfsGroupPolicy }}
+    fsGroupPolicy: {{ $config.driverSpecDefaults.fsGroupPolicy }}
     {{- if $config.driverSpecDefaults.encryption }}
       {{- if $config.driverSpecDefaults.encryption.configMapRef.name }}
     encryption:
@@ -48,20 +48,22 @@ spec:
     cephFsClientType: {{ $config.driverSpecDefaults.cephFsClientType  }}
     kernelMountOptions:
       {{- if $config.driverSpecDefaults.kernelMountOptions }}
-      {{- toYaml $config.driverSpecDefaults.kernelMountOptions | nindent 4 }}
+      {{- toYaml $config.driverSpecDefaults.kernelMountOptions | nindent 6 }}
       {{- else }}
       {}  # Empty map if not defined
       {{- end }}
     fuseMountOptions:
       {{- if $config.driverSpecDefaults.fuseMountOptions }}
-      {{- toYaml $config.driverSpecDefaults.fuseMountOptions | nindent 4 }}
+      {{- toYaml $config.driverSpecDefaults.fuseMountOptions | nindent 6 }}
       {{- else }}
       {}  # Empty map if not defined
       {{- end }}
     # Node Plugin Configuration
     nodePlugin:
       {{- if $config.driverSpecDefaults.nodePlugin }}
+      {{- if $config.driverSpecDefaults.nodePlugin.updateStrategy }}
       updateStrategy: {{ $config.driverSpecDefaults.nodePlugin.updateStrategy | toYaml | nindent 8 }}
+      {{- end }}
       {{- if $config.driverSpecDefaults.nodePlugin.resources }}
       resources:
         registrar: {{ $config.driverSpecDefaults.nodePlugin.resources.registrar | toYaml | nindent 4 }}

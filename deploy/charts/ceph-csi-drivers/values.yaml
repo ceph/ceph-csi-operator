@@ -111,6 +111,9 @@ operatorConfig:
       # Pod's priority class name
       priorityClassName: ""
 
+      # kubelet directory path (default is "/var/lib/kubelet")
+      kubeletDirPath: "/var/lib/kubelet"
+
       # Custom labels for the pod
       labels: {}
 
@@ -119,6 +122,9 @@ operatorConfig:
 
       # Affinity settings for the pod
       affinity: {}
+
+      # Daemonset update strategy.
+      updateStrategy: {}
 
       # List of tolerations for the pod
       tolerations: []
@@ -148,6 +154,12 @@ operatorConfig:
 
       # List of tolerations for the controller plugin
       tolerations: []
+
+      # Affinity settings for the pod
+      affinity: {}
+
+      # Image pull policy
+      imagePullPolicy: "IfNotPresent"
 
 # Drivers configuration
 drivers:
