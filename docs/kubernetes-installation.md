@@ -15,7 +15,7 @@
     - [3. Deploy Ceph-CSI Drivers](#3-deploy-ceph-csi-drivers)
       - [3.1 Deploy the RBD Driver](#31-deploy-the-rbd-driver)
       - [3.2 Deploy the CephFS Driver](#32-deploy-the-cephfs-driver)
-    - [3.3 Deploy the Ceph-NFS Driver](#33-deploy-the-ceph-nfs-driver)
+      - [3.3 Deploy the Ceph-NFS Driver](#33-deploy-the-ceph-nfs-driver)
   - [4. Verify Installation](#4-verify-installation)
   - [5. Create CephConnection](#5-create-cephconnection)
   - [6. Create ClientProfile](#6-create-clientprofile)
@@ -155,7 +155,7 @@ metadata:
 ' | kubectl create -f -
 ```
 
-### 3.3 Deploy the Ceph-NFS Driver
+#### 3.3 Deploy the Ceph-NFS Driver
 
 ```console
 echo '
