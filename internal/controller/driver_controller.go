@@ -683,6 +683,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Args: utils.DeleteZeroValues(
 									append(
 										slices.Clone(leaderElectionSettingsArg),
+										utils.RetryIntervalMaxContainerArg,
 										utils.LeaderElectionContainerArg,
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddressContainerArg,

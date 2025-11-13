@@ -389,6 +389,7 @@ var PidlimitContainerArg = "--pidlimit=-1"
 var ControllerServerContainerArg = "--controllerserver=true"
 var NodeServerContainerArg = "--nodeserver=true"
 var RetryIntervalStartContainerArg = "--retry-interval-start=500ms"
+var RetryIntervalMaxContainerArg = "--retry-interval-max=30s"
 var DefaultFsTypeContainerArg = "--default-fstype=ext4"
 var HandleVolumeInuseErrorContainerArg = "--handle-volume-inuse-error=false"
 var PodUidContainerArg = fmt.Sprintf("--pod-uid=$(%s)", PodUidEnvVar.Name)
