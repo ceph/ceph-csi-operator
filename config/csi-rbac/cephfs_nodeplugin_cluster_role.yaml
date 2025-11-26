@@ -9,7 +9,7 @@ rules:
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["secrets"]
-  verbs: ["get"]
+  verbs: ["get", "list", "watch"]
 - apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["get"]
