@@ -56,4 +56,10 @@ rules:
   - persistentvolumeclaims
   verbs:
   - get
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
 {{- end }}

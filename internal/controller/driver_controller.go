@@ -1043,12 +1043,8 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 
 	log := r.log.WithValues("csiAddonsDaemonSetName", daemonSet.Name)
 
-	withCsiAddonsDaemonSet := false
+	withCsiAddonsDaemonSet := ptr.Deref(r.driver.Spec.DeployCsiAddons, false)
 	withCsiAddonsVolumeCondition := false
-
-	if r.isRbdDriver() {
-		withCsiAddonsDaemonSet = ptr.Deref(r.driver.Spec.DeployCsiAddons, false)
-	}
 
 	// check if the driver wants CSI-Addons features
 	if feature := r.driver.GetAnnotations()[driverCSIAddonsFeatureVolumeCondition]; feature != "" {
@@ -1066,8 +1062,6 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 		}
 
 		withCsiAddonsVolumeCondition = enabled
-		// if the feature is enabled, enable the daemonset too
-		withCsiAddonsDaemonSet = withCsiAddonsDaemonSet || withCsiAddonsVolumeCondition
 	}
 
 	if r.isNfsDriver() {

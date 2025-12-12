@@ -26,3 +26,6 @@ rules:
 - apiGroups: [""]
   resources: ["persistentvolumes", "persistentvolumeclaims"]
   verbs: ["get"]
+- apiGroups: ["authentication.k8s.io"]
+  resources: ["tokenreviews"]
+  verbs: ["create"]
