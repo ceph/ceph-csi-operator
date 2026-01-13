@@ -379,6 +379,37 @@ spec:
               nfs:
                 description: NfsConfigSpec cdefines the desired NFS configuration
                 type: object
+              nvmeof:
+                description: NvmeofConfigSpec defines the desired NVMe-oF configuration
+                properties:
+                  cephCsiSecrets:
+                    description: |-
+                      CephCsiSecretsSpec defines the secrets used by the client profile
+                      to access the Ceph cluster and perform operations
+                      on volumes.
+                    properties:
+                      controllerPublishSecret:
+                        description: |-
+                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                          in any namespace
+                        properties:
+                          name:
+                            description: name is unique within a namespace to reference
+                              a secret resource.
+                            type: string
+                          namespace:
+                            description: namespace defines the space within which
+                              the secret name must be unique.
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  radosNamespace:
+                    type: string
+                    x-kubernetes-validations:
+                    - message: field is immutable
+                      rule: self == oldSelf
+                type: object
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
                 properties:
@@ -7691,8 +7722,8 @@ spec:
             type: object
         type: object
         x-kubernetes-validations:
-        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'''
-          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$')
+        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs|nvmeof).csi.ceph.com'''
+          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs|nvmeof)?\\.csi\\.ceph\\.com$')
     served: true
     storage: true
     subresources:
@@ -29399,6 +29430,18 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  name: ceph-csi-operator-nvmeof-ctrlplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ceph-csi-operator-nvmeof-nodeplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
   name: ceph-csi-operator-rbd-ctrlplugin-sa
   namespace: ceph-csi-operator-system
 ---
@@ -29533,6 +29576,91 @@ rules:
   verbs:
   - create
   - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ceph-csi-operator-nvmeof-ctrlplugin-r
+  namespace: ceph-csi-operator-system
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - watch
+  - list
+  - delete
+  - update
+  - create
+- apiGroups:
+  - csiaddons.openshift.io
+  resources:
+  - csiaddonsnodes
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments/finalizers
+  - daemonsets/finalizers
+  verbs:
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ceph-csi-operator-nvmeof-nodeplugin-r
+  namespace: ceph-csi-operator-system
+rules:
+- apiGroups:
+  - csiaddons.openshift.io
+  resources:
+  - csiaddonsnodes
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments/finalizers
+  - daemonsets/finalizers
+  verbs:
+  - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -30377,6 +30505,199 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: ceph-csi-operator-nvmeof-ctrlplugin-cr
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - volumeattachments
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - volumeattachments/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - csinodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ceph-csi-operator-nvmeof-nodeplugin-cr
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - volumeattachments
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: ceph-csi-operator
@@ -30780,6 +31101,34 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
+  name: ceph-csi-operator-nvmeof-ctrlplugin-rb
+  namespace: ceph-csi-operator-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-csi-operator-nvmeof-ctrlplugin-r
+subjects:
+- kind: ServiceAccount
+  name: ceph-csi-operator-nvmeof-ctrlplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ceph-csi-operator-nvmeof-nodeplugin-rb
+  namespace: ceph-csi-operator-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ceph-csi-operator-nvmeof-nodeplugin-r
+subjects:
+- kind: ServiceAccount
+  name: ceph-csi-operator-nvmeof-nodeplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
   name: ceph-csi-operator-rbd-ctrlplugin-rb
   namespace: ceph-csi-operator-system
 roleRef:
@@ -30887,6 +31236,32 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: ceph-csi-operator-nfs-nodeplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-operator-nvmeof-ctrlplugin-crb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-operator-nvmeof-ctrlplugin-cr
+subjects:
+- kind: ServiceAccount
+  name: ceph-csi-operator-nvmeof-ctrlplugin-sa
+  namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-operator-nvmeof-nodeplugin-crb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-operator-nvmeof-nodeplugin-cr
+subjects:
+- kind: ServiceAccount
+  name: ceph-csi-operator-nvmeof-nodeplugin-sa
   namespace: ceph-csi-operator-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1

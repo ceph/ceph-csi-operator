@@ -31,5 +31,11 @@ spec:
     radosNamespace: {{  $clientProfile.rbd.radosNamespace  }}
     {{- end }}
   {{- end }}
+  {{- if $clientProfile.nvmeof }}
+  nvmeof:
+    {{- if $clientProfile.nvmeof.radosNamespace }}
+    radosNamespace: {{  $clientProfile.nvmeof.radosNamespace  }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- end }}
