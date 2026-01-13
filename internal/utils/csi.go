@@ -418,7 +418,7 @@ func LogFileContainerArg(containerName string) string {
 }
 func TypeContainerArg(t string) string {
 	switch t {
-	case "rbd", "cephfs", "nfs", "controller", "liveness":
+	case "rbd", "cephfs", "nfs", "nvmeof", "controller", "liveness":
 		return fmt.Sprintf("--type=%s", t)
 	default:
 		return ""

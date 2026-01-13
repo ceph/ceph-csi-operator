@@ -100,7 +100,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.controllerPlugin.tolerations` |  | `[]` |
 | `drivers.nfs.deployCsiAddons` |  | `false` |
 | `drivers.nfs.enableMetadata` |  | `false` |
-| `drivers.nfs.enabled` |  | `true` |
+| `drivers.nfs.enabled` |  | `false` |
 | `drivers.nfs.encryption.configMapRef.name` |  | `""` |
 | `drivers.nfs.fsGroupPolicy` |  | `"None"` |
 | `drivers.nfs.fuseMountOptions` |  | `{}` |
@@ -134,7 +134,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.controllerPlugin.tolerations` |  | `[]` |
 | `drivers.rbd.deployCsiAddons` |  | `false` |
 | `drivers.rbd.enableMetadata` |  | `false` |
-| `drivers.rbd.enabled` |  | `true` |
+| `drivers.rbd.enabled` |  | `false` |
 | `drivers.rbd.encryption.configMapRef.name` |  | `""` |
 | `drivers.rbd.fsGroupPolicy` |  | `"File"` |
 | `drivers.rbd.fuseMountOptions` |  | `{}` |
