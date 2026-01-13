@@ -65,6 +65,8 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `kubernetesClusterDomain` |  | `"cluster.local"` |
 | `nfsCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
 | `nfsNodepluginSa.serviceAccount.annotations` |  | `{}` |
+| `nvmeofCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
+| `nvmeofNodepluginSa.serviceAccount.annotations` |  | `{}` |
 | `rbdCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
 | `rbdNodepluginSa.serviceAccount.annotations` |  | `{}` |
 
