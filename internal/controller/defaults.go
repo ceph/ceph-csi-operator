@@ -35,7 +35,7 @@ var imageDefaults = map[string]string{
 	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0",
 	"snapshot-metadata": "registry.k8s.io/sig-storage/csi-snapshot-metadata:v0.2.0",
 	"plugin":            "quay.io/cephcsi/cephcsi:v3.16.0",
-	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.13.0",
+	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.14.0",
 }
 
 const (
