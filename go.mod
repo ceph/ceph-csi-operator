@@ -6,7 +6,7 @@ require (
 	github.com/ceph/ceph-csi-operator/api v0.0.0-00010101000000-000000000000
 	github.com/go-logr/logr v1.4.3
 	github.com/kubernetes-csi/external-snapshot-metadata/client v0.2.0
-	github.com/onsi/ginkgo/v2 v2.27.4
+	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.35.0
