@@ -21,11 +21,11 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 )
@@ -80,5 +80,43 @@ var _ = Describe("Driver Controller", func() {
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
+	})
+})
+
+var _ = Describe("isAffinityEmpty", func() {
+	It("should return true for nil affinity", func() {
+		Expect(isAffinityEmpty(nil)).To(BeTrue())
+	})
+
+	It("should return true for empty affinity struct", func() {
+		Expect(isAffinityEmpty(&corev1.Affinity{})).To(BeTrue())
+	})
+
+	It("should return true for affinity with empty NodeAffinity", func() {
+		affinity := &corev1.Affinity{
+			NodeAffinity: &corev1.NodeAffinity{},
+		}
+		Expect(isAffinityEmpty(affinity)).To(BeTrue())
+	})
+
+	It("should return false for affinity with NodeAffinity content", func() {
+		affinity := &corev1.Affinity{
+			NodeAffinity: &corev1.NodeAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+					NodeSelectorTerms: []corev1.NodeSelectorTerm{
+						{
+							MatchExpressions: []corev1.NodeSelectorRequirement{
+								{
+									Key:      "kubernetes.io/hostname",
+									Operator: corev1.NodeSelectorOpNotIn,
+									Values:   []string{"node1"},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		Expect(isAffinityEmpty(affinity)).To(BeFalse())
 	})
 })

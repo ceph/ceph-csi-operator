@@ -1731,7 +1731,7 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 			if dest.Annotations == nil {
 				dest.Annotations = src.Annotations
 			}
-			if dest.Affinity == nil {
+			if isAffinityEmpty(dest.Affinity) {
 				dest.Affinity = src.Affinity
 			}
 			if dest.Tolerations == nil {
@@ -1786,7 +1786,7 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 			if dest.Annotations == nil {
 				dest.Annotations = src.Annotations
 			}
-			if dest.Affinity == nil {
+			if isAffinityEmpty(dest.Affinity) {
 				dest.Affinity = src.Affinity
 			}
 			if dest.Tolerations == nil {
@@ -1854,4 +1854,15 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 	if dest.CephFsClientType == "" {
 		dest.CephFsClientType = src.CephFsClientType
 	}
+}
+
+// isAffinityEmpty checks if an Affinity is nil or has no meaningful content.
+// This handles the case where an Affinity struct is non-nil but contains only
+// empty nested structs (e.g., &Affinity{NodeAffinity: &NodeAffinity{}}).
+func isAffinityEmpty(affinity *corev1.Affinity) bool {
+	if affinity == nil {
+		return true
+	}
+	return reflect.DeepEqual(affinity, &corev1.Affinity{}) ||
+		reflect.DeepEqual(affinity, &corev1.Affinity{NodeAffinity: &corev1.NodeAffinity{}})
 }
