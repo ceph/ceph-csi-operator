@@ -6,10 +6,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ $normalizedDriverName }}-nodeplugin-rb
+  namespace: {{ $root.Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ $normalizedDriverName }}-nodeplugin-r
+  namespace: {{ $root.Release.Namespace }}
 subjects:
 - kind: ServiceAccount
   name: {{ $normalizedDriverName }}-nodeplugin-sa
