@@ -1,7 +1,9 @@
+{{- $root := . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "ceph-csi-operator.fullname" . }}-controller-manager
+  namespace: {{ $root.Release.Namespace }}
   labels:
     control-plane: controller-manager
   {{- include "ceph-csi-operator.labels" . | nindent 4 }}
