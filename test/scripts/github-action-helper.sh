@@ -11,6 +11,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #############
 : "${FUNCTION:=${1}}"
 
+function create_extra_disk() {
+  sudo apt install -y targetcli-fb open-iscsi
+  truncate -s 75G ~/iscsi-disk.img
+  sudo targetcli /backstores/fileio create disk1 ~/iscsi-disk.img 75G
+  local target_iqn=iqn.2026-02.target.local:disk1
+  sudo targetcli /iscsi create ${target_iqn}
+  sudo targetcli /iscsi/${target_iqn}/tpg1/luns create /backstores/fileio/disk1
+  local init_iqn=iqn.2026-02.initiator.local
+  echo "InitiatorName=${init_iqn}" | sudo tee /etc/iscsi/initiatorname.iscsi >/dev/null
+  sudo targetcli /iscsi/${target_iqn}/tpg1/acls create ${init_iqn}
+  sudo targetcli /iscsi/${target_iqn}/tpg1/acls/${init_iqn} create tpg_lun_or_backstore=lun0 mapped_lun=0
+  sudo iscsiadm -m discovery -t sendtargets -p 127.0.0.1
+  sudo iscsiadm -m node --login
+}
+
 # source https://github.com/rook/rook
 function find_extra_block_dev() {
   # shellcheck disable=SC2005 # redirect doesn't work with sudo, so use echo
@@ -23,6 +38,10 @@ function find_extra_block_dev() {
   echo "  == find_extra_block_dev(): boot_dev='$boot_dev'" >/dev/stderr # debug in case of future errors
   # --nodeps ignores partitions
   extra_dev="$(sudo lsblk --noheading --list --nodeps --output KNAME | grep -v loop | grep -v "$boot_dev" | head -1)"
+  if [ -z "$extra_dev" ]; then
+    create_extra_disk >/dev/stderr
+    extra_dev="$(sudo lsblk --noheading --list --nodeps --output KNAME | grep -Ev "($boot_dev|loop|nbd)" | head -1)"
+  fi
   echo "  == find_extra_block_dev(): extra_dev='$extra_dev'" >/dev/stderr # debug in case of future errors
   echo "$extra_dev"                                                       # output of function
 }
@@ -35,6 +54,13 @@ use_local_disk() {
   sudo apt purge snapd -y
   sudo dmsetup version || true
   sudo swapoff --all --verbose
+  # Create an extra disk if doesn't exist.
+  : "$(block_dev)"
+  sudo lsblk
+
+  unset pipefail
+  mountpoint -q /mnt || return 0
+  set pipefail
   sudo umount /mnt
   # search for the device since it keeps changing between sda and sdb
   sudo wipefs --all --force "$BLOCK_DATA_PART"
