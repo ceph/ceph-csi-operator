@@ -132,3 +132,11 @@ rules:
   - volumeattachments/status
   verbs:
   - patch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - volumeattributesclasses
+  verbs:
+  - get
+  - list
+  - watch

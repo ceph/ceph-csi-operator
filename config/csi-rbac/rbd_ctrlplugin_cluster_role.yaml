@@ -87,3 +87,6 @@ rules:
   - apiGroups: ["cbt.storage.k8s.io"]
     resources: ["snapshotmetadataservices"]
     verbs: ["get", "list"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["volumeattributesclasses"]
+    verbs: ["get", "list", "watch"]
