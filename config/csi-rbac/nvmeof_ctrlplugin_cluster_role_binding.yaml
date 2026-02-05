@@ -1,0 +1,12 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: nvmeof-ctrlplugin-crb
+subjects:
+  - kind: ServiceAccount
+    name: nvmeof-ctrlplugin-sa
+    namespace: system
+roleRef:
+  kind: ClusterRole
+  name: nvmeof-ctrlplugin-cr
+  apiGroup: rbac.authorization.k8s.io
