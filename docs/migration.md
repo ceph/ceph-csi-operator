@@ -39,8 +39,9 @@ Plan maintenance windows accordingly.**
 mkdir -p backup/ceph-csi
 kubectl get configmap -n ceph-csi -o yaml > backup/ceph-csi/configmap.yaml
 kubectl get deployment,daemonset -n ceph-csi -o yaml > backup/ceph-csi/workloads.yaml
-kubectl get clusterrole,clusterrolebinding,serviceaccount,role,rolebinding -n ceph-csi -o yaml > backup/ceph-csi/rbac.yaml
+kubectl get serviceaccount,role,rolebinding -n ceph-csi -o yaml > backup/ceph-csi/rbac.yaml
 kubectl get csidriver -oyaml > backup/ceph-csi/csidriver.yaml
+
 ```
 
 **Note:** Replace the namespace where ceph-CSI resources are created.
@@ -53,6 +54,9 @@ kubectl delete -f backup/ceph-csi/workloads.yaml
 kubectl delete -f backup/ceph-csi/csidriver.yaml
 kubectl delete -f backup/ceph-csi/rbac.yaml
 kubectl delete -f backup/ceph-csi/configmaps.yaml
+kubectl delete clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-provisioner-role
+kubectl delete clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-nodeplugin
+kubectl delete clusterrole.rbac.authorization.k8s.io/rbd-csi-nodeplugin
 ```
 
 Make sure the above yamls contains only the ceph-CSI resources before issuing delete.
@@ -94,7 +98,7 @@ For example the `clusterID` was `ceph-csi` the ClientProfile CR looks like below
 apiVersion: csi.ceph.io/v1
 kind: ClientProfile
 metadata:
-  name: ceph-csi
+  name: ceph-csi #change this with your clusterID
   namespace: ceph-csi-operator-system
 spec:
   cephConnectionRef:
