@@ -126,9 +126,9 @@ timeout_command_exit_code() {
 }
 
 install_minikube_with_none_driver() {
-  CRICTL_VERSION="v1.31.1"
-  MINIKUBE_VERSION="v1.34.0"
-  kubernetes_version="v1.31.1"
+  CRICTL_VERSION="v1.35.0"
+  MINIKUBE_VERSION="v1.38.0"
+  kubernetes_version="v1.35.0"
 
   sudo apt update
   sudo apt install -y conntrack socat
@@ -136,9 +136,9 @@ install_minikube_with_none_driver() {
   sudo dpkg -i minikube_latest_amd64.deb
   rm -f minikube_latest_amd64.deb
 
-  curl -LO https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.15/cri-dockerd_0.3.15.3-0.ubuntu-focal_amd64.deb
-  sudo dpkg -i cri-dockerd_0.3.15.3-0.ubuntu-focal_amd64.deb
-  rm -f cri-dockerd_0.3.15.3-0.ubuntu-focal_amd64.deb
+  curl -LO https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.24/cri-dockerd_0.3.24.3-0.ubuntu-focal_amd64.deb
+  sudo dpkg -i cri-dockerd_0.3.24.3-0.ubuntu-focal_amd64.deb
+  rm -f cri-dockerd_0.3.24.3-0.ubuntu-focal_amd64.deb
 
   wget https://github.com/kubernetes-sigs/cri-tools/releases/download/$CRICTL_VERSION/crictl-$CRICTL_VERSION-linux-amd64.tar.gz
   sudo tar zxvf crictl-$CRICTL_VERSION-linux-amd64.tar.gz -C /usr/local/bin
@@ -156,6 +156,7 @@ install_minikube_with_none_driver() {
 
   export MINIKUBE_HOME=$HOME CHANGE_MINIKUBE_NONE_USER=true KUBECONFIG=$HOME/.kube/config
   minikube start --kubernetes-version="$kubernetes_version" --driver=none --memory 6g --cpus=2 --addons ingress --cni=calico
+  minikube logs
 }
 
 ########
