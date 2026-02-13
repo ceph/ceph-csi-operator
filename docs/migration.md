@@ -54,9 +54,16 @@ kubectl delete -f backup/ceph-csi/workloads.yaml
 kubectl delete -f backup/ceph-csi/csidriver.yaml
 kubectl delete -f backup/ceph-csi/rbac.yaml
 kubectl delete -f backup/ceph-csi/configmaps.yaml
-kubectl delete clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-provisioner-role
 kubectl delete clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-nodeplugin
 kubectl delete clusterrole.rbac.authorization.k8s.io/rbd-csi-nodeplugin
+kubectl delete clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-provisioner-role
+kubectl delete clusterrole.rbac.authorization.k8s.io/rbd-external-provisioner-runner
+kubectl delete clusterrolebinding.rbac.authorization.k8s.io/nfs-csi-provisioner-role
+kubectl delete clusterrole.rbac.authorization.k8s.io/nfs-external-provisioner-runner
+kubectl delete clusterrolebinding.rbac.authorization.k8s.io/cephfs-csi-nodeplugin
+kubectl delete clusterrole.rbac.authorization.k8s.io/cephfs-csi-nodeplugin
+kubectl delete clusterrole.rbac.authorization.k8s.io/cephfs-external-provisioner-runner
+kubectl delete clusterrolebinding.rbac.authorization.k8s.io/cephfs-csi-provisioner-role
 ```
 
 Make sure the above yamls contains only the ceph-CSI resources before issuing delete.
