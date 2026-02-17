@@ -49,7 +49,7 @@ graph TD
     B -->  D[Configure CephFS CSI Driver]
     B -->  E[Configure RBD CSI Driver]
     B -->  F[Configure NFS CSI Driver]
-    B -->  F[Configure NVMe-oF Driver]
+    B -->  G[Configure NVMe-oF Driver]
 
 ```
 
