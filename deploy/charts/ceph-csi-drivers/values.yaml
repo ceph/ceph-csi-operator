@@ -2,490 +2,419 @@
 cephConnections:
   - # Name for the Ceph connection
     name: ""
-
     # Ceph monitors (key-value pairs, typically IP addresses of the Ceph monitors)
     monitors: {}
-
     # Number of RBD mirror daemons (default is 1)
     rbdMirrorDaemonCount: 1
-
     # Labels to be used for CRUSH location selection
     crushLocationLabels: {}
-
 # Configuration for Client Profiles
 clientProfiles:
   - # Name of the client profile
     name: ""
-
     cephConnection:
       # Reference to the Ceph connection for this profile
       name: ""
-
     cephFs:
       # Mount options for CephFS with FUSE
       fuseMountOptions: {}
-
       # Mount options for CephFS with the kernel
       kernelMountOptions: {}
-
       # Sub-volume group for the CephFS client
       subVolumeGroup: ""
-
     rbd:
       # Namespace for RADOS block devices
       radosNamespace: ""
-
+    nvmeof:
+      # Namespace for RADOS block devices
+      radosNamespace: ""
 # Operator configuration section
 operatorConfig:
   # Name of the operator config
   name: ceph-csi-operator-config
-
   # Namespace for the operator configuration
   namespace: ""
-
   # Flag to indicate if the config should be created
   create: true
-
   driverSpecDefaults:
     log:
       # Log verbosity level (0-5)
       verbosity: 0
-
       rotation:
         # Maximum number of log files to keep
         maxFiles: 7
-
         # Maximum size of each log file
         maxLogSize: "10Gi"
-
         # Periodicity for log rotation (options: hourly, daily, weekly, monthly)
         periodicity: "daily"
-
         # Default log directory path
         logHostPath: ""
-
     imageSet:
       # ConfigMap reference to the image set for the driver
       name: ""
-
     # Cluster name identifier
     clusterName: ""
-
     # Flag to enable metadata
     enableMetadata: false
-
     # gRPC timeout in seconds
     grpcTimeout: 30
-
     # Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot)
     snapshotPolicy: "none"
-
     # Flag to generate OMap info
     generateOMapInfo: false
-
     # File system group policy (e.g., "None", "ReadWriteOnceWithFSType")
     fsGroupPolicy: "File"
-
     encryption:
       configMapRef:
         # Name of the ConfigMap for encryption settings
         name: ""
-
     # Flag indicating whether attachment is required
     attachRequired: true
-
     # Flag to deploy CSI Addons
     deployCsiAddons: false
-
     # CephFS client type (options: autodetect, kernel)
     cephFsClientType: "kernel"
-
     # Kernel mount options
     kernelMountOptions: {}
-
     # FUSE mount options
     fuseMountOptions: {}
-
     # Node Plugin Configuration
     nodePlugin:
       # Pod's priority class name
       priorityClassName: ""
-
       # kubelet directory path (default is "/var/lib/kubelet")
       kubeletDirPath: "/var/lib/kubelet"
-
       # Custom labels for the pod
       labels: {}
-
       # Custom annotations for the pod
       annotations: {}
-
       # Affinity settings for the pod
       affinity: {}
-
       # Daemonset update strategy.
       updateStrategy: {}
-
       # List of tolerations for the pod
       tolerations: []
-
       # List of volumes attached to the pod
       volumes: []
-
       # Image pull policy (default is "IfNotPresent")
       imagePullPolicy: "IfNotPresent"
-
     # Controller Plugin Configuration
     controllerPlugin:
       # Flag to use host network for the controller plugin
       hostNetwork: false
-
       # Number of replicas for the controller plugin
       replicas: 1
-
       # Resource requirements for controller plugin containers
       resources: {}
-
       # Deployment strategy for the controller plugin
       deploymentStrategy: {}
-
       # Flag to indicate if the container should be privileged
       privileged: false
-
       # List of tolerations for the controller plugin
       tolerations: []
-
       # Affinity settings for the pod
       affinity: {}
-
       # Image pull policy
       imagePullPolicy: "IfNotPresent"
-
 # Drivers configuration
 drivers:
   rbd: # Driver name for RBD
     name: "rbd.csi.ceph.com"
-
     enabled: true
-
     log:
       # Log verbosity level (0-5)
       verbosity: 0
-
       rotation:
         # Maximum number of log files to keep
         maxFiles: 7
-
         # Maximum size of each log file
         maxLogSize: "10Gi"
-
         # Periodicity for log rotation (options: hourly, daily, weekly, monthly)
         periodicity: "daily"
-
         # Default log directory path
         logHostPath: ""
-
     imageSet:
       # ConfigMap reference to the image set for the driver
       name: ""
-
     # Cluster name identifier
     clusterName: ""
-
     # Flag to enable metadata
     enableMetadata: false
-
     # gRPC timeout in seconds
     grpcTimeout: 30
-
     # Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot)
     snapshotPolicy: "none"
-
     # Flag to generate OMap info
     generateOMapInfo: false
-
     # File system group policy (e.g., "None", "ReadWriteOnceWithFSType")
     fsGroupPolicy: "File"
-
     encryption:
       configMapRef:
         # Name of the ConfigMap for encryption settings
         name: ""
-
     # Flag indicating whether attachment is required
     attachRequired: true
-
     # Flag to deploy CSI Addons
     deployCsiAddons: false
-
     # CephFS client type (options: autodetect, kernel)
     cephFsClientType: "kernel"
-
     # Kernel mount options
     kernelMountOptions: {}
-
     # FUSE mount options
     fuseMountOptions: {}
-
     # Node Plugin Configuration
     nodePlugin:
       # Pod's priority class name
       priorityClassName: ""
-
       # Custom labels for the pod
       labels: {}
-
       # Custom annotations for the pod
       annotations: {}
-
       # Affinity settings for the pod
       affinity: {}
-
       # List of tolerations for the pod
       tolerations: []
-
       # List of volumes attached to the pod
       volumes: []
-
       # Image pull policy (default is "IfNotPresent")
       imagePullPolicy: "IfNotPresent"
-
     # Controller Plugin Configuration
     controllerPlugin:
       # Flag to use host network for the controller plugin
       hostNetwork: false
-
       # Number of replicas for the controller plugin
       replicas: 1
-
       # Resource requirements for controller plugin containers
       resources: {}
-
       # Deployment strategy for the controller plugin
       deploymentStrategy: {}
-
       # Flag to indicate if the container should be privileged
       privileged: false
-
       # List of tolerations for the controller plugin
       tolerations: []
-
+  nvmeof: # Driver name for NVMe-oF (backed by RBD)
+    name: "nvmeof.csi.ceph.com"
+    enabled: true
+    log:
+      # Log verbosity level (0-5)
+      verbosity: 0
+      rotation:
+        # Maximum number of log files to keep
+        maxFiles: 7
+        # Maximum size of each log file
+        maxLogSize: "10Gi"
+        # Periodicity for log rotation (options: hourly, daily, weekly, monthly)
+        periodicity: "daily"
+        # Default log directory path
+        logHostPath: ""
+    imageSet:
+      # ConfigMap reference to the image set for the driver
+      name: ""
+    # Cluster name identifier
+    clusterName: ""
+    # Flag to enable metadata
+    enableMetadata: false
+    # gRPC timeout in seconds
+    grpcTimeout: 30
+    # Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot)
+    snapshotPolicy: "none"
+    # Flag to generate OMap info
+    generateOMapInfo: false
+    # File system group policy (e.g., "None", "ReadWriteOnceWithFSType")
+    fsGroupPolicy: "File"
+    encryption:
+      configMapRef:
+        # Name of the ConfigMap for encryption settings
+        name: ""
+    # Flag indicating whether attachment is required
+    attachRequired: true
+    # Flag to deploy CSI Addons
+    deployCsiAddons: false
+    # CephFS client type (options: autodetect, kernel)
+    cephFsClientType: "kernel"
+    # Kernel mount options
+    kernelMountOptions: {}
+    # FUSE mount options
+    fuseMountOptions: {}
+    # Node Plugin Configuration
+    nodePlugin:
+      # Pod's priority class name
+      priorityClassName: ""
+      # Custom labels for the pod
+      labels: {}
+      # Custom annotations for the pod
+      annotations: {}
+      # Affinity settings for the pod
+      affinity: {}
+      # List of tolerations for the pod
+      tolerations: []
+      # List of volumes attached to the pod
+      volumes: []
+      # Image pull policy (default is "IfNotPresent")
+      imagePullPolicy: "IfNotPresent"
+    # Controller Plugin Configuration
+    controllerPlugin:
+      # Flag to use host network for the controller plugin
+      hostNetwork: false
+      # Number of replicas for the controller plugin
+      replicas: 1
+      # Resource requirements for controller plugin containers
+      resources: {}
+      # Deployment strategy for the controller plugin
+      deploymentStrategy: {}
+      # Flag to indicate if the container should be privileged
+      privileged: false
+      # List of tolerations for the controller plugin
+      tolerations: []
   cephfs: # Driver name for CephFS
     name: "cephfs.csi.ceph.com"
-
     enabled: true
-
     log:
       # Log verbosity level (0-5)
       verbosity: 0
-
       rotation:
         # Maximum number of log files to keep
         maxFiles: 7
-
         # Maximum size of each log file
         maxLogSize: "10Gi"
-
         # Periodicity for log rotation (options: hourly, daily, weekly, monthly)
         periodicity: "daily"
-
         # Default log directory path
         logHostPath: ""
-
     imageSet:
       # ConfigMap reference to the image set for the driver
       name: ""
-
     # Cluster name identifier
     clusterName: ""
-
     # Flag to enable metadata
     enableMetadata: false
-
     # gRPC timeout in seconds
     grpcTimeout: 30
-
     # Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot)
     snapshotPolicy: "volumeSnapshot"
-
     # Flag to generate OMap info
     generateOMapInfo: false
-
     # File system group policy (e.g., "None", "ReadWriteOnceWithFSType")
     fsGroupPolicy: "None"
-
     encryption:
       configMapRef:
         # Name of the ConfigMap for encryption settings
         name: ""
-
     # Flag indicating whether attachment is required
     attachRequired: true
-
     # Flag to deploy CSI Addons
     deployCsiAddons: false
-
     # CephFS client type (options: autodetect, kernel)
     cephFsClientType: "kernel"
-
     # Kernel mount options
     kernelMountOptions: {}
-
     # FUSE mount options
     fuseMountOptions: {}
-
     # Node Plugin Configuration
     nodePlugin:
       # Pod's priority class name
       priorityClassName: ""
-
       # Custom labels for the pod
       labels: {}
-
       # Custom annotations for the pod
       annotations: {}
-
       # Affinity settings for the pod
       affinity: {}
-
       # List of tolerations for the pod
       tolerations: []
-
       # List of volumes attached to the pod
       volumes: []
-
       # Image pull policy (default is "IfNotPresent")
       imagePullPolicy: "IfNotPresent"
-
     # Controller Plugin Configuration
     controllerPlugin:
       # Flag to use host network for the controller plugin
       hostNetwork: false
-
       # Number of replicas for the controller plugin
       replicas: 1
-
       # Resource requirements for controller plugin containers
       resources: {}
-
       # Deployment strategy for the controller plugin
       deploymentStrategy: {}
-
       # Flag to indicate if the container should be privileged
       privileged: false
-
       # List of tolerations for the controller plugin
       tolerations: []
-
   nfs: # Driver name for NFS
     name: "nfs.csi.ceph.com"
-
     enabled: true
-
     log:
       # Log verbosity level (0-5)
       verbosity: 0
-
       rotation:
         # Maximum number of log files to keep
         maxFiles: 7
-
         # Maximum size of each log file
         maxLogSize: "10Gi"
-
         # Periodicity for log rotation (options: hourly, daily, weekly, monthly)
         periodicity: "daily"
-
         # Default log directory path
         logHostPath: ""
-
     imageSet:
       # ConfigMap reference to the image set for the driver
       name: ""
-
     # Cluster name identifier
     clusterName: ""
-
     # Flag to enable metadata
     enableMetadata: false
-
     # gRPC timeout in seconds
     grpcTimeout: 30
-
     # Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot)
     snapshotPolicy: "volumeSnapshot"
-
     # Flag to generate OMap info
     generateOMapInfo: false
-
     # File system group policy (e.g., "None", "ReadWriteOnceWithFSType")
     fsGroupPolicy: "None"
-
     encryption:
       configMapRef:
         # Name of the ConfigMap for encryption settings
         name: ""
-
     # Flag indicating whether attachment is required
     attachRequired: true
-
     # Flag to deploy CSI Addons
     deployCsiAddons: false
-
     # CephFS client type (options: autodetect, kernel)
     cephFsClientType: "kernel"
-
     # Kernel mount options
     kernelMountOptions: {}
-
     # FUSE mount options
     fuseMountOptions: {}
-
     # Node Plugin Configuration
     nodePlugin:
       # Service account name for the pod
       serviceAccountName: ""
-
       # Pod's priority class name
       priorityClassName: ""
-
       # Custom labels for the pod
       labels: {}
-
       # Custom annotations for the pod
       annotations: {}
-
       # Affinity settings for the pod
       affinity: {}
-
       # List of tolerations for the pod
       tolerations: []
-
       # List of volumes attached to the pod
       volumes: []
-
       # Image pull policy (default is "IfNotPresent")
       imagePullPolicy: "IfNotPresent"
-
     # Controller Plugin Configuration
     controllerPlugin:
       # Flag to use host network for the controller plugin
       hostNetwork: false
-
       # Number of replicas for the controller plugin
       replicas: 1
-
       # Resource requirements for controller plugin containers
       resources: {}
-
       # Deployment strategy for the controller plugin
       deploymentStrategy: {}
-
       # Flag to indicate if the container should be privileged
       privileged: false
-
       # List of tolerations for the controller plugin
       tolerations: []
-
 # List of pull secret names that will be added to all serviceaccounts
 imagePullSecrets: []
