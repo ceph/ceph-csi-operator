@@ -17,7 +17,9 @@ spec:
       maxFiles: {{ $driver.log.rotation.maxFiles }}
       maxLogSize: {{ $driver.log.rotation.maxLogSize }}
       periodicity: {{ $driver.log.rotation.periodicity }}
+      {{- if $driver.log.rotation.logHostPath }}
       logHostPath: {{ $driver.log.rotation.logHostPath }}
+      {{- end }}
     {{- end }}
   {{- end }}
   {{- if $driver.imageSet }}
@@ -26,7 +28,9 @@ spec:
     name: {{ $driver.imageSet.name }}
   {{- end }}
   {{- end }}
+  {{- if $driver.clusterName }}
   clusterName: {{ $driver.clusterName }}
+  {{- end }}
   enableMetadata: {{ $driver.enableMetadata }}
   grpcTimeout: {{ $driver.grpcTimeout }}
   snapshotPolicy: {{ $driver.snapshotPolicy }}
@@ -58,7 +62,9 @@ spec:
   nodePlugin:
     serviceAccountName: {{ $normalizedDriverName }}-nodeplugin-sa
     {{- if $driver.nodePlugin }}
-    updateStrategy: {{ $driver.nodePlugin.updateStrategy | toYaml | nindent 8 }}
+    {{- if $driver.nodePlugin.updateStrategy }}
+    updateStrategy: {{ $driver.nodePlugin.updateStrategy | toYaml | nindent 6 }}
+    {{- end }}
     {{- if $driver.nodePlugin.resources }}
     resources:
       registrar: {{ $driver.nodePlugin.resources.registrar | toYaml | nindent 4 }}
@@ -67,14 +73,28 @@ spec:
       logRotator: {{ $driver.nodePlugin.resources.logRotator | toYaml | nindent 4 }}
       plugin: {{ $driver.nodePlugin.resources.plugin | toYaml | nindent 4 }}
     {{- end }}
+    {{- if $driver.nodePlugin.kubeletDirPath }}
     kubeletDirPath: {{ $driver.nodePlugin.kubeletDirPath }}
+    {{- end }}
+    {{- if ne $driver.nodePlugin.enableSeLinuxHostMount nil }}
     enableSeLinuxHostMount: {{ $driver.nodePlugin.enableSeLinuxHostMount }}
+    {{- end }}
+    {{- if $driver.nodePlugin.priorityClassName }}
     priorityClassName: {{ $driver.nodePlugin.priorityClassName }}
-    labels: {{ $driver.nodePlugin.labels | toYaml | nindent 8 }}
-    annotations: {{ $driver.nodePlugin.annotations | toYaml | nindent 8 }}
-    affinity: {{ $driver.nodePlugin.affinity | toYaml | nindent 8 }}
+    {{- end }}
+    {{- if $driver.nodePlugin.labels }}
+    labels: {{ $driver.nodePlugin.labels | toYaml | nindent 6 }}
+    {{- end }}
+    {{- if $driver.nodePlugin.annotations }}
+    annotations: {{ $driver.nodePlugin.annotations | toYaml | nindent 6 }}
+    {{- end }}
+    {{- if $driver.nodePlugin.affinity }}
+    affinity: {{ $driver.nodePlugin.affinity | toYaml | nindent 6 }}
+    {{- end }}
     tolerations: {{ $driver.nodePlugin.tolerations | toYaml | nindent 8 }}
+    {{- if $driver.nodePlugin.imagePullPolicy }}
     imagePullPolicy: {{ $driver.nodePlugin.imagePullPolicy }}
+    {{- end }}
     {{- if $driver.nodePlugin.topology }}
       topology:
         domainLabels:
@@ -92,7 +112,9 @@ spec:
     serviceAccountName: {{ $normalizedDriverName }}-ctrlplugin-sa
     {{- if $driver.controllerPlugin }}
     hostNetwork: {{ $driver.controllerPlugin.hostNetwork | default false }}
-    deploymentStrategy: {{ $driver.controllerPlugin.deploymentStrategy | toYaml | nindent 8 }}
+    {{- if $driver.controllerPlugin.deploymentStrategy }}
+    deploymentStrategy: {{ $driver.controllerPlugin.deploymentStrategy | toYaml | nindent 6 }}
+    {{- end }}
     replicas: {{ $driver.controllerPlugin.replicas | default 2 }}
     {{- if $driver.controllerPlugin.resources }}
     resources:
@@ -107,8 +129,12 @@ spec:
       plugin: {{ $driver.controllerPlugin.resources.plugin | toYaml | nindent 8 }}
     {{- end }}
     privileged: {{ $driver.controllerPlugin.privileged | default false }}
+    {{- if $driver.controllerPlugin.priorityClassName }}
     priorityClassName: {{ $driver.controllerPlugin.priorityClassName }}
-    affinity: {{ $driver.controllerPlugin.affinity | toYaml | nindent 8 }}
+    {{- end }}
+    {{- if $driver.controllerPlugin.affinity }}
+    affinity: {{ $driver.controllerPlugin.affinity | toYaml | nindent 6 }}
+    {{- end }}
     tolerations:
     {{- toYaml $driver.controllerPlugin.tolerations | nindent 8 }}
     volumes:
@@ -117,7 +143,9 @@ spec:
       {{- else }}
       []
       {{- end }}
+    {{- if $driver.controllerPlugin.imagePullPolicy }}
     imagePullPolicy: {{ $driver.controllerPlugin.imagePullPolicy }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}
