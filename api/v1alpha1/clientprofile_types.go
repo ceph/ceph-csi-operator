@@ -44,7 +44,7 @@ type RbdConfigSpec struct {
 	RadosNamespace string `json:"radosNamespace,omitempty"`
 }
 
-// NfsConfigSpec cdefines the desired NFS configuration
+// NfsConfigSpec defines the desired NFS configuration
 type NfsConfigSpec struct {
 }
 

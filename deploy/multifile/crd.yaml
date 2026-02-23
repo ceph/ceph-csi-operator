@@ -368,7 +368,7 @@ spec:
                     type: string
                 type: object
               nfs:
-                description: NfsConfigSpec cdefines the desired NFS configuration
+                description: NfsConfigSpec defines the desired NFS configuration
                 type: object
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
@@ -484,7 +484,7 @@ spec:
                     type: string
                 type: object
               nfs:
-                description: NfsConfigSpec cdefines the desired NFS configuration
+                description: NfsConfigSpec defines the desired NFS configuration
                 type: object
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
