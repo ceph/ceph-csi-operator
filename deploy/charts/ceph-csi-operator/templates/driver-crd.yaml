@@ -7164,8 +7164,8 @@ spec:
             type: object
         type: object
         x-kubernetes-validations:
-        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'''
-          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$')
+        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs|nvmeof).csi.ceph.com'''
+          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs|nvmeof)?\\.csi\\.ceph\\.com$')
     served: true
     storage: true
     subresources:

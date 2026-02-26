@@ -370,6 +370,37 @@ spec:
               nfs:
                 description: NfsConfigSpec cdefines the desired NFS configuration
                 type: object
+              nvmeof:
+                description: NvmeofConfigSpec defines the desired NVMe-oF configuration
+                properties:
+                  cephCsiSecrets:
+                    description: |-
+                      CephCsiSecretsSpec defines the secrets used by the client profile
+                      to access the Ceph cluster and perform operations
+                      on volumes.
+                    properties:
+                      controllerPublishSecret:
+                        description: |-
+                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                          in any namespace
+                        properties:
+                          name:
+                            description: name is unique within a namespace to reference
+                              a secret resource.
+                            type: string
+                          namespace:
+                            description: namespace defines the space within which
+                              the secret name must be unique.
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  radosNamespace:
+                    type: string
+                    x-kubernetes-validations:
+                    - message: field is immutable
+                      rule: self == oldSelf
+                type: object
               rbd:
                 description: RbdConfigSpec defines the desired RBD configuration
                 properties:
@@ -7682,8 +7713,8 @@ spec:
             type: object
         type: object
         x-kubernetes-validations:
-        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'''
-          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$')
+        - message: '.metadata.name must match: ''[<prefix>.](rbd|cephfs|nfs|nvmeof).csi.ceph.com'''
+          rule: self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs|nvmeof)?\\.csi\\.ceph\\.com$')
     served: true
     storage: true
     subresources:

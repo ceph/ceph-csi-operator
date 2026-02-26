@@ -386,7 +386,7 @@ type DriverStatus struct {
 //+kubebuilder:storageversion
 //+kubebuilder:subresource:status
 
-// +kubebuilder:validation:XValidation:rule=self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs)?\\.csi\\.ceph\\.com$'),message=".metadata.name must match: '[<prefix>.](rbd|cephfs|nfs).csi.ceph.com'"
+// +kubebuilder:validation:XValidation:rule=self.metadata.name.matches('^(.+\\.)?(rbd|cephfs|nfs|nvmeof)?\\.csi\\.ceph\\.com$'),message=".metadata.name must match: '[<prefix>.](rbd|cephfs|nfs|nvmeof).csi.ceph.com'"
 // Driver is the Schema for the drivers API
 type Driver struct {
 	metav1.TypeMeta   `json:",inline"`

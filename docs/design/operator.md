@@ -4,9 +4,9 @@
 
 This document outlines the design of the Ceph-CSI Operator, which aims to
 provide Kubernetes native management interfaces for Ceph-CSI drivers (CephFS,
-RBD, and NFS) for Kubernetes based environments. The operator automates the
-deployment, configuration, and management of these drivers using new Kubernetes
-APIs defined as a set of Custom Resource Definitions (CRDs).
+RBD, NFS and NVMe-oF) for Kubernetes based environments. The operator automates
+the deployment, configuration, and management of these drivers using new
+Kubernetes APIs defined as a set of Custom Resource Definitions (CRDs).
 
 ## System Overview
 
@@ -49,6 +49,7 @@ graph TD
     B -->  D[Configure CephFS CSI Driver]
     B -->  E[Configure RBD CSI Driver]
     B -->  F[Configure NFS CSI Driver]
+    B -->  G[Configure NVMe-oF Driver]
 
 ```
 
@@ -58,7 +59,7 @@ In this diagram:
   which trigger actions in the operator.
 - **Operator**: Listens for changes in CRs and initiates the installation and
   configuration of CSI drivers.
-- **Configure CephFS, NFS, RBD**: Actions performed by the operator to install
+- **Configure CephFS, NFS, RBD, NVMe-oF**: Actions performed by the operator to install
   and configure the respective CSI drivers based on the configuration presented on the updated CR.
 
 ## CRDs for ceph-csi-operator
@@ -247,12 +248,12 @@ status:
 ### Driver CRD
 
 Manages the installation, lifecycle management, and configuration for CephFS,
-RBD, and NFS CSI drivers within namespaces.
+RBD, NFS and NVMe-oF CSI drivers within namespaces.
 
 - Allows customization of driver settings on a per-driver basis.
-- Best practice dictates only a single instance of RBD/NFS/CephFS drivers
-  should be created in a single namespace. If there is a need to deploy a
-  second instance of a driver of a similar type, it should be deployed in a
+- Best practice dictates only a single instance of RBD/NVMe-oF/NFS/CephFS
+  drivers should be created in a single namespace. If there is a need to deploy
+  a second instance of a driver of a similar type, it should be deployed in a
   different namespace.
 - Each CSI driver must have a unique name across all namespaces.
 
@@ -331,8 +332,8 @@ status: {}
 
 ### ClientProfile CRD
 
-Contains details about CephFS, RBD, and NFS configuration to be used when
-communicating with Ceph. Include a reference to a CephConnection holding
+Contains details about CephFS, RBD, NFS, and NVMe-oF configuration to be used
+when communicating with Ceph. Include a reference to a CephConnection holding
 the connection information for the target Ceph cluster.
 
 ```yaml

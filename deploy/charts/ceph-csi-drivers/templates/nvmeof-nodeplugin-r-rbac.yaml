@@ -1,0 +1,40 @@
+{{- $root := . -}}
+{{- $driver := .Values.drivers.nvmeof -}}
+{{- if $driver.enabled }}
+{{- $normalizedDriverName := include "normalizeDriverName" $driver.name }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $normalizedDriverName }}-nodeplugin-r
+rules:
+- apiGroups:
+  - csiaddons.openshift.io
+  resources:
+  - csiaddonsnodes
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - deployments/finalizers
+  - daemonsets/finalizers
+  verbs:
+  - update
+{{- end }}
