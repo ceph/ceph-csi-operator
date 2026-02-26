@@ -58,7 +58,7 @@ type RbdConfigSpec struct {
 	CephCsiSecrets *CephCsiSecretsSpec `json:"cephCsiSecrets,omitempty"`
 }
 
-// NfsConfigSpec cdefines the desired NFS configuration
+// NfsConfigSpec defines the desired NFS configuration
 type NfsConfigSpec struct {
 }
 
