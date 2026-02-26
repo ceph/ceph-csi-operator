@@ -28,11 +28,11 @@ import (
 )
 
 var imageDefaults = map[string]string{
-	"provisioner":       "registry.k8s.io/sig-storage/csi-provisioner:v6.0.0",
-	"attacher":          "registry.k8s.io/sig-storage/csi-attacher:v4.10.0",
-	"resizer":           "registry.k8s.io/sig-storage/csi-resizer:v2.0.0",
-	"snapshotter":       "registry.k8s.io/sig-storage/csi-snapshotter:v8.4.0",
-	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0",
+	"provisioner":       "registry.k8s.io/sig-storage/csi-provisioner:v6.1.1",
+	"attacher":          "registry.k8s.io/sig-storage/csi-attacher:v4.11.0",
+	"resizer":           "registry.k8s.io/sig-storage/csi-resizer:v2.1.0",
+	"snapshotter":       "registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0",
+	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.16.0",
 	"snapshot-metadata": "registry.k8s.io/sig-storage/csi-snapshot-metadata:v0.2.0",
 	"plugin":            "quay.io/cephcsi/cephcsi:v3.16.1",
 	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.14.0",
