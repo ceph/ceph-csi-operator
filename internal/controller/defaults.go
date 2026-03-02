@@ -28,7 +28,7 @@ import (
 )
 
 var imageDefaults = map[string]string{
-	"provisioner":       "registry.k8s.io/sig-storage/csi-provisioner:v6.1.1",
+	"provisioner":       "registry.k8s.io/sig-storage/csi-provisioner:v6.2.0",
 	"attacher":          "registry.k8s.io/sig-storage/csi-attacher:v4.11.0",
 	"resizer":           "registry.k8s.io/sig-storage/csi-resizer:v2.1.0",
 	"snapshotter":       "registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0",

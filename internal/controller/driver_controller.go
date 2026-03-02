@@ -692,7 +692,6 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.RetryIntervalStartContainerArg,
 										utils.DefaultFsTypeContainerArg,
 										utils.PreventVolumeModeConversionContainerArg,
-										utils.HonorPVReclaimPolicyContainerArg,
 										utils.If(r.isBlockStorageDriver(), utils.DefaultFsTypeContainerArg, ""),
 										utils.TopologyContainerArg(topology),
 										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
