@@ -23,8 +23,8 @@
 .vscode/
 
 # Go workspace file
-go.work
-go.work.sum
+/go.work
+/go.work.sum
 
 # git merge files
 *.orig
