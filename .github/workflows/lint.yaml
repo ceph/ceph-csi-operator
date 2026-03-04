@@ -103,3 +103,13 @@ jobs:
           go-version-file: go.mod
       - name: run mod check
         run: make mod.check
+
+  vendorcheck:
+    name: vendorcheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - name: Check the vendor folder consistency
+      run: |
+        go mod vendor -o vendor.gen
+        diff -r vendor vendor.gen
