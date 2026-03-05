@@ -1,0 +1,52 @@
+---
+merge_queue:
+  max_parallel_checks: 1
+
+queue_rules:
+  - name: default
+    merge_method: rebase
+    update_method: rebase
+    batch_size: 1
+    autoqueue: true
+    queue_conditions:
+      - "#approved-reviews-by >= 1"
+      - "#changes-requested-reviews-by = 0"
+      - check-success = build
+      - check-success = codespell
+      - check-success = golangci
+      - check-success = govulncheck
+      - check-success = markdownlint
+      - check-success = shellcheck
+      - check-success = modcheck
+      - check-success = vendorcheck
+      - check-success = test
+      - check-success = unittests
+      - check-success = run-e2e-tests
+      - check-success = dependency-review
+      - check-success = DCO
+
+pull_request_rules:
+  - name: Dismiss reviews on update
+    conditions:
+      - base = main
+    actions:
+      dismiss_reviews:
+        approved: true
+        changes_requested: false
+
+  - name: Ask author to resolve conflicts
+    conditions:
+      - conflict
+    actions:
+      comment:
+        message: "@{{author}}, this pull request has merge conflicts. Please resolve them before it can be merged."
+
+  - name: Remind about DCO sign-off
+    conditions:
+      - -closed
+      - -merged
+      - check-failure = DCO
+    actions:
+      comment:
+        message: |
+          @{{author}}, your commits are missing the `Signed-off-by` line required by the DCO.
