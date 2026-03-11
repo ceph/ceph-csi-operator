@@ -32,6 +32,8 @@ jobs:
         run: make build-multifile-installer
       - name: Generate operator helm charts
         run: make build-helm-installer
+      - name: Verify operator helm values are in sync
+        run: make verify-helm-values
       - name: Generate operator helm document
         run: make generate-helm-docs
       - name: Check for uncommitted changes
