@@ -1,54 +1,94 @@
+# Service account configuration for CephFS controller plugin
 cephfsCtrlpluginSa:
   serviceAccount:
+    # -- Annotations to add to the CephFS controller plugin service account (default: {})
     annotations: {}
+# Service account configuration for CephFS node plugin
 cephfsNodepluginSa:
   serviceAccount:
+    # -- Annotations to add to the CephFS node plugin service account (default: {})
     annotations: {}
+# Controller manager configuration
 controllerManager:
+  # Manager configuration
   manager:
+    # -- Arguments to pass to the manager container (default: ["--leader-elect"])
     args:
     - --leader-elect
+    # Security context for the manager container
     containerSecurityContext:
+      # -- Disallow privilege escalation for the manager container (default: false)
       allowPrivilegeEscalation: false
       capabilities:
+        # -- List of capabilities to drop from the manager container (default: ["ALL"])
         drop:
         - ALL
+      # -- Mount root filesystem as read-only (default: true)
       readOnlyRootFilesystem: true
+    # Environment variables for the manager container
     env:
+      # -- Prefix for CSI service account names created by the operator (default: "ceph-csi-operator-")
       csiServiceAccountPrefix: ceph-csi-operator-
+      # -- Namespace to watch for resources, empty for all namespaces (default: "")
       watchNamespace: ""
+    # Container image configuration for the manager
     image:
+      # -- Repository for the ceph-csi-operator image (default: "quay.io/cephcsi/ceph-csi-operator")
       repository: quay.io/cephcsi/ceph-csi-operator
+      # -- Tag for the ceph-csi-operator image (default: "latest")
       tag: latest
+    # Resource limits and requests for the manager container
     resources:
       limits:
+        # -- CPU limit for the manager container (default: "500m")
         cpu: 500m
+        # -- Memory limit for the manager container (default: "128Mi")
         memory: 128Mi
       requests:
+        # -- CPU request for the manager container (default: "10m")
         cpu: 10m
+        # -- Memory request for the manager container (default: "64Mi")
         memory: 64Mi
+  # Pod-level security context for the controller manager
   podSecurityContext:
+    # -- Run the pod as a non-root user (default: true)
     runAsNonRoot: true
+  # -- Number of controller manager replicas (default: 1)
   replicas: 1
   serviceAccount:
+    # -- Annotations to add to the controller manager service account (default: {})
     annotations: {}
+# -- List of image pull secret names for pulling container images (default: [])
 imagePullSecrets: []
+# -- Kubernetes cluster domain used for DNS resolution (default: "cluster.local")
 kubernetesClusterDomain: cluster.local
+# Service account configuration for NFS controller plugin
 nfsCtrlpluginSa:
   serviceAccount:
+    # -- Annotations to add to the NFS controller plugin service account (default: {})
     annotations: {}
+# Service account configuration for NFS node plugin
 nfsNodepluginSa:
   serviceAccount:
+    # -- Annotations to add to the NFS node plugin service account (default: {})
     annotations: {}
+# Service account configuration for NVMe-oF controller plugin
 nvmeofCtrlpluginSa:
   serviceAccount:
+    # -- Annotations to add to the NVMe-oF controller plugin service account (default: {})
     annotations: {}
+# Service account configuration for NVMe-oF node plugin
 nvmeofNodepluginSa:
   serviceAccount:
+    # -- Annotations to add to the NVMe-oF node plugin service account (default: {})
     annotations: {}
+# Service account configuration for RBD controller plugin
 rbdCtrlpluginSa:
   serviceAccount:
+    # -- Annotations to add to the RBD controller plugin service account (default: {})
     annotations: {}
+# Service account configuration for RBD node plugin
 rbdNodepluginSa:
   serviceAccount:
+    # -- Annotations to add to the RBD node plugin service account (default: {})
     annotations: {}

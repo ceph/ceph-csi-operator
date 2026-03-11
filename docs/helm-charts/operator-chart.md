@@ -44,31 +44,31 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `cephfsCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `cephfsNodepluginSa.serviceAccount.annotations` |  | `{}` |
-| `controllerManager.manager.args[0]` |  | `"--leader-elect"` |
-| `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` |  | `false` |
-| `controllerManager.manager.containerSecurityContext.capabilities.drop[0]` |  | `"ALL"` |
-| `controllerManager.manager.containerSecurityContext.readOnlyRootFilesystem` |  | `true` |
-| `controllerManager.manager.env.csiServiceAccountPrefix` |  | `"ceph-csi-operator-"` |
-| `controllerManager.manager.env.watchNamespace` |  | `""` |
-| `controllerManager.manager.image.repository` |  | `"quay.io/cephcsi/ceph-csi-operator"` |
-| `controllerManager.manager.image.tag` |  | `"latest"` |
-| `controllerManager.manager.resources.limits.cpu` |  | `"500m"` |
-| `controllerManager.manager.resources.limits.memory` |  | `"128Mi"` |
-| `controllerManager.manager.resources.requests.cpu` |  | `"10m"` |
-| `controllerManager.manager.resources.requests.memory` |  | `"64Mi"` |
-| `controllerManager.podSecurityContext.runAsNonRoot` |  | `true` |
-| `controllerManager.replicas` |  | `1` |
-| `controllerManager.serviceAccount.annotations` |  | `{}` |
-| `imagePullSecrets` |  | `[]` |
-| `kubernetesClusterDomain` |  | `"cluster.local"` |
-| `nfsCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `nfsNodepluginSa.serviceAccount.annotations` |  | `{}` |
-| `nvmeofCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `nvmeofNodepluginSa.serviceAccount.annotations` |  | `{}` |
-| `rbdCtrlpluginSa.serviceAccount.annotations` |  | `{}` |
-| `rbdNodepluginSa.serviceAccount.annotations` |  | `{}` |
+| `cephfsCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the CephFS controller plugin service account (default: {}) | `{}` |
+| `cephfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the CephFS node plugin service account (default: {}) | `{}` |
+| `controllerManager.manager.args` | Arguments to pass to the manager container (default: ["--leader-elect"]) | `["--leader-elect"]` |
+| `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` | Disallow privilege escalation for the manager container (default: false) | `false` |
+| `controllerManager.manager.containerSecurityContext.capabilities.drop` | List of capabilities to drop from the manager container (default: ["ALL"]) | `["ALL"]` |
+| `controllerManager.manager.containerSecurityContext.readOnlyRootFilesystem` | Mount root filesystem as read-only (default: true) | `true` |
+| `controllerManager.manager.env.csiServiceAccountPrefix` | Prefix for CSI service account names created by the operator (default: "ceph-csi-operator-") | `"ceph-csi-operator-"` |
+| `controllerManager.manager.env.watchNamespace` | Namespace to watch for resources, empty for all namespaces (default: "") | `""` |
+| `controllerManager.manager.image.repository` | Repository for the ceph-csi-operator image (default: "quay.io/cephcsi/ceph-csi-operator") | `"quay.io/cephcsi/ceph-csi-operator"` |
+| `controllerManager.manager.image.tag` | Tag for the ceph-csi-operator image (default: "latest") | `"latest"` |
+| `controllerManager.manager.resources.limits.cpu` | CPU limit for the manager container (default: "500m") | `"500m"` |
+| `controllerManager.manager.resources.limits.memory` | Memory limit for the manager container (default: "128Mi") | `"128Mi"` |
+| `controllerManager.manager.resources.requests.cpu` | CPU request for the manager container (default: "10m") | `"10m"` |
+| `controllerManager.manager.resources.requests.memory` | Memory request for the manager container (default: "64Mi") | `"64Mi"` |
+| `controllerManager.podSecurityContext.runAsNonRoot` | Run the pod as a non-root user (default: true) | `true` |
+| `controllerManager.replicas` | Number of controller manager replicas (default: 1) | `1` |
+| `controllerManager.serviceAccount.annotations` | Annotations to add to the controller manager service account (default: {}) | `{}` |
+| `imagePullSecrets` | List of image pull secret names for pulling container images (default: []) | `[]` |
+| `kubernetesClusterDomain` | Kubernetes cluster domain used for DNS resolution (default: "cluster.local") | `"cluster.local"` |
+| `nfsCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NFS controller plugin service account (default: {}) | `{}` |
+| `nfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the NFS node plugin service account (default: {}) | `{}` |
+| `nvmeofCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF controller plugin service account (default: {}) | `{}` |
+| `nvmeofNodepluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF node plugin service account (default: {}) | `{}` |
+| `rbdCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the RBD controller plugin service account (default: {}) | `{}` |
+| `rbdNodepluginSa.serviceAccount.annotations` | Annotations to add to the RBD node plugin service account (default: {}) | `{}` |
 
 ### **Development Build**
 
