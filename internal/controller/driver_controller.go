@@ -692,7 +692,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.RetryIntervalStartContainerArg,
 										utils.DefaultFsTypeContainerArg,
 										utils.PreventVolumeModeConversionContainerArg,
-										utils.If(r.isBlockStorageDriver(), utils.DefaultFsTypeContainerArg, ""),
+										utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
 										utils.TopologyContainerArg(topology),
 										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
 									),
@@ -741,7 +741,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.LogVerbosityContainerArg(logVerbosity),
 										utils.CsiAddressContainerArg,
 										utils.TimeoutContainerArg(grpcTimeout),
-										utils.If(r.isBlockStorageDriver(), utils.DefaultFsTypeContainerArg, ""),
+										utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -1293,7 +1293,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
 					HostNetwork:        true,
-					HostPID:            r.isBlockStorageDriver(),
+					HostPID:            r.isRbdOrNvemofDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
@@ -1331,7 +1331,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 											"",
 										),
 										utils.If(
-											r.isBlockStorageDriver(),
+											r.isRbdOrNvemofDriver(),
 											utils.StagingPathContainerArg(kubeletDirPath),
 											"",
 										),
@@ -1385,7 +1385,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									if r.isCephFsDriver() {
 										mounts = append(mounts, utils.CsiMountInfoVolumeMount)
 									}
-									if r.isBlockStorageDriver() {
+									if r.isRbdOrNvemofDriver() {
 										mounts = append(mounts, utils.OidcTokenVolumeMount)
 									}
 									if logRotationEnabled {
@@ -1530,7 +1530,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 								utils.KmsConfigVolume(&r.driver.Spec.Encryption.ConfigMapRef),
 							)
 						}
-						if r.isBlockStorageDriver() {
+						if r.isRbdOrNvemofDriver() {
 							volumes = append(
 								volumes,
 								utils.OidcTokenVolume,
@@ -1627,7 +1627,7 @@ func (r *driverReconcile) isNvmeofDriver() bool {
 	return r.driverType == NvmeofDriverType
 }
 
-func (r *driverReconcile) isBlockStorageDriver() bool {
+func (r *driverReconcile) isRbdOrNvemofDriver() bool {
 	return r.isRbdDriver() || r.isNvmeofDriver()
 }
 
