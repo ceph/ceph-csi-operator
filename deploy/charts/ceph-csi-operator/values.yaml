@@ -32,6 +32,9 @@ controllerManager:
   replicas: 1
   serviceAccount:
     annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 imagePullSecrets: []
 kubernetesClusterDomain: cluster.local
 nfsCtrlpluginSa:
