@@ -46,189 +46,189 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `cephConnections[0].crushLocationLabels` |  | `{}` |
-| `cephConnections[0].monitors` |  | `{}` |
-| `cephConnections[0].name` |  | `""` |
-| `cephConnections[0].rbdMirrorDaemonCount` |  | `1` |
-| `clientProfiles[0].cephConnection.name` |  | `""` |
-| `clientProfiles[0].cephFs.fuseMountOptions` |  | `{}` |
-| `clientProfiles[0].cephFs.kernelMountOptions` |  | `{}` |
-| `clientProfiles[0].cephFs.subVolumeGroup` |  | `""` |
-| `clientProfiles[0].name` |  | `""` |
-| `clientProfiles[0].nvmeof.radosNamespace` |  | `""` |
-| `clientProfiles[0].rbd.radosNamespace` |  | `""` |
-| `drivers.cephfs.attachRequired` |  | `true` |
-| `drivers.cephfs.cephFsClientType` |  | `"kernel"` |
-| `drivers.cephfs.clusterName` |  | `""` |
-| `drivers.cephfs.controllerPlugin.deploymentStrategy` |  | `{}` |
-| `drivers.cephfs.controllerPlugin.hostNetwork` |  | `false` |
-| `drivers.cephfs.controllerPlugin.privileged` |  | `false` |
-| `drivers.cephfs.controllerPlugin.replicas` |  | `1` |
-| `drivers.cephfs.controllerPlugin.resources` |  | `{}` |
-| `drivers.cephfs.controllerPlugin.tolerations` |  | `[]` |
-| `drivers.cephfs.deployCsiAddons` |  | `false` |
-| `drivers.cephfs.enableMetadata` |  | `false` |
-| `drivers.cephfs.enabled` |  | `true` |
-| `drivers.cephfs.encryption.configMapRef.name` |  | `""` |
-| `drivers.cephfs.fsGroupPolicy` |  | `"None"` |
-| `drivers.cephfs.fuseMountOptions` |  | `{}` |
-| `drivers.cephfs.generateOMapInfo` |  | `false` |
-| `drivers.cephfs.grpcTimeout` |  | `30` |
-| `drivers.cephfs.imageSet.name` |  | `""` |
-| `drivers.cephfs.kernelMountOptions` |  | `{}` |
-| `drivers.cephfs.log.rotation.logHostPath` |  | `""` |
-| `drivers.cephfs.log.rotation.maxFiles` |  | `7` |
-| `drivers.cephfs.log.rotation.maxLogSize` |  | `"10Gi"` |
-| `drivers.cephfs.log.rotation.periodicity` |  | `"daily"` |
-| `drivers.cephfs.log.verbosity` |  | `0` |
-| `drivers.cephfs.name` |  | `"cephfs.csi.ceph.com"` |
-| `drivers.cephfs.nodePlugin.affinity` |  | `{}` |
-| `drivers.cephfs.nodePlugin.annotations` |  | `{}` |
-| `drivers.cephfs.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
-| `drivers.cephfs.nodePlugin.labels` |  | `{}` |
-| `drivers.cephfs.nodePlugin.priorityClassName` |  | `""` |
-| `drivers.cephfs.nodePlugin.tolerations` |  | `[]` |
-| `drivers.cephfs.nodePlugin.volumes` |  | `[]` |
-| `drivers.cephfs.snapshotPolicy` |  | `"volumeSnapshot"` |
-| `drivers.nfs.attachRequired` |  | `true` |
-| `drivers.nfs.cephFsClientType` |  | `"kernel"` |
-| `drivers.nfs.clusterName` |  | `""` |
-| `drivers.nfs.controllerPlugin.deploymentStrategy` |  | `{}` |
-| `drivers.nfs.controllerPlugin.hostNetwork` |  | `false` |
-| `drivers.nfs.controllerPlugin.privileged` |  | `false` |
-| `drivers.nfs.controllerPlugin.replicas` |  | `1` |
-| `drivers.nfs.controllerPlugin.resources` |  | `{}` |
-| `drivers.nfs.controllerPlugin.tolerations` |  | `[]` |
-| `drivers.nfs.deployCsiAddons` |  | `false` |
-| `drivers.nfs.enableMetadata` |  | `false` |
-| `drivers.nfs.enabled` |  | `true` |
-| `drivers.nfs.encryption.configMapRef.name` |  | `""` |
-| `drivers.nfs.fsGroupPolicy` |  | `"None"` |
-| `drivers.nfs.fuseMountOptions` |  | `{}` |
-| `drivers.nfs.generateOMapInfo` |  | `false` |
-| `drivers.nfs.grpcTimeout` |  | `30` |
-| `drivers.nfs.imageSet.name` |  | `""` |
-| `drivers.nfs.kernelMountOptions` |  | `{}` |
-| `drivers.nfs.log.rotation.logHostPath` |  | `""` |
-| `drivers.nfs.log.rotation.maxFiles` |  | `7` |
-| `drivers.nfs.log.rotation.maxLogSize` |  | `"10Gi"` |
-| `drivers.nfs.log.rotation.periodicity` |  | `"daily"` |
-| `drivers.nfs.log.verbosity` |  | `0` |
-| `drivers.nfs.name` |  | `"nfs.csi.ceph.com"` |
-| `drivers.nfs.nodePlugin.affinity` |  | `{}` |
-| `drivers.nfs.nodePlugin.annotations` |  | `{}` |
-| `drivers.nfs.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
-| `drivers.nfs.nodePlugin.labels` |  | `{}` |
-| `drivers.nfs.nodePlugin.priorityClassName` |  | `""` |
-| `drivers.nfs.nodePlugin.serviceAccountName` |  | `""` |
-| `drivers.nfs.nodePlugin.tolerations` |  | `[]` |
-| `drivers.nfs.nodePlugin.volumes` |  | `[]` |
-| `drivers.nfs.snapshotPolicy` |  | `"volumeSnapshot"` |
-| `drivers.nvmeof.attachRequired` |  | `true` |
-| `drivers.nvmeof.cephFsClientType` |  | `"kernel"` |
-| `drivers.nvmeof.clusterName` |  | `""` |
-| `drivers.nvmeof.controllerPlugin.deploymentStrategy` |  | `{}` |
-| `drivers.nvmeof.controllerPlugin.hostNetwork` |  | `false` |
-| `drivers.nvmeof.controllerPlugin.privileged` |  | `false` |
-| `drivers.nvmeof.controllerPlugin.replicas` |  | `1` |
-| `drivers.nvmeof.controllerPlugin.resources` |  | `{}` |
-| `drivers.nvmeof.controllerPlugin.tolerations` |  | `[]` |
-| `drivers.nvmeof.deployCsiAddons` |  | `false` |
-| `drivers.nvmeof.enableMetadata` |  | `false` |
-| `drivers.nvmeof.enabled` |  | `true` |
-| `drivers.nvmeof.encryption.configMapRef.name` |  | `""` |
-| `drivers.nvmeof.fsGroupPolicy` |  | `"File"` |
-| `drivers.nvmeof.fuseMountOptions` |  | `{}` |
-| `drivers.nvmeof.generateOMapInfo` |  | `false` |
-| `drivers.nvmeof.grpcTimeout` |  | `30` |
-| `drivers.nvmeof.imageSet.name` |  | `""` |
-| `drivers.nvmeof.kernelMountOptions` |  | `{}` |
-| `drivers.nvmeof.log.rotation.logHostPath` |  | `""` |
-| `drivers.nvmeof.log.rotation.maxFiles` |  | `7` |
-| `drivers.nvmeof.log.rotation.maxLogSize` |  | `"10Gi"` |
-| `drivers.nvmeof.log.rotation.periodicity` |  | `"daily"` |
-| `drivers.nvmeof.log.verbosity` |  | `0` |
-| `drivers.nvmeof.name` |  | `"nvmeof.csi.ceph.com"` |
-| `drivers.nvmeof.nodePlugin.affinity` |  | `{}` |
-| `drivers.nvmeof.nodePlugin.annotations` |  | `{}` |
-| `drivers.nvmeof.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
-| `drivers.nvmeof.nodePlugin.labels` |  | `{}` |
-| `drivers.nvmeof.nodePlugin.priorityClassName` |  | `""` |
-| `drivers.nvmeof.nodePlugin.tolerations` |  | `[]` |
-| `drivers.nvmeof.nodePlugin.volumes` |  | `[]` |
-| `drivers.nvmeof.snapshotPolicy` |  | `"none"` |
-| `drivers.rbd.attachRequired` |  | `true` |
-| `drivers.rbd.cephFsClientType` |  | `"kernel"` |
-| `drivers.rbd.clusterName` |  | `""` |
-| `drivers.rbd.controllerPlugin.deploymentStrategy` |  | `{}` |
-| `drivers.rbd.controllerPlugin.hostNetwork` |  | `false` |
-| `drivers.rbd.controllerPlugin.privileged` |  | `false` |
-| `drivers.rbd.controllerPlugin.replicas` |  | `1` |
-| `drivers.rbd.controllerPlugin.resources` |  | `{}` |
-| `drivers.rbd.controllerPlugin.tolerations` |  | `[]` |
-| `drivers.rbd.deployCsiAddons` |  | `false` |
-| `drivers.rbd.enableMetadata` |  | `false` |
-| `drivers.rbd.enabled` |  | `true` |
-| `drivers.rbd.encryption.configMapRef.name` |  | `""` |
-| `drivers.rbd.fsGroupPolicy` |  | `"File"` |
-| `drivers.rbd.fuseMountOptions` |  | `{}` |
-| `drivers.rbd.generateOMapInfo` |  | `false` |
-| `drivers.rbd.grpcTimeout` |  | `30` |
-| `drivers.rbd.imageSet.name` |  | `""` |
-| `drivers.rbd.kernelMountOptions` |  | `{}` |
-| `drivers.rbd.log.rotation.logHostPath` |  | `""` |
-| `drivers.rbd.log.rotation.maxFiles` |  | `7` |
-| `drivers.rbd.log.rotation.maxLogSize` |  | `"10Gi"` |
-| `drivers.rbd.log.rotation.periodicity` |  | `"daily"` |
-| `drivers.rbd.log.verbosity` |  | `0` |
-| `drivers.rbd.name` |  | `"rbd.csi.ceph.com"` |
-| `drivers.rbd.nodePlugin.affinity` |  | `{}` |
-| `drivers.rbd.nodePlugin.annotations` |  | `{}` |
-| `drivers.rbd.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
-| `drivers.rbd.nodePlugin.labels` |  | `{}` |
-| `drivers.rbd.nodePlugin.priorityClassName` |  | `""` |
-| `drivers.rbd.nodePlugin.tolerations` |  | `[]` |
-| `drivers.rbd.nodePlugin.volumes` |  | `[]` |
-| `drivers.rbd.snapshotPolicy` |  | `"none"` |
-| `imagePullSecrets` |  | `[]` |
-| `operatorConfig.create` |  | `true` |
-| `operatorConfig.driverSpecDefaults.attachRequired` |  | `true` |
-| `operatorConfig.driverSpecDefaults.cephFsClientType` |  | `"kernel"` |
-| `operatorConfig.driverSpecDefaults.clusterName` |  | `""` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.affinity` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` |  | `false` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` |  | `"IfNotPresent"` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` |  | `false` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.replicas` |  | `1` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.resources` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.tolerations` |  | `[]` |
-| `operatorConfig.driverSpecDefaults.deployCsiAddons` |  | `false` |
-| `operatorConfig.driverSpecDefaults.enableMetadata` |  | `false` |
-| `operatorConfig.driverSpecDefaults.encryption.configMapRef.name` |  | `""` |
-| `operatorConfig.driverSpecDefaults.fsGroupPolicy` |  | `"File"` |
-| `operatorConfig.driverSpecDefaults.fuseMountOptions` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.generateOMapInfo` |  | `false` |
-| `operatorConfig.driverSpecDefaults.grpcTimeout` |  | `30` |
-| `operatorConfig.driverSpecDefaults.imageSet.name` |  | `""` |
-| `operatorConfig.driverSpecDefaults.kernelMountOptions` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` |  | `""` |
-| `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` |  | `7` |
-| `operatorConfig.driverSpecDefaults.log.rotation.maxLogSize` |  | `"10Gi"` |
-| `operatorConfig.driverSpecDefaults.log.rotation.periodicity` |  | `"daily"` |
-| `operatorConfig.driverSpecDefaults.log.verbosity` |  | `0` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.affinity` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.annotations` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy` |  | `"IfNotPresent"` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath` |  | `"/var/lib/kubelet"` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.labels` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName` |  | `""` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` |  | `[]` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy` |  | `{}` |
-| `operatorConfig.driverSpecDefaults.nodePlugin.volumes` |  | `[]` |
-| `operatorConfig.driverSpecDefaults.snapshotPolicy` |  | `"none"` |
-| `operatorConfig.name` |  | `"ceph-csi-operator-config"` |
-| `operatorConfig.namespace` |  | `""` |
+| `cephConnections[0].crushLocationLabels` | Labels to be used for CRUSH location selection (default: {}) | `{}` |
+| `cephConnections[0].monitors` | Ceph monitors (key-value pairs, typically IP addresses of the Ceph monitors) (default: {}) | `{}` |
+| `cephConnections[0].name` | Name for the Ceph connection (default: "") | `""` |
+| `cephConnections[0].rbdMirrorDaemonCount` | Number of RBD mirror daemons (default: 1) | `1` |
+| `clientProfiles[0].cephConnection.name` | Reference to the Ceph connection for this profile (default: "") | `""` |
+| `clientProfiles[0].cephFs.fuseMountOptions` | Mount options for CephFS with FUSE (default: {}) | `{}` |
+| `clientProfiles[0].cephFs.kernelMountOptions` | Mount options for CephFS with the kernel (default: {}) | `{}` |
+| `clientProfiles[0].cephFs.subVolumeGroup` | Sub-volume group for the CephFS client (default: "") | `""` |
+| `clientProfiles[0].name` | Name of the client profile (default: "") | `""` |
+| `clientProfiles[0].nvmeof.radosNamespace` | Namespace for RADOS block devices (default: "") | `""` |
+| `clientProfiles[0].rbd.radosNamespace` | Namespace for RADOS block devices (default: "") | `""` |
+| `drivers.cephfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
+| `drivers.cephfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
+| `drivers.cephfs.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.cephfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
+| `drivers.cephfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.cephfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.cephfs.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
+| `drivers.cephfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
+| `drivers.cephfs.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
+| `drivers.cephfs.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
+| `drivers.cephfs.enableMetadata` | Flag to enable metadata (default: false) | `false` |
+| `drivers.cephfs.enabled` | Enable the CephFS driver (default: true) | `true` |
+| `drivers.cephfs.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
+| `drivers.cephfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None") | `"None"` |
+| `drivers.cephfs.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
+| `drivers.cephfs.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
+| `drivers.cephfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
+| `drivers.cephfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
+| `drivers.cephfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.cephfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.cephfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
+| `drivers.cephfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.cephfs.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
+| `drivers.cephfs.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
+| `drivers.cephfs.name` | CSI driver name for CephFS (default: "cephfs.csi.ceph.com") | `"cephfs.csi.ceph.com"` |
+| `drivers.cephfs.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `drivers.cephfs.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.cephfs.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `drivers.cephfs.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.cephfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
+| `drivers.cephfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
+| `drivers.cephfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.cephfs.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot") | `"volumeSnapshot"` |
+| `drivers.nfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
+| `drivers.nfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
+| `drivers.nfs.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.nfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
+| `drivers.nfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.nfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.nfs.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
+| `drivers.nfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
+| `drivers.nfs.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
+| `drivers.nfs.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
+| `drivers.nfs.enableMetadata` | Flag to enable metadata (default: false) | `false` |
+| `drivers.nfs.enabled` | Enable the NFS driver (default: true) | `true` |
+| `drivers.nfs.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
+| `drivers.nfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None") | `"None"` |
+| `drivers.nfs.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
+| `drivers.nfs.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
+| `drivers.nfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
+| `drivers.nfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
+| `drivers.nfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.nfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
+| `drivers.nfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.nfs.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
+| `drivers.nfs.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
+| `drivers.nfs.name` | CSI driver name for NFS (default: "nfs.csi.ceph.com") | `"nfs.csi.ceph.com"` |
+| `drivers.nfs.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `drivers.nfs.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.nfs.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `drivers.nfs.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.nfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
+| `drivers.nfs.nodePlugin.serviceAccountName` | Service account name for the pod (default: "") | `""` |
+| `drivers.nfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
+| `drivers.nfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.nfs.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot") | `"volumeSnapshot"` |
+| `drivers.nvmeof.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
+| `drivers.nvmeof.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
+| `drivers.nvmeof.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.nvmeof.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
+| `drivers.nvmeof.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.nvmeof.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.nvmeof.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
+| `drivers.nvmeof.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
+| `drivers.nvmeof.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
+| `drivers.nvmeof.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
+| `drivers.nvmeof.enableMetadata` | Flag to enable metadata (default: false) | `false` |
+| `drivers.nvmeof.enabled` | Enable the NVMe-oF driver (default: true) | `true` |
+| `drivers.nvmeof.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
+| `drivers.nvmeof.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
+| `drivers.nvmeof.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
+| `drivers.nvmeof.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
+| `drivers.nvmeof.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
+| `drivers.nvmeof.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
+| `drivers.nvmeof.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nvmeof.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.nvmeof.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
+| `drivers.nvmeof.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.nvmeof.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
+| `drivers.nvmeof.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
+| `drivers.nvmeof.name` | CSI driver name for NVMe-oF (default: "nvmeof.csi.ceph.com") | `"nvmeof.csi.ceph.com"` |
+| `drivers.nvmeof.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `drivers.nvmeof.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.nvmeof.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `drivers.nvmeof.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.nvmeof.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
+| `drivers.nvmeof.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
+| `drivers.nvmeof.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.nvmeof.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
+| `drivers.rbd.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
+| `drivers.rbd.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
+| `drivers.rbd.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.rbd.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
+| `drivers.rbd.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.rbd.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.rbd.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
+| `drivers.rbd.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
+| `drivers.rbd.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
+| `drivers.rbd.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
+| `drivers.rbd.enableMetadata` | Flag to enable metadata (default: false) | `false` |
+| `drivers.rbd.enabled` | Enable the RBD driver (default: true) | `true` |
+| `drivers.rbd.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
+| `drivers.rbd.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
+| `drivers.rbd.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
+| `drivers.rbd.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
+| `drivers.rbd.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
+| `drivers.rbd.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
+| `drivers.rbd.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.rbd.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.rbd.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
+| `drivers.rbd.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.rbd.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
+| `drivers.rbd.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
+| `drivers.rbd.name` | CSI driver name for RBD (default: "rbd.csi.ceph.com") | `"rbd.csi.ceph.com"` |
+| `drivers.rbd.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `drivers.rbd.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.rbd.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `drivers.rbd.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.rbd.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
+| `drivers.rbd.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
+| `drivers.rbd.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.rbd.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
+| `imagePullSecrets` | List of pull secret names that will be added to all serviceaccounts (default: []) | `[]` |
+| `operatorConfig.create` | Flag to indicate if the config should be created (default: true) | `true` |
+| `operatorConfig.driverSpecDefaults.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
+| `operatorConfig.driverSpecDefaults.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
+| `operatorConfig.driverSpecDefaults.clusterName` | Cluster name identifier (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
+| `operatorConfig.driverSpecDefaults.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.enableMetadata` | Flag to enable metadata (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
+| `operatorConfig.driverSpecDefaults.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
+| `operatorConfig.driverSpecDefaults.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
+| `operatorConfig.driverSpecDefaults.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `operatorConfig.driverSpecDefaults.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
+| `operatorConfig.driverSpecDefaults.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath` | kubelet directory path (default: "/var/lib/kubelet") | `"/var/lib/kubelet"` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy` | Daemonset update strategy (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `operatorConfig.driverSpecDefaults.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
+| `operatorConfig.name` | Name of the operator config (default: "ceph-csi-operator-config") | `"ceph-csi-operator-config"` |
+| `operatorConfig.namespace` | Namespace for the operator configuration (default: "") | `""` |
 
 ### **Development Build**
 

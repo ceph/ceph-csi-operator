@@ -201,10 +201,18 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 .PHONY: build-helm-installer
 build-helm-installer: manifests generate kustomize helmify ## Generate helm charts for the operator.
 	mkdir -p build deploy
+	@# Preserve the manually maintained values.yaml (contains helm-docs comments)
+	@if [ -f deploy/charts/ceph-csi-operator/values.yaml ]; then \
+		cp deploy/charts/ceph-csi-operator/values.yaml deploy/charts/ceph-csi-operator/values.yaml.bak; \
+	fi
 	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
 	cd build && $(KUSTOMIZE) edit add resource ../config/default/
 	$(KUSTOMIZE) build build | $(HELMIFY) -preserve-ns -image-pull-secrets deploy/charts/ceph-csi-operator
 	hack/patch-csi-operator-helm-chart.sh deploy/charts/ceph-csi-operator
+	@# Restore the manually maintained values.yaml
+	@if [ -f deploy/charts/ceph-csi-operator/values.yaml.bak ]; then \
+		mv deploy/charts/ceph-csi-operator/values.yaml.bak deploy/charts/ceph-csi-operator/values.yaml; \
+	fi
 	rm -rf build
 
 .PHONY: build-multifile-installer
@@ -222,6 +230,26 @@ build-csi-rbac:
 	cd build && echo "$$BUILD_CSI_RBAC_OVERLAY" > kustomization.yaml
 	$(KUSTOMIZE) build build > deploy/multifile/csi-rbac.yaml
 	rm -rf build
+
+.PHONY: verify-helm-values
+verify-helm-values: manifests generate kustomize helmify ## Verify operator values.yaml is in sync with generated output.
+	@mkdir -p build
+	@cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
+	@cd build && $(KUSTOMIZE) edit add resource ../config/default/
+	@mkdir -p build/tmp-chart
+	@$(KUSTOMIZE) build build | $(HELMIFY) -preserve-ns -image-pull-secrets build/tmp-chart > /dev/null 2>&1
+	@# Compare values by stripping comments from the maintained file
+	@grep -v '^[[:space:]]*#' deploy/charts/ceph-csi-operator/values.yaml | grep -v '^[[:space:]]*$$' > build/maintained-values-stripped.yaml
+	@grep -v '^[[:space:]]*#' build/tmp-chart/values.yaml | grep -v '^[[:space:]]*$$' > build/generated-values-stripped.yaml
+	@if ! diff -q build/maintained-values-stripped.yaml build/generated-values-stripped.yaml > /dev/null 2>&1; then \
+		echo "ERROR: deploy/charts/ceph-csi-operator/values.yaml is out of sync with generated output."; \
+		echo "Diff (maintained vs generated):"; \
+		diff -u build/maintained-values-stripped.yaml build/generated-values-stripped.yaml || true; \
+		rm -rf build; \
+		exit 1; \
+	fi
+	@echo "deploy/charts/ceph-csi-operator/values.yaml is in sync."
+	@rm -rf build
 
 ##@ Docs
 .PHONY: generate-helm-docs
