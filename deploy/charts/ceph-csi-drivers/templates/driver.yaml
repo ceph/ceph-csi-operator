@@ -67,11 +67,11 @@ spec:
     {{- end }}
     {{- if $driver.nodePlugin.resources }}
     resources:
-      registrar: {{ $driver.nodePlugin.resources.registrar | toYaml | nindent 4 }}
-      liveness: {{ $driver.nodePlugin.resources.liveness | toYaml | nindent 4 }}
-      addons: {{ $driver.nodePlugin.resources.addons | toYaml | nindent 4 }}
-      logRotator: {{ $driver.nodePlugin.resources.logRotator | toYaml | nindent 4 }}
-      plugin: {{ $driver.nodePlugin.resources.plugin | toYaml | nindent 4 }}
+      registrar: {{ $driver.nodePlugin.resources.registrar | toYaml | nindent 8 }}
+      liveness: {{ $driver.nodePlugin.resources.liveness | toYaml | nindent 8 }}
+      addons: {{ $driver.nodePlugin.resources.addons | toYaml | nindent 8 }}
+      logRotator: {{ $driver.nodePlugin.resources.logRotator | toYaml | nindent 8 }}
+      plugin: {{ $driver.nodePlugin.resources.plugin | toYaml | nindent 8 }}
     {{- end }}
     {{- if $driver.nodePlugin.kubeletDirPath }}
     kubeletDirPath: {{ $driver.nodePlugin.kubeletDirPath }}
