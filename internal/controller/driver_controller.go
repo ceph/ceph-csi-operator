@@ -597,8 +597,14 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
 					HostNetwork:        ptr.Deref(pluginSpec.HostNetwork, false),
-					Affinity:           getControllerPluginPodAffinity(pluginSpec, &appSelector),
-					Tolerations:        pluginSpec.Tolerations,
+					DNSPolicy: utils.Call(func() corev1.DNSPolicy {
+						if ptr.Deref(pluginSpec.HostNetwork, false) {
+							return corev1.DNSClusterFirstWithHostNet
+						}
+						return corev1.DNSClusterFirst
+					}),
+					Affinity:    getControllerPluginPodAffinity(pluginSpec, &appSelector),
+					Tolerations: pluginSpec.Tolerations,
 					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							// Plugin Container
