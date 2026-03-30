@@ -86,7 +86,8 @@ runs:
         .drivers |=
         with_entries(
           .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
-          .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com")
+          .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
+          .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com"))
         )
         ' ./deploy/charts/ceph-csi-drivers/values.yaml
 
