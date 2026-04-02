@@ -44,8 +44,6 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `cephfsCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the CephFS controller plugin service account (default: {}) | `{}` |
-| `cephfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the CephFS node plugin service account (default: {}) | `{}` |
 | `controllerManager.manager.args` | Arguments to pass to the manager container (default: ["--leader-elect"]) | `["--leader-elect"]` |
 | `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` | Disallow privilege escalation for the manager container (default: false) | `false` |
 | `controllerManager.manager.containerSecurityContext.capabilities.drop` | List of capabilities to drop from the manager container (default: ["ALL"]) | `["ALL"]` |
@@ -63,12 +61,6 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.serviceAccount.annotations` | Annotations to add to the controller manager service account (default: {}) | `{}` |
 | `imagePullSecrets` | List of image pull secret names for pulling container images (default: []) | `[]` |
 | `kubernetesClusterDomain` | Kubernetes cluster domain used for DNS resolution (default: "cluster.local") | `"cluster.local"` |
-| `nfsCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NFS controller plugin service account (default: {}) | `{}` |
-| `nfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the NFS node plugin service account (default: {}) | `{}` |
-| `nvmeofCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF controller plugin service account (default: {}) | `{}` |
-| `nvmeofNodepluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF node plugin service account (default: {}) | `{}` |
-| `rbdCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the RBD controller plugin service account (default: {}) | `{}` |
-| `rbdNodepluginSa.serviceAccount.annotations` | Annotations to add to the RBD node plugin service account (default: {}) | `{}` |
 
 ### **Development Build**
 

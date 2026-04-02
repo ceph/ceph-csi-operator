@@ -1,13 +1,3 @@
-# Service account configuration for CephFS controller plugin
-cephfsCtrlpluginSa:
-  serviceAccount:
-    # -- Annotations to add to the CephFS controller plugin service account (default: {})
-    annotations: {}
-# Service account configuration for CephFS node plugin
-cephfsNodepluginSa:
-  serviceAccount:
-    # -- Annotations to add to the CephFS node plugin service account (default: {})
-    annotations: {}
 # Controller manager configuration
 controllerManager:
   # Manager configuration
@@ -62,33 +52,3 @@ controllerManager:
 imagePullSecrets: []
 # -- Kubernetes cluster domain used for DNS resolution (default: "cluster.local")
 kubernetesClusterDomain: cluster.local
-# Service account configuration for NFS controller plugin
-nfsCtrlpluginSa:
-  serviceAccount:
-    # -- Annotations to add to the NFS controller plugin service account (default: {})
-    annotations: {}
-# Service account configuration for NFS node plugin
-nfsNodepluginSa:
-  serviceAccount:
-    # -- Annotations to add to the NFS node plugin service account (default: {})
-    annotations: {}
-# Service account configuration for NVMe-oF controller plugin
-nvmeofCtrlpluginSa:
-  serviceAccount:
-    # -- Annotations to add to the NVMe-oF controller plugin service account (default: {})
-    annotations: {}
-# Service account configuration for NVMe-oF node plugin
-nvmeofNodepluginSa:
-  serviceAccount:
-    # -- Annotations to add to the NVMe-oF node plugin service account (default: {})
-    annotations: {}
-# Service account configuration for RBD controller plugin
-rbdCtrlpluginSa:
-  serviceAccount:
-    # -- Annotations to add to the RBD controller plugin service account (default: {})
-    annotations: {}
-# Service account configuration for RBD node plugin
-rbdNodepluginSa:
-  serviceAccount:
-    # -- Annotations to add to the RBD node plugin service account (default: {})
-    annotations: {}
