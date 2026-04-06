@@ -872,7 +872,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							})
 						}
 						// OMap Generator Sidecar Container
-						if r.isRbdDriver() && ptr.Deref(r.driver.Spec.GenerateOMapInfo, false) {
+						if (r.isRbdDriver() || r.isCephFsDriver()) && ptr.Deref(r.driver.Spec.GenerateOMapInfo, false) {
 							containers = append(containers, corev1.Container{
 								Name:            "csi-omap-generator",
 								Image:           r.images["plugin"],
