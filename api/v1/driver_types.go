@@ -234,6 +234,19 @@ type ControllerPluginSpec struct {
 	// For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
 	//+kubebuilder:validation:Optional
 	Privileged *bool `json:"privileged,omitempty"`
+
+	// RbdHardMaxCloneDepth is the hard limit for the number of nested volume clones
+	// that are taken before a flatten occurs
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:Minimum=0
+	RbdHardMaxCloneDepth int `json:"rbdHardMaxCloneDepth,omitempty"`
+
+	// RbdSoftMaxCloneDepth is the soft limit for the number of nested volume clones
+	// that are taken before a flatten occurs, a flatten operation will be
+	// triggered when breached
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:Minimum=0
+	RbdSoftMaxCloneDepth int `json:"rbdSoftMaxCloneDepth,omitempty"`
 }
 
 type LivenessSpec struct {
