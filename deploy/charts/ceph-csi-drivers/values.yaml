@@ -110,6 +110,10 @@ operatorConfig:
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
       privileged: false
+      # -- Hard limit for nested RBD volume clones before flattening (default: 0)
+      rbdHardMaxCloneDepth: 0
+      # -- Soft limit for nested RBD volume clones before triggering flatten (default: 0)
+      rbdSoftMaxCloneDepth: 0
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
       # -- Affinity settings for the pod (default: {})
@@ -193,6 +197,10 @@ drivers:
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
       privileged: false
+      # -- Hard limit for nested RBD volume clones before flattening (default: 0)
+      rbdHardMaxCloneDepth: 0
+      # -- Soft limit for nested RBD volume clones before triggering flatten (default: 0)
+      rbdSoftMaxCloneDepth: 0
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
   # NVMe-oF driver configuration (backed by RBD)
@@ -270,6 +278,10 @@ drivers:
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
       privileged: false
+      # -- Hard limit for nested RBD volume clones before flattening (default: 0)
+      rbdHardMaxCloneDepth: 0
+      # -- Soft limit for nested RBD volume clones before triggering flatten (default: 0)
+      rbdSoftMaxCloneDepth: 0
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
   # CephFS driver configuration
@@ -347,6 +359,10 @@ drivers:
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
       privileged: false
+      # -- Hard limit for nested RBD volume clones before flattening (default: 0)
+      rbdHardMaxCloneDepth: 0
+      # -- Soft limit for nested RBD volume clones before triggering flatten (default: 0)
+      rbdSoftMaxCloneDepth: 0
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
   # NFS driver configuration
@@ -426,6 +442,10 @@ drivers:
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
       privileged: false
+      # -- Hard limit for nested RBD volume clones before flattening (default: 0)
+      rbdHardMaxCloneDepth: 0
+      # -- Soft limit for nested RBD volume clones before triggering flatten (default: 0)
+      rbdSoftMaxCloneDepth: 0
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
 # -- List of pull secret names that will be added to all serviceaccounts (default: [])
