@@ -424,10 +424,10 @@ func TypeContainerArg(t string) string {
 	}
 }
 func SetMetadataContainerArg(on bool) string {
-	return If(on, "--setmetadata=true", "")
+	return fmt.Sprintf("--setmetadata=%t", on)
 }
 func SetFencingContainerArg(on bool) string {
-	return If(on, "--enable-fencing=true", "")
+	return fmt.Sprintf("--enable-fencing=%t", on)
 }
 func TimeoutContainerArg(timeout int) string {
 	return fmt.Sprintf("--timeout=%ds", timeout)
