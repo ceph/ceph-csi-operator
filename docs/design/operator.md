@@ -165,7 +165,9 @@ spec:
       priorityClassName: system-cluster-critical
       labels:
         app: cephfs-ctrlplugin
-      privileged: true  
+      privileged: true
+      rbdHardMaxCloneDepth: 8
+      rbdSoftMaxCloneDepth: 4
       annotations:
         k8s.v1.cni.cncf.io/networks: macvlan-conf-1
       replicas: 2

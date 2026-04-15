@@ -129,6 +129,12 @@ spec:
       plugin: {{ $driver.controllerPlugin.resources.plugin | toYaml | nindent 8 }}
     {{- end }}
     privileged: {{ $driver.controllerPlugin.privileged | default false }}
+    {{- if $driver.controllerPlugin.rbdHardMaxCloneDepth }}
+    rbdHardMaxCloneDepth: {{ $driver.controllerPlugin.rbdHardMaxCloneDepth }}
+    {{- end }}
+    {{- if $driver.controllerPlugin.rbdSoftMaxCloneDepth }}
+    rbdSoftMaxCloneDepth: {{ $driver.controllerPlugin.rbdSoftMaxCloneDepth }}
+    {{- end }}
     {{- if $driver.controllerPlugin.priorityClassName }}
     priorityClassName: {{ $driver.controllerPlugin.priorityClassName }}
     {{- end }}

@@ -486,3 +486,17 @@ func DomainLabelsContainerArg(options []string) string {
 func TopologyContainerArg(topology bool) string {
 	return fmt.Sprintf("--feature-gates=Topology=%t", topology)
 }
+func RbdHardMaxCloneDepthArg(depth int) string {
+	return If(
+		depth > 0,
+		fmt.Sprintf("--rbdhardmaxclonedepth=%d", depth),
+		"",
+	)
+}
+func RbdSoftMaxCloneDepthArg(depth int) string {
+	return If(
+		depth > 0,
+		fmt.Sprintf("--rbdsoftmaxclonedepth=%d", depth),
+		"",
+	)
+}

@@ -1149,7 +1149,6 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 										utils.CsiAddonsAddressContainerArg,
 										utils.ContainerPortArg(port),
 										utils.PodContainerArg,
-										utils.NamespaceContainerArg,
 										utils.PodUidContainerArg,
 										utils.StagingPathContainerArg(kubeletDirPath),
 										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
@@ -1161,9 +1160,9 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 								},
 								Env: []corev1.EnvVar{
 									utils.NodeIdEnvVar,
+									utils.PodUidEnvVar,
 									utils.PodNameEnvVar,
 									utils.PodNamespaceEnvVar,
-									utils.PodUidEnvVar,
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := []corev1.VolumeMount{
@@ -1814,6 +1813,12 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 			}
 			if dest.Privileged == nil {
 				dest.Privileged = src.Privileged
+			}
+			if dest.RbdHardMaxCloneDepth == 0 {
+				dest.RbdHardMaxCloneDepth = src.RbdHardMaxCloneDepth
+			}
+			if dest.RbdSoftMaxCloneDepth == 0 {
+				dest.RbdSoftMaxCloneDepth = src.RbdSoftMaxCloneDepth
 			}
 			if dest.Resources.Attacher == nil {
 				dest.Resources.Attacher = src.Resources.Attacher

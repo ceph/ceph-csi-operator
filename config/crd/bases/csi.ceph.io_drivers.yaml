@@ -1062,6 +1062,19 @@ spec:
                       Some platforms require controller plugin to run privileged,
                       For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
                     type: boolean
+                  rbdHardMaxCloneDepth:
+                    description: |-
+                      RbdHardMaxCloneDepth is the hard limit for the number of nested volume clones
+                      that are taken before a flatten occurs
+                    minimum: 0
+                    type: integer
+                  rbdSoftMaxCloneDepth:
+                    description: |-
+                      RbdSoftMaxCloneDepth is the soft limit for the number of nested volume clones
+                      that are taken before a flatten occurs, a flatten operation will be
+                      triggered when breached
+                    minimum: 0
+                    type: integer
                   replicas:
                     description: Set replicas for controller plugin's deployment.
                       Defaults to 2
