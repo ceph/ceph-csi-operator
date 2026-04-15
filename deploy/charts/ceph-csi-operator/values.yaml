@@ -55,6 +55,8 @@ controllerManager:
     runAsNonRoot: true
   # -- Number of controller manager replicas (default: 1)
   replicas: 1
+  # -- Priority class name for the controller manager pod (default: "")
+  priorityClassName: ""
   serviceAccount:
     # -- Annotations to add to the controller manager service account (default: {})
     annotations: {}

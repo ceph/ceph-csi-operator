@@ -61,3 +61,6 @@ spec:
         8 }}
       serviceAccountName: {{ include "ceph-csi-operator.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
+      {{- if .Values.controllerManager.priorityClassName }}
+      priorityClassName: {{ .Values.controllerManager.priorityClassName }}
+      {{- end }}
