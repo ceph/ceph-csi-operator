@@ -40,7 +40,6 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
-	csiv1alpha1 "github.com/ceph/ceph-csi-operator/api/v1alpha1"
 	"github.com/ceph/ceph-csi-operator/internal/controller"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
 	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1alpha1"
@@ -55,7 +54,6 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(csiv1alpha1.AddToScheme(scheme))
 	utilruntime.Must(csiv1.AddToScheme(scheme))
 	utilruntime.Must(sm.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme

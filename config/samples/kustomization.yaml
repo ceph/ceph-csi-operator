@@ -1,10 +1,5 @@
 ## Append samples of your project ##
 resources:
-- csi_v1alpha1_driver.yaml
-- csi_v1alpha1_operatorconfig.yaml
-- csi_v1alpha1_cephconnection.yaml
-- csi_v1alpha1_clientprofile.yaml
-- csi_v1alpha1_clientprofilemapping.yaml
 - csi_v1_cephconnection.yaml
 - csi_v1_clientprofile.yaml
 - csi_v1_clientprofilemapping.yaml
