@@ -31,7 +31,6 @@ spec:
   {{- if $driver.clusterName }}
   clusterName: {{ $driver.clusterName }}
   {{- end }}
-  enableMetadata: {{ $driver.enableMetadata }}
   grpcTimeout: {{ $driver.grpcTimeout }}
   snapshotPolicy: {{ $driver.snapshotPolicy }}
   generateOMapInfo: {{ $driver.generateOMapInfo }}

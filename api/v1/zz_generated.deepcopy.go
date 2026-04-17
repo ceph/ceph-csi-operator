@@ -579,11 +579,6 @@ func (in *DriverSpec) DeepCopyInto(out *DriverSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.EnableMetadata != nil {
-		in, out := &in.EnableMetadata, &out.EnableMetadata
-		*out = new(bool)
-		**out = **in
-	}
 	if in.EnableFencing != nil {
 		in, out := &in.EnableFencing, &out.EnableFencing
 		*out = new(bool)
