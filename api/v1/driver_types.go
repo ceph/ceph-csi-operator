@@ -291,12 +291,6 @@ type DriverSpec struct {
 	//+kubebuilder:validation:Optional
 	ClusterName *string `json:"clusterName,omitempty"`
 
-	// Set to true to enable adding volume metadata on the CephFS subvolumes and RBD images.
-	// Not all users might be interested in getting volume/snapshot details as metadata on CephFS subvolume and RBD images.
-	// Hence enable metadata is false by default.
-	//+kubebuilder:validation:Optional
-	EnableMetadata *bool `json:"enableMetadata,omitempty"`
-
 	// Set to true to enable fencing for the driver.
 	// Fencing is a feature that allows the driver to fence a node when it is tainted with node.kubernetes.io/out-of-service.
 	//+kubebuilder:validation:Optional
