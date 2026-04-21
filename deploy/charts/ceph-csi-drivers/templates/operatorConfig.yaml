@@ -148,5 +148,9 @@ spec:
       {{- if $config.driverSpecDefaults.controllerPlugin.imagePullPolicy }}
       imagePullPolicy: {{ $config.driverSpecDefaults.controllerPlugin.imagePullPolicy }}
       {{- end }}
+      {{- if $config.driverSpecDefaults.controllerPlugin.extraDriverArgs }}
+      extraDriverArgs:
+        {{- toYaml $config.driverSpecDefaults.controllerPlugin.extraDriverArgs | nindent 8 }}
+      {{- end }}
     {{- end }}
 {{- end }}

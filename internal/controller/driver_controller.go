@@ -614,31 +614,34 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								ImagePullPolicy: imagePullPolicy,
 								SecurityContext: logRotateSecurityContext,
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.TypeContainerArg(string(r.driverType)),
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.EndpointContainerArg,
-										utils.NodeIdContainerArg,
-										utils.ControllerServerContainerArg,
-										utils.DriverNameContainerArg(r.driver.Name),
-										utils.PidlimitContainerArg,
-										utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
-										utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
-										utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
-										utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
-										utils.If(
-											ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
-											utils.CsiAddonsEndpointContainerArg,
-											"",
-										),
-										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
-										utils.If(
-											logRotationEnabled,
-											utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
-											"",
-										),
-									},
+									append(
+										[]string{
+											utils.TypeContainerArg(string(r.driverType)),
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.EndpointContainerArg,
+											utils.NodeIdContainerArg,
+											utils.ControllerServerContainerArg,
+											utils.DriverNameContainerArg(r.driver.Name),
+											utils.PidlimitContainerArg,
+											utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
+											utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
+											utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
+											utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
+											utils.If(
+												ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
+												utils.CsiAddonsEndpointContainerArg,
+												"",
+											),
+											utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+											utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+											utils.If(
+												logRotationEnabled,
+												utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
+												"",
+											),
+										},
+										utils.ExtraDriverArgsContainerArgs(pluginSpec.ExtraDriverArgs)...,
+									),
 								),
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
@@ -1161,9 +1164,9 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 								},
 								Env: []corev1.EnvVar{
 									utils.NodeIdEnvVar,
+									utils.PodUidEnvVar,
 									utils.PodNameEnvVar,
 									utils.PodNamespaceEnvVar,
-									utils.PodUidEnvVar,
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := []corev1.VolumeMount{
@@ -1814,6 +1817,9 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 			}
 			if dest.Privileged == nil {
 				dest.Privileged = src.Privileged
+			}
+			if dest.ExtraDriverArgs == nil {
+				dest.ExtraDriverArgs = src.ExtraDriverArgs
 			}
 			if dest.Resources.Attacher == nil {
 				dest.Resources.Attacher = src.Resources.Attacher

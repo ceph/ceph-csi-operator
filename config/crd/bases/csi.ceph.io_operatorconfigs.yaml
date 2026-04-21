@@ -1049,6 +1049,12 @@ spec:
                               "RollingUpdate". Default is RollingUpdate.
                             type: string
                         type: object
+                      extraDriverArgs:
+                        additionalProperties:
+                          type: string
+                        description: Extra arguments to pass to the CSI controller
+                          plugin container.
+                        type: object
                       hostNetwork:
                         description: hostNetwork setting to be propagated to CSI controller
                           plugin pods
@@ -8290,6 +8296,12 @@ spec:
                             description: Type of deployment. Can be "Recreate" or
                               "RollingUpdate". Default is RollingUpdate.
                             type: string
+                        type: object
+                      extraDriverArgs:
+                        additionalProperties:
+                          type: string
+                        description: Extra arguments to pass to the CSI controller
+                          plugin container.
                         type: object
                       hostNetwork:
                         description: hostNetwork setting to be propagated to CSI controller

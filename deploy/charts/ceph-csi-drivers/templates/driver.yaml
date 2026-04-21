@@ -146,6 +146,10 @@ spec:
     {{- if $driver.controllerPlugin.imagePullPolicy }}
     imagePullPolicy: {{ $driver.controllerPlugin.imagePullPolicy }}
     {{- end }}
+    {{- if $driver.controllerPlugin.extraDriverArgs }}
+    extraDriverArgs:
+      {{- toYaml $driver.controllerPlugin.extraDriverArgs | nindent 6 }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}

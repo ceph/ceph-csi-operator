@@ -234,6 +234,10 @@ type ControllerPluginSpec struct {
 	// For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
 	//+kubebuilder:validation:Optional
 	Privileged *bool `json:"privileged,omitempty"`
+
+	// Extra arguments to pass to the CSI controller plugin container.
+	//+kubebuilder:validation:Optional
+	ExtraDriverArgs map[string]string `json:"extraDriverArgs,omitempty"`
 }
 
 type LivenessSpec struct {
