@@ -106,6 +106,10 @@ spec:
       {{- else }}
       []  # Empty list if no volumes are defined
       {{- end }}
+    {{- if $driver.nodePlugin.containerExtraArgs }}
+    containerExtraArgs:
+      {{- toYaml $driver.nodePlugin.containerExtraArgs | nindent 6 }}
+    {{- end }}
   {{- end }}
   # Controller Plugin Configuration
   controllerPlugin:
@@ -145,6 +149,10 @@ spec:
       {{- end }}
     {{- if $driver.controllerPlugin.imagePullPolicy }}
     imagePullPolicy: {{ $driver.controllerPlugin.imagePullPolicy }}
+    {{- end }}
+    {{- if $driver.controllerPlugin.containerExtraArgs }}
+    containerExtraArgs:
+      {{- toYaml $driver.controllerPlugin.containerExtraArgs | nindent 6 }}
     {{- end }}
   {{- end }}
 {{- end }}

@@ -1,10 +1,9 @@
-# v0.0.1 Pending Release Notes
+# v1.0.0 Pending Release Notes
 
 ## Breaking Changes
 
 ## Features
 
-- CSI-Addons Volume Condition reporting can be enabled by annotating a Driver with `addons.csi.ceph.io/volume-condition: true`.
-- The NVMe-oF driver can be created with a `nvmeof.csi.ceph.com` named csi.ceph.io/v1 Driver CR.
+- Added `containerExtraArgs` field to `NodePluginSpec` and `ControllerPluginSpec` to allow passing custom arguments to CSI containers. The field accepts a map where the key is the container name (e.g., `csi-rbdplugin`, `csi-provisioner`, `driver-registrar`) and the value is a list of CLI arguments. This enables customization of container behavior without modifying default operator values. The field can be configured at both the OperatorConfig level (for defaults) and Driver level (for driver-specific overrides).
 
 ## NOTE
