@@ -622,7 +622,6 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.ControllerServerContainerArg,
 										utils.DriverNameContainerArg(r.driver.Name),
 										utils.PidlimitContainerArg,
-										utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
 										utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
 										utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
 										utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
@@ -881,7 +880,6 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.TypeContainerArg("controller"),
 										utils.DriverNamespaceContainerArg,
 										utils.DriverNameContainerArg(r.driver.Name),
-										utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
 										utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
 									},
 								),
@@ -1703,9 +1701,6 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 	}
 	if dest.ClusterName == nil {
 		dest.ClusterName = src.ClusterName
-	}
-	if dest.EnableMetadata == nil {
-		dest.EnableMetadata = src.EnableMetadata
 	}
 	if dest.GRpcTimeout == 0 {
 		dest.GRpcTimeout = src.GRpcTimeout

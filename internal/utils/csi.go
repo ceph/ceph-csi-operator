@@ -423,9 +423,6 @@ func TypeContainerArg(t string) string {
 		return ""
 	}
 }
-func SetMetadataContainerArg(on bool) string {
-	return fmt.Sprintf("--setmetadata=%t", on)
-}
 func SetFencingContainerArg(on bool) string {
 	return fmt.Sprintf("--enable-fencing=%t", on)
 }
