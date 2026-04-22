@@ -67,7 +67,6 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
 | `drivers.cephfs.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
-| `drivers.cephfs.enableMetadata` | Flag to enable metadata (default: false) | `false` |
 | `drivers.cephfs.enabled` | Enable the CephFS driver (default: true) | `true` |
 | `drivers.cephfs.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
 | `drivers.cephfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None") | `"None"` |
@@ -100,7 +99,6 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
 | `drivers.nfs.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
-| `drivers.nfs.enableMetadata` | Flag to enable metadata (default: false) | `false` |
 | `drivers.nfs.enabled` | Enable the NFS driver (default: true) | `true` |
 | `drivers.nfs.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
 | `drivers.nfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None") | `"None"` |
@@ -134,7 +132,6 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
 | `drivers.nvmeof.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
-| `drivers.nvmeof.enableMetadata` | Flag to enable metadata (default: false) | `false` |
 | `drivers.nvmeof.enabled` | Enable the NVMe-oF driver (default: true) | `true` |
 | `drivers.nvmeof.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
 | `drivers.nvmeof.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
@@ -167,7 +164,6 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
 | `drivers.rbd.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
-| `drivers.rbd.enableMetadata` | Flag to enable metadata (default: false) | `false` |
 | `drivers.rbd.enabled` | Enable the RBD driver (default: true) | `true` |
 | `drivers.rbd.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
 | `drivers.rbd.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
@@ -204,7 +200,6 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
 | `operatorConfig.driverSpecDefaults.deployCsiAddons` | Flag to deploy CSI Addons (default: false) | `false` |
-| `operatorConfig.driverSpecDefaults.enableMetadata` | Flag to enable metadata (default: false) | `false` |
 | `operatorConfig.driverSpecDefaults.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
 | `operatorConfig.driverSpecDefaults.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |

@@ -54,8 +54,6 @@ operatorConfig:
       name: ""
     # -- Cluster name identifier (default: "")
     clusterName: ""
-    # -- Flag to enable metadata (default: false)
-    enableMetadata: false
     # -- gRPC timeout in seconds (default: 30)
     grpcTimeout: 30
     # -- Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")
@@ -141,8 +139,6 @@ drivers:
       name: ""
     # -- Cluster name identifier (default: "")
     clusterName: ""
-    # -- Flag to enable metadata (default: false)
-    enableMetadata: false
     # -- gRPC timeout in seconds (default: 30)
     grpcTimeout: 30
     # -- Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")
@@ -218,8 +214,6 @@ drivers:
       name: ""
     # -- Cluster name identifier (default: "")
     clusterName: ""
-    # -- Flag to enable metadata (default: false)
-    enableMetadata: false
     # -- gRPC timeout in seconds (default: 30)
     grpcTimeout: 30
     # -- Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")
@@ -295,8 +289,6 @@ drivers:
       name: ""
     # -- Cluster name identifier (default: "")
     clusterName: ""
-    # -- Flag to enable metadata (default: false)
-    enableMetadata: false
     # -- gRPC timeout in seconds (default: 30)
     grpcTimeout: 30
     # -- Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot")
@@ -372,8 +364,6 @@ drivers:
       name: ""
     # -- Cluster name identifier (default: "")
     clusterName: ""
-    # -- Flag to enable metadata (default: false)
-    enableMetadata: false
     # -- gRPC timeout in seconds (default: 30)
     grpcTimeout: 30
     # -- Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot")
