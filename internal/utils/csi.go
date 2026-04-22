@@ -511,3 +511,13 @@ func ExtraDriverArgsContainerArgs(args map[string]string) []string {
 
 	return out
 }
+
+// GetExtraArgsForContainer returns the extra arguments for a specific container name.
+// extraArgs is a map where keys are container names and values are lists of CLI arguments.
+// Returns the arguments for the specified container, or an empty slice if none are defined.
+func GetExtraArgsForContainer(containerName string, extraArgs map[string][]string) []string {
+	if len(extraArgs) == 0 {
+		return nil
+	}
+	return extraArgs[containerName]
+}

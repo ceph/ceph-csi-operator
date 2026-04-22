@@ -234,10 +234,6 @@ type ControllerPluginSpec struct {
 	// For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
 	//+kubebuilder:validation:Optional
 	Privileged *bool `json:"privileged,omitempty"`
-
-	// Extra arguments to pass to the CSI controller plugin container.
-	//+kubebuilder:validation:Optional
-	ExtraDriverArgs map[string]string `json:"extraDriverArgs,omitempty"`
 }
 
 type LivenessSpec struct {
@@ -380,6 +376,15 @@ type DriverSpec struct {
 	// Set mount options to use when using the Fuse client
 	//+kubebuilder:validation:Optional
 	FuseMountOptions map[string]string `json:"fuseMountOptions,omitempty"`
+
+	// Extra arguments for containers in the driver deployment.
+	// The key is the container name, the value is a list of CLI arguments.
+	// The operator will not override the default CLI argument values it's setting.
+	// This is more for customizing what comes as default with cephcsi.
+	// Examples of container names: csi-rbdplugin, csi-provisioner, csi-attacher,
+	// csi-resizer, csi-snapshotter, csi-registrar, liveness-prometheus, etc.
+	//+kubebuilder:validation:Optional
+	ExtraArgs map[string][]string `json:"extraArgs,omitempty"`
 }
 
 // DriverStatus defines the observed state of Driver
