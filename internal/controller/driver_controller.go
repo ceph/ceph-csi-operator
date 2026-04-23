@@ -614,31 +614,34 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								ImagePullPolicy: imagePullPolicy,
 								SecurityContext: logRotateSecurityContext,
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.TypeContainerArg(string(r.driverType)),
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.EndpointContainerArg,
-										utils.NodeIdContainerArg,
-										utils.ControllerServerContainerArg,
-										utils.DriverNameContainerArg(r.driver.Name),
-										utils.PidlimitContainerArg,
-										utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
-										utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
-										utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
-										utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
-										utils.If(
-											ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
-											utils.CsiAddonsEndpointContainerArg,
-											"",
-										),
-										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
-										utils.If(
-											logRotationEnabled,
-											utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
-											"",
-										),
-									},
+									append(
+										[]string{
+											utils.TypeContainerArg(string(r.driverType)),
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.EndpointContainerArg,
+											utils.NodeIdContainerArg,
+											utils.ControllerServerContainerArg,
+											utils.DriverNameContainerArg(r.driver.Name),
+											utils.PidlimitContainerArg,
+											utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
+											utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
+											utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
+											utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
+											utils.If(
+												ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
+												utils.CsiAddonsEndpointContainerArg,
+												"",
+											),
+											utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+											utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+											utils.If(
+												logRotationEnabled,
+												utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
+												"",
+											),
+										},
+										utils.GetExtraArgsForContainer(fmt.Sprintf("csi-%splugin", r.driverType), r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
@@ -690,17 +693,20 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["provisioner"],
 								Args: utils.DeleteZeroValues(
 									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LeaderElectionContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddressContainerArg,
-										utils.TimeoutContainerArg(grpcTimeout),
-										utils.RetryIntervalStartContainerArg,
-										utils.DefaultFsTypeContainerArg,
-										utils.PreventVolumeModeConversionContainerArg,
-										utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
-										utils.TopologyContainerArg(topology),
-										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+										append(
+											slices.Clone(leaderElectionSettingsArg),
+											utils.LeaderElectionContainerArg,
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddressContainerArg,
+											utils.TimeoutContainerArg(grpcTimeout),
+											utils.RetryIntervalStartContainerArg,
+											utils.DefaultFsTypeContainerArg,
+											utils.PreventVolumeModeConversionContainerArg,
+											utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
+											utils.TopologyContainerArg(topology),
+											utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+										),
+										utils.GetExtraArgsForContainer("csi-provisioner", r.driver.Spec.ExtraArgs)...,
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -718,13 +724,16 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["resizer"],
 								Args: utils.DeleteZeroValues(
 									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LeaderElectionContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddressContainerArg,
-										utils.TimeoutContainerArg(grpcTimeout),
-										utils.HandleVolumeInuseErrorContainerArg,
-										utils.RecoverVolumeExpansionFailureContainerArg,
+										append(
+											slices.Clone(leaderElectionSettingsArg),
+											utils.LeaderElectionContainerArg,
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddressContainerArg,
+											utils.TimeoutContainerArg(grpcTimeout),
+											utils.HandleVolumeInuseErrorContainerArg,
+											utils.RecoverVolumeExpansionFailureContainerArg,
+										),
+										utils.GetExtraArgsForContainer("csi-resizer", r.driver.Spec.ExtraArgs)...,
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -742,12 +751,15 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["attacher"],
 								Args: utils.DeleteZeroValues(
 									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LeaderElectionContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddressContainerArg,
-										utils.TimeoutContainerArg(grpcTimeout),
-										utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
+										append(
+											slices.Clone(leaderElectionSettingsArg),
+											utils.LeaderElectionContainerArg,
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddressContainerArg,
+											utils.TimeoutContainerArg(grpcTimeout),
+											utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
+										),
+										utils.GetExtraArgsForContainer("csi-attacher", r.driver.Spec.ExtraArgs)...,
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -767,17 +779,20 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["snapshotter"],
 								Args: utils.DeleteZeroValues(
 									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LeaderElectionContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddressContainerArg,
-										utils.TimeoutContainerArg(grpcTimeout),
-										utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
-										utils.If(
-											r.driverType != NfsDriverType && snPolicy == csiv1.VolumeGroupSnapshotPolicy,
-											utils.EnableVolumeGroupSnapshotsContainerArg,
-											"",
+										append(
+											slices.Clone(leaderElectionSettingsArg),
+											utils.LeaderElectionContainerArg,
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddressContainerArg,
+											utils.TimeoutContainerArg(grpcTimeout),
+											utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+											utils.If(
+												r.driverType != NfsDriverType && snPolicy == csiv1.VolumeGroupSnapshotPolicy,
+												utils.EnableVolumeGroupSnapshotsContainerArg,
+												"",
+											),
 										),
+										utils.GetExtraArgsForContainer("csi-snapshotter", r.driver.Spec.ExtraArgs)...,
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -806,13 +821,16 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								},
 								Args: utils.DeleteZeroValues(
 									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LeaderElectionContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddressContainerArg,
-										utils.TimeoutContainerArg(grpcTimeout),
-										utils.ExtraCreateMetadataContainerArg,
-										utils.EnableVolumeGroupSnapshotsContainerArg,
+										append(
+											slices.Clone(leaderElectionSettingsArg),
+											utils.LeaderElectionContainerArg,
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddressContainerArg,
+											utils.TimeoutContainerArg(grpcTimeout),
+											utils.ExtraCreateMetadataContainerArg,
+											utils.EnableVolumeGroupSnapshotsContainerArg,
+										),
+										utils.GetExtraArgsForContainer("ex-csi-snapshotter", r.driver.Spec.ExtraArgs)...,
 									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
@@ -834,15 +852,18 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								SecurityContext: logRotateSecurityContext,
 								Args: utils.DeleteZeroValues(
 									append(
-										slices.Clone(leaderElectionSettingsArg),
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddonsNodeIdContainerArg,
-										utils.PodContainerArg,
-										utils.PodUidContainerArg,
-										utils.CsiAddonsAddressContainerArg,
-										utils.ContainerPortArg(port),
-										utils.NamespaceContainerArg,
-										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+										append(
+											slices.Clone(leaderElectionSettingsArg),
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddonsNodeIdContainerArg,
+											utils.PodContainerArg,
+											utils.PodUidContainerArg,
+											utils.CsiAddonsAddressContainerArg,
+											utils.ContainerPortArg(port),
+											utils.NamespaceContainerArg,
+											utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+										),
+										utils.GetExtraArgsForContainer("csi-addons", r.driver.Spec.ExtraArgs)...,
 									),
 								),
 								Ports: []corev1.ContainerPort{
@@ -876,14 +897,17 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.TypeContainerArg("controller"),
-										utils.DriverNamespaceContainerArg,
-										utils.DriverNameContainerArg(r.driver.Name),
-										utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
-										utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
-									},
+									append(
+										[]string{
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.TypeContainerArg("controller"),
+											utils.DriverNamespaceContainerArg,
+											utils.DriverNameContainerArg(r.driver.Name),
+											utils.SetMetadataContainerArg(ptr.Deref(r.driver.Spec.EnableMetadata, false)),
+											utils.ClusterNameContainerArg(ptr.Deref(r.driver.Spec.ClusterName, "")),
+										},
+										utils.GetExtraArgsForContainer("csi-omap-generator", r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								Env: []corev1.EnvVar{
 									utils.DriverNamespaceEnvVar,
@@ -905,14 +929,17 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.TypeContainerArg("liveness"),
-										utils.EndpointContainerArg,
-										utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
-										utils.MetricsPathContainerArg,
-										utils.PoolTimeContainerArg,
-										utils.TimeoutContainerArg(3),
-									},
+									append(
+										[]string{
+											utils.TypeContainerArg("liveness"),
+											utils.EndpointContainerArg,
+											utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
+											utils.MetricsPathContainerArg,
+											utils.PoolTimeContainerArg,
+											utils.TimeoutContainerArg(3),
+										},
+										utils.GetExtraArgsForContainer("liveness-prometheus", r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
@@ -1143,27 +1170,30 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 									},
 								},
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.CsiAddonsNodeIdContainerArg,
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.CsiAddonsAddressContainerArg,
-										utils.ContainerPortArg(port),
-										utils.PodContainerArg,
-										utils.NamespaceContainerArg,
-										utils.PodUidContainerArg,
-										utils.StagingPathContainerArg(kubeletDirPath),
-										utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
-										utils.If(withCsiAddonsVolumeCondition, utils.CsiAddonsVolumeConditionArg, ""),
-									},
+									append(
+										[]string{
+											utils.CsiAddonsNodeIdContainerArg,
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.CsiAddonsAddressContainerArg,
+											utils.ContainerPortArg(port),
+											utils.PodContainerArg,
+											utils.NamespaceContainerArg,
+											utils.PodUidContainerArg,
+											utils.StagingPathContainerArg(kubeletDirPath),
+											utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+											utils.If(withCsiAddonsVolumeCondition, utils.CsiAddonsVolumeConditionArg, ""),
+										},
+										utils.GetExtraArgsForContainer("csi-addons", r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								Ports: []corev1.ContainerPort{
 									port,
 								},
 								Env: []corev1.EnvVar{
 									utils.NodeIdEnvVar,
+									utils.PodUidEnvVar,
 									utils.PodNameEnvVar,
 									utils.PodNamespaceEnvVar,
-									utils.PodUidEnvVar,
 								},
 								VolumeMounts: utils.Call(func() []corev1.VolumeMount {
 									mounts := []corev1.VolumeMount{
@@ -1317,49 +1347,52 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									AllowPrivilegeEscalation: ptr.To(true),
 								},
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.TypeContainerArg(string(r.driverType)),
-										utils.NodeServerContainerArg,
-										utils.NodeIdContainerArg,
-										utils.DriverNameContainerArg(r.driver.Name),
-										utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
-										utils.EndpointContainerArg,
-										utils.PidlimitContainerArg,
-										utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
-										utils.If(
-											ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
-											utils.CsiAddonsEndpointContainerArg,
-											"",
-										),
-										utils.If(
-											r.isRbdOrNvemofDriver(),
-											utils.StagingPathContainerArg(kubeletDirPath),
-											"",
-										),
-										utils.If(
-											r.isCephFsDriver(),
-											utils.KernelMountOptionsContainerArg(r.driver.Spec.KernelMountOptions),
-											"",
-										),
-										utils.If(
-											r.isCephFsDriver(),
-											utils.FuseMountOptionsContainerArg(r.driver.Spec.FuseMountOptions),
-											"",
-										),
-										utils.If(
-											topology,
-											utils.DomainLabelsContainerArg(domainLabels),
-											"",
-										),
-										utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
-										utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
-										utils.If(
-											logRotationEnabled,
-											utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
-											"",
-										),
-									},
+									append(
+										[]string{
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.TypeContainerArg(string(r.driverType)),
+											utils.NodeServerContainerArg,
+											utils.NodeIdContainerArg,
+											utils.DriverNameContainerArg(r.driver.Name),
+											utils.SetFencingContainerArg(ptr.Deref(r.driver.Spec.EnableFencing, false)),
+											utils.EndpointContainerArg,
+											utils.PidlimitContainerArg,
+											utils.If(forceKernelClient, utils.ForceCephKernelClientContainerArg, ""),
+											utils.If(
+												ptr.Deref(r.driver.Spec.DeployCsiAddons, false),
+												utils.CsiAddonsEndpointContainerArg,
+												"",
+											),
+											utils.If(
+												r.isRbdOrNvemofDriver(),
+												utils.StagingPathContainerArg(kubeletDirPath),
+												"",
+											),
+											utils.If(
+												r.isCephFsDriver(),
+												utils.KernelMountOptionsContainerArg(r.driver.Spec.KernelMountOptions),
+												"",
+											),
+											utils.If(
+												r.isCephFsDriver(),
+												utils.FuseMountOptionsContainerArg(r.driver.Spec.FuseMountOptions),
+												"",
+											),
+											utils.If(
+												topology,
+												utils.DomainLabelsContainerArg(domainLabels),
+												"",
+											),
+											utils.If(logRotationEnabled, utils.LogToStdErrContainerArg, ""),
+											utils.If(logRotationEnabled, utils.AlsoLogToStdErrContainerArg, ""),
+											utils.If(
+												logRotationEnabled,
+												utils.LogFileContainerArg(fmt.Sprintf("csi-%splugin", r.driverType)),
+												"",
+											),
+										},
+										utils.GetExtraArgsForContainer(fmt.Sprintf("csi-%splugin", r.driverType), r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
@@ -1428,11 +1461,14 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									},
 								},
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.LogVerbosityContainerArg(logVerbosity),
-										utils.KubeletRegistrationPathContainerArg(kubeletDirPath, r.driver.Name),
-										utils.CsiAddressContainerArg,
-									},
+									append(
+										[]string{
+											utils.LogVerbosityContainerArg(logVerbosity),
+											utils.KubeletRegistrationPathContainerArg(kubeletDirPath, r.driver.Name),
+											utils.CsiAddressContainerArg,
+										},
+										utils.GetExtraArgsForContainer("driver-registrar", r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								VolumeMounts: []corev1.VolumeMount{
 									utils.PluginDirVolumeMount,
@@ -1457,14 +1493,17 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									},
 								},
 								Args: utils.DeleteZeroValues(
-									[]string{
-										utils.TypeContainerArg("liveness"),
-										utils.EndpointContainerArg,
-										utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
-										utils.MetricsPathContainerArg,
-										utils.PoolTimeContainerArg,
-										utils.TimeoutContainerArg(3),
-									},
+									append(
+										[]string{
+											utils.TypeContainerArg("liveness"),
+											utils.EndpointContainerArg,
+											utils.MetricsPortContainerArg(r.driver.Spec.Liveness.MetricsPort),
+											utils.MetricsPathContainerArg,
+											utils.PoolTimeContainerArg,
+											utils.TimeoutContainerArg(3),
+										},
+										utils.GetExtraArgsForContainer("liveness-prometheus", r.driver.Spec.ExtraArgs)...,
+									),
 								),
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,

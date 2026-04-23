@@ -112,6 +112,8 @@ operatorConfig:
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
+      # -- Extra driver arguments (default: {})
+      extraDriverArgs: {}
       # -- Affinity settings for the pod (default: {})
       affinity: {}
       # -- Image pull policy (default: "IfNotPresent")
@@ -195,6 +197,8 @@ drivers:
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
+      # -- Extra driver arguments (default: {})
+      extraDriverArgs: {}
   # NVMe-oF driver configuration (backed by RBD)
   nvmeof:
     # -- CSI driver name for NVMe-oF (default: "nvmeof.csi.ceph.com")
@@ -272,6 +276,8 @@ drivers:
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
+      # -- Extra driver arguments (default: {})
+      extraDriverArgs: {}
   # CephFS driver configuration
   cephfs:
     # -- CSI driver name for CephFS (default: "cephfs.csi.ceph.com")
@@ -349,6 +355,8 @@ drivers:
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
+      # -- Extra driver arguments (default: {})
+      extraDriverArgs: {}
   # NFS driver configuration
   nfs:
     # -- CSI driver name for NFS (default: "nfs.csi.ceph.com")
@@ -428,5 +436,7 @@ drivers:
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
+      # -- Extra driver arguments (default: {})
+      extraDriverArgs: {}
 # -- List of pull secret names that will be added to all serviceaccounts (default: [])
 imagePullSecrets: []

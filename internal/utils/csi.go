@@ -18,6 +18,7 @@ package utils
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -485,4 +486,38 @@ func DomainLabelsContainerArg(options []string) string {
 }
 func TopologyContainerArg(topology bool) string {
 	return fmt.Sprintf("--feature-gates=Topology=%t", topology)
+}
+
+func ExtraDriverArgsContainerArgs(args map[string]string) []string {
+	if len(args) == 0 {
+		return nil
+	}
+
+	keys := make([]string, 0, len(args))
+	for key := range args {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+
+	out := make([]string, 0, len(keys))
+	for _, key := range keys {
+		value := args[key]
+		if value == "" {
+			out = append(out, fmt.Sprintf("--%s", key))
+			continue
+		}
+		out = append(out, fmt.Sprintf("--%s=%s", key, value))
+	}
+
+	return out
+}
+
+// GetExtraArgsForContainer returns the extra arguments for a specific container name.
+// extraArgs is a map where keys are container names and values are lists of CLI arguments.
+// Returns the arguments for the specified container, or an empty slice if none are defined.
+func GetExtraArgsForContainer(containerName string, extraArgs map[string][]string) []string {
+	if len(extraArgs) == 0 {
+		return nil
+	}
+	return extraArgs[containerName]
 }
