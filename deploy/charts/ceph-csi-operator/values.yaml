@@ -92,3 +92,7 @@ rbdNodepluginSa:
   serviceAccount:
     # -- Annotations to add to the RBD node plugin service account (default: {})
     annotations: {}
+# OpenShift configuration
+openshift:
+  # -- Enable OpenShift-specific resources (SecurityContextConstraints) (default: false)
+  enabled: false

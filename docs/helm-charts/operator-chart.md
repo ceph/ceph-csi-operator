@@ -38,6 +38,24 @@ helm install ceph-csi-operator --create-namespace --namespace ceph-csi-operator-
 
 For example settings, see the next section or [values.yaml](https://github.com/ceph/ceph-csi-operator/tree/main/deploy/charts/ceph-csi-operator/values.yaml)
 
+### **OpenShift Installation**
+
+For OpenShift clusters, enable the OpenShift-specific SecurityContextConstraints (SCC) by setting `openshift.enabled=true`:
+
+```console
+helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/
+helm install ceph-csi-operator --create-namespace --namespace ceph-csi-operator-system \
+  --set openshift.enabled=true \
+  ceph-csi-operator/ceph-csi-operator
+```
+
+This will create:
+* A SecurityContextConstraint (`ceph-csi-operator-scc`) that grants the necessary permissions for CSI operations
+* A ClusterRole (`ceph-csi-operator-scc-user`) that allows using the SCC
+* ClusterRoleBindings that bind all CSI service accounts to the SCC ClusterRole
+
+**Note:** When deploying drivers on OpenShift, you must also enable OpenShift support in the drivers chart. See the [drivers chart documentation](./drivers-chart.md#openshift-installation) for details.
+
 ## Configuration
 
 The following table lists the configurable parameters of the ceph-csi-operator chart and their default values.
@@ -67,6 +85,7 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `nfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the NFS node plugin service account (default: {}) | `{}` |
 | `nvmeofCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF controller plugin service account (default: {}) | `{}` |
 | `nvmeofNodepluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF node plugin service account (default: {}) | `{}` |
+| `openshift.enabled` | Enable OpenShift-specific resources (SecurityContextConstraints) (default: false) | `false` |
 | `rbdCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the RBD controller plugin service account (default: {}) | `{}` |
 | `rbdNodepluginSa.serviceAccount.annotations` | Annotations to add to the RBD node plugin service account (default: {}) | `{}` |
 

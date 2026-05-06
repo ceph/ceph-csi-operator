@@ -12,7 +12,9 @@ This document provides an overview of the two main installation methods for **Ce
 - **Helm Chart Installation**: A simpler, more automated way to install Ceph-CSI using Helm charts.
 - **Kubernetes YAML Installation**: A manual method for installing Ceph-CSI using Kubernetes YAML files.
 
-Both methods achieve the same goal deploying Ceph-CSI drivers and operators in your Kubernetes cluster but they offer different levels of control and automation.
+Both methods achieve the same goal deploying Ceph-CSI drivers and operators in your Kubernetes or OpenShift cluster but they offer different levels of control and automation.
+
+**Note:** For OpenShift deployments, additional SecurityContextConstraints (SCC) are required. See the OpenShift-specific sections in each installation method for details.
 
 ## 2. Choose Your Installation Method
 

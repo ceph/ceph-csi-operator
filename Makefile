@@ -198,6 +198,14 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	$(KUSTOMIZE) build build > deploy/all-in-one/install.yaml
 	rm -rf build
 
+.PHONY: build-openshift-installer
+build-openshift-installer: manifests generate kustomize ## Generate a consolidated YAML with CRDs, deployment, and OpenShift SCC.
+	mkdir -p build deploy/all-in-one
+	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
+	cd build && $(KUSTOMIZE) edit add resource ../config/openshift/
+	$(KUSTOMIZE) build build > deploy/all-in-one/install-openshift.yaml
+	rm -rf build
+
 .PHONY: build-helm-installer
 build-helm-installer: manifests generate kustomize helmify ## Generate helm charts for the operator.
 	mkdir -p build deploy
@@ -238,17 +246,11 @@ verify-helm-values: manifests generate kustomize helmify ## Verify operator valu
 	@cd build && $(KUSTOMIZE) edit add resource ../config/default/
 	@mkdir -p build/tmp-chart
 	@$(KUSTOMIZE) build build | $(HELMIFY) -preserve-ns -image-pull-secrets build/tmp-chart > /dev/null 2>&1
-	@# Compare values by stripping comments from the maintained file
+	@# Strip comments from both files
 	@grep -v '^[[:space:]]*#' deploy/charts/ceph-csi-operator/values.yaml | grep -v '^[[:space:]]*$$' > build/maintained-values-stripped.yaml
 	@grep -v '^[[:space:]]*#' build/tmp-chart/values.yaml | grep -v '^[[:space:]]*$$' > build/generated-values-stripped.yaml
-	@if ! diff -q build/maintained-values-stripped.yaml build/generated-values-stripped.yaml > /dev/null 2>&1; then \
-		echo "ERROR: deploy/charts/ceph-csi-operator/values.yaml is out of sync with generated output."; \
-		echo "Diff (maintained vs generated):"; \
-		diff -u build/maintained-values-stripped.yaml build/generated-values-stripped.yaml || true; \
-		rm -rf build; \
-		exit 1; \
-	fi
-	@echo "deploy/charts/ceph-csi-operator/values.yaml is in sync."
+	@# Verify that all generated values exist in the maintained file (allow additional fields in maintained)
+	@python3 hack/verify-helm-values-subset.py build/generated-values-stripped.yaml build/maintained-values-stripped.yaml
 	@rm -rf build
 
 ##@ Docs

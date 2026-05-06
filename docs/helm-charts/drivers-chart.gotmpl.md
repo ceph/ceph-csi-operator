@@ -39,6 +39,25 @@ helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver cep
 
 For example settings, see the next section or [values.yaml](https://github.com/ceph/ceph-csi-operator/tree/main/deploy/charts/ceph-csi-drivers/values.yaml)
 
+### **OpenShift Installation**
+
+For OpenShift clusters, you must enable OpenShift support and configure the SCC ClusterRole name to match the operator installation:
+
+```console
+helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator-charts
+helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver \
+  --set openshift.enabled=true \
+  --set openshift.sccClusterRoleName=ceph-csi-operator-scc-user \
+  ceph-csi-operator/ceph-csi-drivers
+```
+
+**Important:**
+* The operator chart must be installed first with `openshift.enabled=true` to create the SCC and ClusterRole
+* The `sccClusterRoleName` must match the ClusterRole created by the operator chart (format: `<operator-release-name>-scc-user`)
+* If you used a custom release name for the operator (e.g., `my-operator`), set `sccClusterRoleName=my-operator-scc-user`
+
+This will create ClusterRoleBindings in the driver namespace that bind the driver service accounts to the SCC ClusterRole created by the operator chart.
+
 ## Configuration
 
 The following table lists the configurable parameters of the ceph-csi-drivers chart and their default values.
