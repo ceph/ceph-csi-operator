@@ -420,3 +420,10 @@ drivers:
       tolerations: []
 # -- List of pull secret names that will be added to all serviceaccounts (default: [])
 imagePullSecrets: []
+# OpenShift configuration
+openshift:
+  # -- Enable OpenShift-specific resources (ClusterRoleBindings for SCC) (default: false)
+  enabled: false
+  # -- Name of the SCC ClusterRole created by the operator chart (default: "ceph-csi-operator-scc-user")
+  # This should match the ClusterRole name from the operator chart: {{ operator-release-name }}-scc-user
+  sccClusterRoleName: "ceph-csi-operator-scc-user"

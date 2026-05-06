@@ -40,6 +40,25 @@ helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver cep
 
 For example settings, see the next section or [values.yaml](https://github.com/ceph/ceph-csi-operator/tree/main/deploy/charts/ceph-csi-drivers/values.yaml)
 
+### **OpenShift Installation**
+
+For OpenShift clusters, you must enable OpenShift support and configure the SCC ClusterRole name to match the operator installation:
+
+```console
+helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator-charts
+helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver \
+  --set openshift.enabled=true \
+  --set openshift.sccClusterRoleName=ceph-csi-operator-scc-user \
+  ceph-csi-operator/ceph-csi-drivers
+```
+
+**Important:**
+* The operator chart must be installed first with `openshift.enabled=true` to create the SCC and ClusterRole
+* The `sccClusterRoleName` must match the ClusterRole created by the operator chart (format: `<operator-release-name>-scc-user`)
+* If you used a custom release name for the operator (e.g., `my-operator`), set `sccClusterRoleName=my-operator-scc-user`
+
+This will create ClusterRoleBindings in the driver namespace that bind the driver service accounts to the SCC ClusterRole created by the operator chart.
+
 ## Configuration
 
 The following table lists the configurable parameters of the ceph-csi-drivers chart and their default values.
@@ -187,6 +206,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
 | `drivers.rbd.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
 | `imagePullSecrets` | List of pull secret names that will be added to all serviceaccounts (default: []) | `[]` |
+| `openshift.enabled` | Enable OpenShift-specific resources (ClusterRoleBindings for SCC) (default: false) | `false` |
+| `openshift.sccClusterRoleName` | Name of the SCC ClusterRole created by the operator chart (default: "ceph-csi-operator-scc-user") This should match the ClusterRole name from the operator chart: {{ operator-release-name }}-scc-user | `"ceph-csi-operator-scc-user"` |
 | `operatorConfig.create` | Flag to indicate if the config should be created (default: true) | `true` |
 | `operatorConfig.driverSpecDefaults.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `operatorConfig.driverSpecDefaults.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |

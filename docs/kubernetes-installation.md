@@ -3,139 +3,247 @@
 ---
 - [Ceph-CSI-Operator Release Installation Guide](#ceph-csi-operator-release-installation-guide)
   - [1. Prerequisites](#1-prerequisites)
-  - [2. Install the Ceph-CSI Operator](#2-install-the-ceph-csi-operator)
+    - [Clone the Repository](#clone-the-repository)
+  - [2. Kubernetes Installation](#2-kubernetes-installation)
     - [2.1 All-in-One Installation](#21-all-in-one-installation)
-      - [Step 1: Install from the Released Version](#step-1-install-from-the-released-version)
-      - [Step 2: Verify Installation](#step-2-verify-installation)
+      - [Install the Operator](#install-the-operator)
+      - [Verify Installation](#verify-installation)
     - [2.2 Multi-File Installation](#22-multi-file-installation)
       - [Step 1: Install CRDs](#step-1-install-crds)
-      - [Step 2: Create RBAC Resources in the Desired Namespace](#step-2-create-rbac-resources-in-the-desired-namespace)
-      - [Step 3: Install the Ceph-CSI Operator](#step-3-install-the-ceph-csi-operator)
-      - [Step 4: Verify the Installation](#step-4-verify-the-installation)
-    - [3. Deploy Ceph-CSI Drivers](#3-deploy-ceph-csi-drivers)
-      - [3.1 Deploy the RBD Driver](#31-deploy-the-rbd-driver)
-      - [3.2 Deploy the CephFS Driver](#32-deploy-the-cephfs-driver)
-      - [3.3 Deploy the Ceph-NFS Driver](#33-deploy-the-ceph-nfs-driver)
-  - [4. Verify Installation](#4-verify-installation)
-  - [5. Create CephConnection](#5-create-cephconnection)
-  - [6. Create ClientProfile](#6-create-clientprofile)
-  - [7. Create Ceph Secrets](#7-create-ceph-secrets)
-  - [8. Create StorageClasses](#8-create-storageclasses)
-  - [9. Create VolumeSnapshotClasses (Optional)](#9-create-volumesnapshotclasses-optional)
-  - [10. Verify Storage Provisioning](#10-verify-storage-provisioning)
-  - [11. Upgrade Ceph-CSI Operator and Drivers](#11-upgrade-ceph-csi-operator-and-drivers)
-    - [Step 1: Checkout the Latest Tag](#step-1-checkout-the-latest-tag)
-      - [Step 2: Apply the updated yaml's](#step-2-apply-the-updated-yamls)
-      - [Step 3: Verify the Upgrade](#step-3-verify-the-upgrade)
-  - [7. Clean Up Resources](#7-clean-up-resources)
+      - [Step 2: Create RBAC Resources](#step-2-create-rbac-resources)
+      - [Step 3: Install the Operator](#step-3-install-the-operator)
+      - [Step 4: Verify Installation](#step-4-verify-installation)
+  - [3. OpenShift Installation](#3-openshift-installation)
+    - [Prerequisites](#prerequisites)
+    - [3.1 All-in-One Installation](#31-all-in-one-installation)
+      - [Install the Operator with SCC](#install-the-operator-with-scc)
+      - [Verify Installation](#verify-installation-1)
+      - [Verify SCC Resources](#verify-scc-resources)
+    - [3.2 Multi-File Installation](#32-multi-file-installation)
+      - [Step 1: Install CRDs](#step-1-install-crds-1)
+      - [Step 2: Create RBAC Resources](#step-2-create-rbac-resources-1)
+      - [Step 3: Create OpenShift SCC](#step-3-create-openshift-scc)
+      - [Step 4: Install the Operator](#step-4-install-the-operator)
+      - [Step 5: Verify Installation](#step-5-verify-installation)
+  - [4. Deploy Ceph-CSI Drivers](#4-deploy-ceph-csi-drivers)
+    - [4.1 Deploy the RBD Driver](#41-deploy-the-rbd-driver)
+    - [4.2 Deploy the CephFS Driver](#42-deploy-the-cephfs-driver)
+    - [4.3 Deploy the Ceph-NFS Driver](#43-deploy-the-ceph-nfs-driver)
+  - [5. Verify Installation](#5-verify-installation)
+  - [6. Create CephConnection](#6-create-cephconnection)
+  - [7. Create ClientProfile](#7-create-clientprofile)
+  - [8. Create Ceph Secrets](#8-create-ceph-secrets)
+  - [9. Create StorageClasses](#9-create-storageclasses)
+  - [10. Create VolumeSnapshotClasses (Optional)](#10-create-volumesnapshotclasses-optional)
+  - [11. Verify Storage Provisioning](#11-verify-storage-provisioning)
+  - [12. Upgrade Ceph-CSI Operator and Drivers](#12-upgrade-ceph-csi-operator-and-drivers)
+    - [Step 1: Fetch and Checkout the Latest Tag](#step-1-fetch-and-checkout-the-latest-tag)
+    - [Step 2: Apply Updated Manifests](#step-2-apply-updated-manifests)
+      - [For Kubernetes (All-in-One)](#for-kubernetes-all-in-one)
+      - [For OpenShift (All-in-One)](#for-openshift-all-in-one)
+      - [For Multi-File Installation](#for-multi-file-installation)
+    - [Step 3: Verify the Upgrade](#step-3-verify-the-upgrade)
+  - [13. Clean Up Resources](#13-clean-up-resources)
+    - [Step 1: Delete Custom Resources](#step-1-delete-custom-resources)
+    - [Step 2: Uninstall the Operator](#step-2-uninstall-the-operator)
+      - [For Kubernetes](#for-kubernetes)
+      - [For OpenShift](#for-openshift)
+      - [For Multi-File Installation](#for-multi-file-installation-1)
+    - [Step 3: Verify Deletion](#step-3-verify-deletion)
 
 ## 1. Prerequisites
 
 Before proceeding with the installation of the Ceph-CSI Operator, ensure the following requirements are met:
 
-- **Kubernetes Cluster:** A running Kubernetes cluster with a supported version ([Kubernetes Release Versions](https://kubernetes.io/releases/)).
-- **Ceph Cluster:** A Ceph cluster with a supported version ([Ceph Releases](https://docs.ceph.com/en/latest/releases/)).
-- **kubectl CLI:** The `kubectl` command-line tool must be installed and configured to interact with your Kubernetes cluster.
+- **Kubernetes or OpenShift Cluster:**
+  - Kubernetes: A running cluster with a supported version ([Kubernetes Release Versions](https://kubernetes.io/releases/))
+  - OpenShift: Version 4.19 or later with cluster administrator privileges
+- **Ceph Cluster:** A Ceph cluster with a supported version ([Ceph Releases](https://docs.ceph.com/en/latest/releases/))
+- **CLI Tools:**
+  - `kubectl` for Kubernetes clusters
+  - `oc` or `kubectl` for OpenShift clusters
 
-**Note:** This guide assumes minimal configuration to deploy the Ceph-CSI Operator and drivers. You may customize the configurations as per your environment and requirements.
+### Clone the Repository
 
+For all installation methods, clone the Ceph-CSI-Operator repository and checkout the desired release tag:
 
-
-## 2. Install the Ceph-CSI Operator
-
-Ceph-CSI Operator installation can be done using two methods: **All-in-One Installation** or **Multi-File Installation**. Choose the method that best suits your requirements.
-
-Step 1: Clone the Ceph-CSI Repository and Checkout the Release Tag
-
-For both installation methods (All-in-One and Multi-File), it's necessary to checkout the desired release tag from the Ceph-CSI repository.
-
-```concole
+```console
 git clone https://github.com/ceph/ceph-csi-operator.git
 cd ceph-csi-operator
 git checkout v0.3.1
 ```
 
-**Note:** checkout the latest tag, refer to [Releases](https://github.com/ceph/ceph-csi-operator/releases) for latest.
+**Note:** Check out the latest tag from [Releases](https://github.com/ceph/ceph-csi-operator/releases).
+
+---
+
+## 2. Kubernetes Installation
+
+Choose either the All-in-One or Multi-File installation method based on your requirements.
 
 ### 2.1 All-in-One Installation
 
-The **All-in-One Installation** method allows for a quick and easy deployment of the Ceph-CSI Operator and all its components (CRDs, RBAC, operator) in a single step.
+The All-in-One installation deploys all components (CRDs, RBAC, operator) in a single command.
 
-#### Step 1: Install from the Released Version
-
-To install the Ceph-CSI Operator, use the following command:
+#### Install the Operator
 
 ```console
 kubectl create -f deploy/all-in-one/install.yaml
 ```
 
-This YAML file will install:
-
-- The Ceph-CSI Operator
+This creates:
 - Custom Resource Definitions (CRDs)
 - RBAC resources (Role-Based Access Control)
+- Ceph-CSI Operator deployment
 
-#### Step 2: Verify Installation
-
+#### Verify Installation
 
 ```bash
 kubectl get pods -n ceph-csi-operator-system
+```
+
+Expected output:
+
+```text
 NAME                                                    READY   STATUS    RESTARTS   AGE
 ceph-csi-operator-controller-manager-67d45fd9ff-zgst7   2/2     Running   0          40s
 ```
-
 
 ### 2.2 Multi-File Installation
 
-The **Multi-File Installation** method is more flexible and allows you to deploy each component (CRDs, RBAC, Operator) separately, providing finer control over the installation process.
-
-Install CRDs, Operator, and RBAC Resources in your specific namespace
-
-The RBAC (Role-Based Access Control) resources should be applied in the same namespace where you plan to install the Ceph-CSI drivers.
+The Multi-File installation provides finer control by deploying components separately.
 
 #### Step 1: Install CRDs
 
-First, create the CRDs for the Ceph-CSI components:
-
-```concole
+```console
 kubectl create -f deploy/multifile/crd.yaml
 ```
 
-This will create the necessary Custom Resource Definitions (CRDs) like CephConnection, ClientProfile, ClientProfileMapping and Driver.
+This creates the Custom Resource Definitions: `CephConnection`, `ClientProfile`, `ClientProfileMapping`, and `Driver`.
 
-#### Step 2: Create RBAC Resources in the Desired Namespace
+#### Step 2: Create RBAC Resources
 
-You need to create the RBAC resources in the namespace where you plan to install the Ceph-CSI drivers. For example, if you're using the ceph-csi-operator-system namespace:
+Create RBAC resources in the namespace where you plan to install the Ceph-CSI drivers:
 
+```console
 kubectl create -f deploy/multifile/csi-rbac.yaml -n ceph-csi-operator-system
+```
 
-This will ensure the correct service accounts, roles, and role bindings are created in the target namespace.
+#### Step 3: Install the Operator
 
-#### Step 3: Install the Ceph-CSI Operator
-
-After applying the CRDs and RBAC resources, install the Ceph-CSI Operator itself. Make sure you have the correct namespace set for the installation.
-
-```concole
+```console
 kubectl create -f deploy/multifile/operator.yaml -n ceph-csi-operator-system
 ```
 
-#### Step 4: Verify the Installation
-
-After installing the operator, verify the pods in your specified namespace:
+#### Step 4: Verify Installation
 
 ```bash
 kubectl get pods -n ceph-csi-operator-system
+```
+
+Expected output:
+
+```text
 NAME                                                    READY   STATUS    RESTARTS   AGE
 ceph-csi-operator-controller-manager-67d45fd9ff-zgst7   2/2     Running   0          40s
 ```
 
-You should see the Ceph-CSI operator controller running.
+---
 
-### 3. Deploy Ceph-CSI Drivers
+## 3. OpenShift Installation
 
-Once the operator is installed, deploy the Ceph-CSI drivers:
+When deploying on OpenShift, additional SecurityContextConstraints (SCC) resources are required to grant necessary permissions for CSI operations.
 
-#### 3.1 Deploy the RBD Driver
+### Prerequisites
+
+- OpenShift 4.x cluster
+- Cluster administrator privileges to create SecurityContextConstraints
+
+### 3.1 All-in-One Installation
+
+The recommended method for OpenShift is the all-in-one installer that includes SCC resources.
+
+#### Install the Operator with SCC
+
+```console
+kubectl create -f deploy/all-in-one/install-openshift.yaml
+```
+
+This creates:
+- All operator components (CRDs, RBAC, deployment)
+- SecurityContextConstraint (`ceph-csi-scc`) with necessary host-level permissions
+- ClusterRole to use the SCC
+- ClusterRoleBindings for all CSI service accounts (RBD, CephFS, NFS, NVMe-oF)
+
+#### Verify Installation
+
+```bash
+kubectl get pods -n ceph-csi-operator-system
+```
+
+Expected output:
+
+```text
+NAME                                                    READY   STATUS    RESTARTS   AGE
+ceph-csi-operator-controller-manager-67d45fd9ff-zgst7   2/2     Running   0          40s
+```
+
+#### Verify SCC Resources
+
+```bash
+oc get scc | grep ceph-csi
+```
+
+Expected output:
+
+```text
+ceph-csi-scc   false   []        RunAsAny   RunAsAny   RunAsAny   RunAsAny   <none>     false
+```
+
+### 3.2 Multi-File Installation
+
+For more granular control, you can install components separately.
+
+#### Step 1: Install CRDs
+
+```console
+kubectl create -f deploy/multifile/crd.yaml
+```
+
+#### Step 2: Create RBAC Resources
+
+```console
+kubectl create -f deploy/multifile/csi-rbac.yaml -n ceph-csi-operator-system
+```
+
+#### Step 3: Create OpenShift SCC
+
+```console
+kubectl create -f deploy/multifile/openshift-scc.yaml
+```
+
+This creates the SecurityContextConstraints and necessary RBAC for CSI service accounts.
+
+#### Step 4: Install the Operator
+
+```console
+kubectl create -f deploy/multifile/operator.yaml -n ceph-csi-operator-system
+```
+
+#### Step 5: Verify Installation
+
+```bash
+kubectl get pods -n ceph-csi-operator-system
+oc get scc | grep ceph-csi
+```
+
+---
+
+## 4. Deploy Ceph-CSI Drivers
+
+Once the operator is installed (on either Kubernetes or OpenShift), deploy the required CSI drivers.
+
+### 4.1 Deploy the RBD Driver
 
 ```console
 echo '
@@ -147,7 +255,7 @@ metadata:
 ' | kubectl create -f -
 ```
 
-#### 3.2 Deploy the CephFS Driver
+### 4.2 Deploy the CephFS Driver
 
 ```console
 echo '
@@ -159,7 +267,7 @@ metadata:
 ' | kubectl create -f -
 ```
 
-#### 3.3 Deploy the Ceph-NFS Driver
+### 4.3 Deploy the Ceph-NFS Driver
 
 ```console
 echo '
@@ -171,12 +279,19 @@ metadata:
 ' | kubectl create -f -
 ```
 
-## 4. Verify Installation
+---
 
-To verify the installation, check the status of the Ceph-CSI components:
+## 5. Verify Installation
+
+Verify that all CSI driver components are running:
 
 ```bash
-kubectl get pod -nceph-csi-operator-system
+kubectl get pod -n ceph-csi-operator-system
+```
+
+Expected output:
+
+```text
 NAME                                                    READY   STATUS    RESTARTS   AGE
 ceph-csi-operator-controller-manager-744dc99cb5-scxxh   2/2     Running   0          45s
 cephfs.csi.ceph.com-ctrlplugin-5847c998b5-xf85m         5/5     Running   0          27s
@@ -187,7 +302,9 @@ rbd.csi.ceph.com-ctrlplugin-6965dcfdb8-w88kn            5/5     Running   0     
 rbd.csi.ceph.com-nodeplugin-lnm4n                       2/2     Running   0          4m35s
 ```
 
-## 5. Create CephConnection
+---
+
+## 6. Create CephConnection
 
 Create a CephConnection CR to connect to the Ceph cluster:
 
@@ -204,10 +321,13 @@ spec:
 ' | kubectl create -f -
 ```
 
-## 6. Create ClientProfile
+Replace the monitor IP address with your Ceph cluster's monitor addresses.
 
-Create a ClientProfile CR to define the client configuration which points to
-the CephConnection CR and the CephFS and RBD configurations:
+---
+
+## 7. Create ClientProfile
+
+Create a ClientProfile CR to define the client configuration:
 
 ```console
 echo '
@@ -227,7 +347,9 @@ spec:
 > [!IMPORTANT]
 > The ClientProfile name (`storage` in this example) will be used as the `clusterID` parameter in your StorageClass and VolumeSnapshotClass resources.
 
-## 7. Create Ceph Secrets
+---
+
+## 8. Create Ceph Secrets
 
 Before you can provision storage, create Kubernetes Secrets containing Ceph credentials for CSI operations.
 
@@ -242,7 +364,7 @@ For detailed instructions on creating Ceph users and Kubernetes Secrets, refer t
 > - Create secrets in the namespace where your applications will create PVCs
 > - NFS volumes use the same CephFS secret format since NFS is built on CephFS
 
-## 8. Create StorageClasses
+## 9. Create StorageClasses
 
 Create StorageClasses using the upstream Ceph-CSI examples:
 
@@ -263,7 +385,7 @@ Create StorageClasses using the upstream Ceph-CSI examples:
 >
 > This is the key difference from legacy Ceph-CSI deployments where `clusterID` was arbitrary.
 
-## 9. Create VolumeSnapshotClasses (Optional)
+## 10. Create VolumeSnapshotClasses (Optional)
 
 For snapshot support, use the upstream Ceph-CSI VolumeSnapshotClass examples:
 
@@ -278,7 +400,7 @@ parameters:
   clusterID: storage  # Must match your ClientProfile name
 ```
 
-## 10. Verify Storage Provisioning
+## 11. Verify Storage Provisioning
 
 Test your setup using the [Ceph-CSI PVC examples](https://github.com/ceph/ceph-csi/tree/devel/examples):
 
@@ -288,52 +410,51 @@ Test your setup using the [Ceph-CSI PVC examples](https://github.com/ceph/ceph-c
 
 The PVC should reach `Bound` status, indicating successful provisioning.
 
-## 11. Upgrade Ceph-CSI Operator and Drivers
+---
 
-Upgrading your Ceph-CSI installation involves updating the Ceph-CSI Operator and drivers to a newer version. Follow the steps below to perform the upgrade:
+## 12. Upgrade Ceph-CSI Operator and Drivers
 
-### Step 1: Checkout the Latest Tag
+To upgrade to a newer version:
 
-First, make sure you have the latest version of the Ceph-CSI repository by checking out the latest release tag:
+### Step 1: Fetch and Checkout the Latest Tag
 
-1. **Fetch all the tags from the remote repository:**
-
-   ```bash
-   git fetch --tags
-
-2. **Checkout the latest tag:**
-
-For example, to checkout the latest release tag (v1.0.0):
-
-```concole
-git checkout v1.0.0
+```bash
+git fetch --tags
+git tag -l                    # List available tags
+git checkout v1.0.0           # Replace with desired version
 ```
 
-You can list all available tags with:
+### Step 2: Apply Updated Manifests
 
-```concle
-git tag -l
+#### For Kubernetes (All-in-One)
+```console
+kubectl apply -f deploy/all-in-one/install.yaml
 ```
 
-Use the `git describe --tags` command to verify the current tag you are on.
+#### For OpenShift (All-in-One)
+```console
+kubectl apply -f deploy/all-in-one/install-openshift.yaml
+```
 
-#### Step 2: Apply the updated yaml's
+#### For Multi-File Installation
+```console
+kubectl apply -f deploy/multifile/crd.yaml
+kubectl apply -f deploy/multifile/operator.yaml -n ceph-csi-operator-system
+```
 
-based on the installation steps above you can use similar steps and apply the yaml files from the newly checked out branch.
+### Step 3: Verify the Upgrade
 
-#### Step 3: Verify the Upgrade
-
-After the upgrade is complete, verify that all pods are running the latest version of the Ceph-CSI components:
-
-```concole
+```console
 kubectl get pods -n ceph-csi-operator-system
 ```
 
-Ensure that the image/CRD versions match the upgraded version.
+Ensure all pods are running and using the upgraded version.
 
-## 7. Clean Up Resources
+---
 
-To clean up the resources, delete the cepconnection, clientprofile and drivers:
+## 13. Clean Up Resources
+
+### Step 1: Delete Custom Resources
 
 ```console
 kubectl delete cephconnection ceph-connection -n ceph-csi-operator-system
@@ -343,15 +464,34 @@ kubectl delete driver cephfs.csi.ceph.com -n ceph-csi-operator-system
 kubectl delete driver nfs.csi.ceph.com -n ceph-csi-operator-system
 ```
 
-To uninstall the Ceph-CSI-Operator, delete the operator:
+### Step 2: Uninstall the Operator
 
+#### For Kubernetes
 ```console
 kubectl delete -f deploy/all-in-one/install.yaml
 ```
 
-verify the deletion:
+#### For OpenShift
+```console
+kubectl delete -f deploy/all-in-one/install-openshift.yaml
+```
+
+#### For Multi-File Installation
+```console
+kubectl delete -f deploy/multifile/operator.yaml -n ceph-csi-operator-system
+kubectl delete -f deploy/multifile/csi-rbac.yaml -n ceph-csi-operator-system
+kubectl delete -f deploy/multifile/openshift-scc.yaml  # OpenShift only
+kubectl delete -f deploy/multifile/crd.yaml
+```
+
+### Step 3: Verify Deletion
 
 ```bash
 kubectl get pods -n ceph-csi-operator-system
+```
+
+Expected output:
+
+```text
 No resources found in ceph-csi-operator-system namespace.
 ```

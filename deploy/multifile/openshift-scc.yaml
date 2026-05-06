@@ -1,0 +1,163 @@
+---
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: ceph-csi-scc
+  annotations:
+    kubernetes.io/description: >-
+      SecurityContextConstraints for Ceph CSI drivers to enable privileged operations
+      required for CSI functionality including host access and volume management.
+# CSI daemonset pod needs to run as privileged
+allowPrivilegedContainer: true
+# CSI daemonset pod needs hostnetworking
+allowHostNetwork: true
+# CSI daemonset pod needs host ports for CSI addons
+allowHostPorts: true
+# Set for RBD plugin pod
+allowHostPID: true
+# Required for multus and encryption
+allowHostIPC: true
+# Allow host path volumes
+allowHostDirVolumePlugin: true
+# SYS_ADMIN is needed for rbd to execute rbd map command
+allowedCapabilities:
+  - SYS_ADMIN
+# Run as any user
+runAsUser:
+  type: RunAsAny
+# SELinux context
+seLinuxContext:
+  type: RunAsAny
+# FSGroup
+fsGroup:
+  type: RunAsAny
+# Supplemental groups
+supplementalGroups:
+  type: RunAsAny
+# Containers write to root filesystem
+readOnlyRootFilesystem: false
+# Allowed volume types
+volumes:
+  - hostPath
+  - configMap
+  - emptyDir
+  - projected
+  - secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ceph-csi-scc-user
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    resourceNames:
+      - ceph-csi-scc
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-rbd-ctrlplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-rbd-ctrlplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-rbd-nodeplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-rbd-nodeplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-cephfs-ctrlplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-cephfs-ctrlplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-cephfs-nodeplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-cephfs-nodeplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-nfs-ctrlplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-nfs-ctrlplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-nfs-nodeplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-nfs-nodeplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-nvmeof-ctrlplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-nvmeof-ctrlplugin-sa
+    namespace: ceph-csi-operator-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ceph-csi-nvmeof-nodeplugin-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ceph-csi-scc-user
+subjects:
+  - kind: ServiceAccount
+    name: ceph-csi-operator-nvmeof-nodeplugin-sa
+    namespace: ceph-csi-operator-system

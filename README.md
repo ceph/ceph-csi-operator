@@ -20,7 +20,11 @@
 
 ## Overview
 
-The Ceph CSI Operator provides native management interfaces for [Ceph-CSI drivers (CephFS, RBD, and NFS)](https://github.com/ceph/ceph-csi) for Kubernetes based environments. The operator automates the deployment, configuration, and management of these drivers using new Kubernetes APIs defined as a set of Custom Resource Definitions (CRDs).
+The Ceph CSI Operator provides native management interfaces for [Ceph-CSI drivers (CephFS, RBD, and NFS)](https://github.com/ceph/ceph-csi) for Kubernetes and OpenShift environments. The operator automates the deployment, configuration, and management of these drivers using new Kubernetes APIs defined as a set of Custom Resource Definitions (CRDs).
+
+**Platform Support:**
+- Kubernetes 1.32+
+- OpenShift 4.19+
 
 ## Quick Start
 

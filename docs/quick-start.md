@@ -1,6 +1,8 @@
 - [Quick Start Guide for Ceph-CSI-Operator](#quick-start-guide-for-ceph-csi-operator)
   - [1. Prerequisites](#1-prerequisites)
   - [2. Install the Ceph-CSI Operator](#2-install-the-ceph-csi-operator)
+    - [2.1 Standard Kubernetes Installation](#21-standard-kubernetes-installation)
+    - [2.2 OpenShift Installation](#22-openshift-installation)
     - [3. Deploy Ceph-CSI Drivers](#3-deploy-ceph-csi-drivers)
       - [3.1 Deploy the RBD Driver](#31-deploy-the-rbd-driver)
       - [3.2 Deploy the CephFS Driver](#32-deploy-the-cephfs-driver)
@@ -20,16 +22,26 @@
 
 Before deploying the Ceph-CSI-Operator, ensure the following requirements are met:
 
-- A Kubernetes cluster ([supported version](https://kubernetes.io/releases/) recommended)
+- A Kubernetes cluster ([supported version](https://kubernetes.io/releases/) recommended) or OpenShift 4.x cluster
 - Ceph cluster ([supported version](https://docs.ceph.com/en/latest/releases/) recommended)
-- `kubectl` CLI installed
+- `kubectl` CLI installed (or `oc` CLI for OpenShift)
 
 **Note:** In this guide, we will use minimal configurations to deploy the Ceph-CSI-Operator and drivers. You can customize the configurations as per your requirements.
 
 ## 2. Install the Ceph-CSI Operator
 
+### 2.1 Standard Kubernetes Installation
+
 ```console
 kubectl create -f deploy/all-in-one/install.yaml
+```
+
+### 2.2 OpenShift Installation
+
+For OpenShift clusters, use the OpenShift-specific installer that includes the required SecurityContextConstraints:
+
+```console
+kubectl create -f deploy/all-in-one/install-openshift.yaml
 ```
 
 verify the installation:
@@ -209,11 +221,17 @@ kubectl delete driver nfs.csi.ceph.com -n ceph-csi-operator-system
 
 To uninstall the Ceph-CSI-Operator, delete the operator:
 
+**For standard Kubernetes:**
 ```console
 kubectl delete -f deploy/all-in-one/install.yaml
 ```
 
-verify the deletion:
+**For OpenShift:**
+```console
+kubectl delete -f deploy/all-in-one/install-openshift.yaml
+```
+
+Verify the deletion:
 
 ```bash
 kubectl get pods -n ceph-csi-operator-system
