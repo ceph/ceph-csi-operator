@@ -8,7 +8,11 @@
   - [4. Verify Installation](#4-verify-installation)
   - [5. Create CephConnection](#5-create-cephconnection)
   - [6. Create ClientProfile](#6-create-clientprofile)
-  - [7. Clean Up Resources](#7-clean-up-resources)
+  - [7. Create Ceph Secrets](#7-create-ceph-secrets)
+  - [8. Create StorageClasses](#8-create-storageclasses)
+  - [9. Create VolumeSnapshotClasses (Optional)](#9-create-volumesnapshotclasses-optional)
+  - [10. Test Storage Provisioning](#10-test-storage-provisioning)
+  - [11. Clean Up Resources](#11-clean-up-resources)
 
 # Quick Start Guide for Ceph-CSI-Operator
 
@@ -129,10 +133,69 @@ spec:
 ' | kubectl create -f -
 ```
 
-Use the ClientProfile Name as the ClusterID in the required classes (StrorageClass,VolumeSnapshotClass etc).
+> [!IMPORTANT]
+> The ClientProfile name (`storage` in this example) will be used as the `clusterID` parameter in your StorageClass and VolumeSnapshotClass resources.
 
+## 7. Create Ceph Secrets
 
-## 7. Clean Up Resources
+Before creating storage classes, create Kubernetes Secrets with Ceph credentials for CSI operations.
+
+For detailed instructions on creating Ceph users and Kubernetes Secrets, refer to the upstream Ceph-CSI documentation:
+
+- **Secret Examples**:
+  - [RBD Secret Example](https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/secret.yaml)
+  - [CephFS Secret Example](https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/secret.yaml) (also used for NFS)
+- **Ceph Capabilities**: [Required Ceph Capabilities](https://github.com/ceph/ceph-csi/blob/devel/docs/capabilities.md)
+
+> [!NOTE]
+> - Create secrets in the namespace where your applications will create PVCs
+> - NFS volumes use the same CephFS secret format since NFS is built on CephFS
+
+## 8. Create StorageClasses
+
+Create StorageClasses using the upstream Ceph-CSI examples:
+
+- [RBD StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml)
+- [CephFS StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml)
+- [NFS StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml)
+
+> [!IMPORTANT]
+> **ClusterID and ClientProfile Mapping**
+>
+> The `clusterID` parameter **must match** your ClientProfile CR name:
+>
+> ```yaml
+> # In your StorageClass
+> parameters:
+>   clusterID: storage  # Must match the ClientProfile name from step 6
+> ```
+
+## 9. Create VolumeSnapshotClasses (Optional)
+
+For snapshot support, use the upstream Ceph-CSI VolumeSnapshotClass examples:
+
+- [RBD VolumeSnapshotClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml)
+- [CephFS VolumeSnapshotClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/snapshotclass.yaml)
+- [NFS VolumeSnapshotClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/snapshotclass.yaml)
+
+Ensure the `clusterID` parameter matches your ClientProfile name:
+
+```yaml
+parameters:
+  clusterID: storage  # Must match your ClientProfile name
+```
+
+## 10. Test Storage Provisioning
+
+Test your setup using the [Ceph-CSI PVC examples](https://github.com/ceph/ceph-csi/tree/devel/examples):
+
+- [RBD PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/pvc.yaml)
+- [CephFS PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/pvc.yaml)
+- [NFS PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/pvc.yaml)
+
+The PVC should reach `Bound` status, indicating successful provisioning.
+
+## 11. Clean Up Resources
 
 To clean up the resources, delete the cepconnection, clientprofile and drivers:
 
