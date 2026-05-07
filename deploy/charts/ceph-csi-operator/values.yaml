@@ -48,8 +48,24 @@ controllerManager:
   serviceAccount:
     # -- Annotations to add to the controller manager service account (default: {})
     annotations: {}
+  # -- Node selector for the controller manager pod (default: {})
+  nodeSelector: {}
+  # -- Tolerations for the controller manager pod (default: [])
+  tolerations: []
+  # -- Topology spread constraints for the controller manager pod (default: [])
+  topologySpreadConstraints: []
 # -- List of image pull secret names for pulling container images (default: [])
 imagePullSecrets: []
+# Service account configuration
+serviceAccount:
+  # -- Specifies whether a service account should be created (default: true)
+  create: true
+  # -- Automatically mount a ServiceAccount's API credentials (default: true)
+  automount: true
+  # -- Annotations to add to the service account (default: {})
+  annotations: {}
+  # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template (default: "")
+  name: ""
 # -- Kubernetes cluster domain used for DNS resolution (default: "cluster.local")
 kubernetesClusterDomain: cluster.local
 # OpenShift configuration
