@@ -32,6 +32,7 @@ spec:
   clusterName: {{ $driver.clusterName }}
   {{- end }}
   enableMetadata: {{ $driver.enableMetadata }}
+  enableFencing: {{ $driver.enableFencing }}
   grpcTimeout: {{ $driver.grpcTimeout }}
   snapshotPolicy: {{ $driver.snapshotPolicy }}
   generateOMapInfo: {{ $driver.generateOMapInfo }}
