@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ceph-csi-operator-system
+namePrefix: ceph-csi-operator-
+
+resources:
+- ../rbac
+- ../manager
+- ../crd
+
+patches:
+- path: manager_priority_patch.yaml
+  target:
+    kind: Deployment
+    name: controller-manager
+- patch: |-
+    - op: add
+      path: /spec/template/spec/containers/0/env/-
+      value:
+        name: CSI_SERVICE_ACCOUNT_PREFIX
+        value: ceph-csi-operator-
+    - op: add
+      path: /spec/template/spec/containers/0/env/-
+      value:
+        name: WATCH_NAMESPACE
+        value: ""
+  target:
+    kind: Deployment
+    name: controller-manager
+
+images:
+- name: controller
+  newName: quay.io/cephcsi/ceph-csi-operator
+  newTag: latest

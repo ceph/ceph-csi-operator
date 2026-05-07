@@ -62,8 +62,6 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `cephfsCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the CephFS controller plugin service account (default: {}) | `{}` |
-| `cephfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the CephFS node plugin service account (default: {}) | `{}` |
 | `controllerManager.manager.args` | Arguments to pass to the manager container (default: ["--leader-elect"]) | `["--leader-elect"]` |
 | `controllerManager.manager.containerSecurityContext.allowPrivilegeEscalation` | Disallow privilege escalation for the manager container (default: false) | `false` |
 | `controllerManager.manager.containerSecurityContext.capabilities.drop` | List of capabilities to drop from the manager container (default: ["ALL"]) | `["ALL"]` |
@@ -76,18 +74,20 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.manager.resources.limits.memory` | Memory limit for the manager container (default: "128Mi") | `"128Mi"` |
 | `controllerManager.manager.resources.requests.cpu` | CPU request for the manager container (default: "10m") | `"10m"` |
 | `controllerManager.manager.resources.requests.memory` | Memory request for the manager container (default: "64Mi") | `"64Mi"` |
+| `controllerManager.nodeSelector` | Node selector for the controller manager pod (default: {}) | `{}` |
 | `controllerManager.podSecurityContext.runAsNonRoot` | Run the pod as a non-root user (default: true) | `true` |
+| `controllerManager.priorityClassName` | Priority class name for the controller manager pod (default: "") | `""` |
 | `controllerManager.replicas` | Number of controller manager replicas (default: 1) | `1` |
 | `controllerManager.serviceAccount.annotations` | Annotations to add to the controller manager service account (default: {}) | `{}` |
+| `controllerManager.tolerations` | Tolerations for the controller manager pod (default: []) | `[]` |
+| `controllerManager.topologySpreadConstraints` | Topology spread constraints for the controller manager pod (default: []) | `[]` |
 | `imagePullSecrets` | List of image pull secret names for pulling container images (default: []) | `[]` |
 | `kubernetesClusterDomain` | Kubernetes cluster domain used for DNS resolution (default: "cluster.local") | `"cluster.local"` |
-| `nfsCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NFS controller plugin service account (default: {}) | `{}` |
-| `nfsNodepluginSa.serviceAccount.annotations` | Annotations to add to the NFS node plugin service account (default: {}) | `{}` |
-| `nvmeofCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF controller plugin service account (default: {}) | `{}` |
-| `nvmeofNodepluginSa.serviceAccount.annotations` | Annotations to add to the NVMe-oF node plugin service account (default: {}) | `{}` |
 | `openshift.enabled` | Enable OpenShift-specific resources (SecurityContextConstraints) (default: false) | `false` |
-| `rbdCtrlpluginSa.serviceAccount.annotations` | Annotations to add to the RBD controller plugin service account (default: {}) | `{}` |
-| `rbdNodepluginSa.serviceAccount.annotations` | Annotations to add to the RBD node plugin service account (default: {}) | `{}` |
+| `serviceAccount.annotations` | Annotations to add to the service account (default: {}) | `{}` |
+| `serviceAccount.automount` | Automatically mount a ServiceAccount's API credentials (default: true) | `true` |
+| `serviceAccount.create` | Specifies whether a service account should be created (default: true) | `true` |
+| `serviceAccount.name` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template (default: "") | `""` |
 
 ### **Development Build**
 

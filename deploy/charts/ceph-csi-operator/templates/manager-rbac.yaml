@@ -114,5 +114,5 @@ roleRef:
   name: '{{ include "ceph-csi-operator.fullname" . }}-manager-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "ceph-csi-operator.fullname" . }}-controller-manager'
+  name: '{{ include "ceph-csi-operator.serviceAccountName" . }}'
   namespace: '{{ .Release.Namespace }}'
