@@ -554,6 +554,7 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: true
+      priorityClassName: system-cluster-critical
       securityContext:
         runAsNonRoot: true
       serviceAccountName: ceph-csi-operator-controller-manager

@@ -1329,6 +1329,19 @@ spec:
                       type: string
                     description: Pod's annotations
                     type: object
+                  containerExtraArgs:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: |-
+                      Extra arguments for containers in the controller plugin deployment.
+                      The key is the container name, the value is a list of CLI arguments.
+                      The operator will not override the default CLI argument values it's setting.
+                      This is more for customizing what comes as default with cephcsi.
+                      Examples of container names: csi-rbdplugin, csi-provisioner, csi-attacher,
+                      csi-resizer, csi-snapshotter, csi-omap-generator, liveness-prometheus, etc.
+                    type: object
                   deploymentStrategy:
                     description: |-
                       DeploymentStrategy describes how to replace existing pods with new ones
@@ -5070,6 +5083,19 @@ spec:
                       type: string
                     description: Pod's annotations
                     type: object
+                  containerExtraArgs:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: |-
+                      Extra arguments for containers in the node plugin daemonset.
+                      The key is the container name, the value is a list of CLI arguments.
+                      The operator will not override the default CLI argument values it's setting.
+                      This is more for customizing what comes as default with cephcsi.
+                      Examples of container names: csi-rbdplugin, driver-registrar, csi-addons,
+                      liveness-prometheus, etc.
+                    type: object
                   enableSeLinuxHostMount:
                     description: Control the host mount of /etc/selinux for csi plugin
                       pods. Defaults to false
@@ -8514,6 +8540,19 @@ spec:
                         additionalProperties:
                           type: string
                         description: Pod's annotations
+                        type: object
+                      containerExtraArgs:
+                        additionalProperties:
+                          items:
+                            type: string
+                          type: array
+                        description: |-
+                          Extra arguments for containers in the controller plugin deployment.
+                          The key is the container name, the value is a list of CLI arguments.
+                          The operator will not override the default CLI argument values it's setting.
+                          This is more for customizing what comes as default with cephcsi.
+                          Examples of container names: csi-rbdplugin, csi-provisioner, csi-attacher,
+                          csi-resizer, csi-snapshotter, csi-omap-generator, liveness-prometheus, etc.
                         type: object
                       deploymentStrategy:
                         description: |-
@@ -12290,6 +12329,19 @@ spec:
                         additionalProperties:
                           type: string
                         description: Pod's annotations
+                        type: object
+                      containerExtraArgs:
+                        additionalProperties:
+                          items:
+                            type: string
+                          type: array
+                        description: |-
+                          Extra arguments for containers in the node plugin daemonset.
+                          The key is the container name, the value is a list of CLI arguments.
+                          The operator will not override the default CLI argument values it's setting.
+                          This is more for customizing what comes as default with cephcsi.
+                          Examples of container names: csi-rbdplugin, driver-registrar, csi-addons,
+                          liveness-prometheus, etc.
                         type: object
                       enableSeLinuxHostMount:
                         description: Control the host mount of /etc/selinux for csi
@@ -16858,6 +16910,7 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: true
+      priorityClassName: system-cluster-critical
       securityContext:
         runAsNonRoot: true
       serviceAccountName: ceph-csi-operator-controller-manager
