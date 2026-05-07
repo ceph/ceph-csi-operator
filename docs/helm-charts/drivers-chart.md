@@ -96,6 +96,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.cephfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.cephfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.cephfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.cephfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.cephfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.cephfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
@@ -131,6 +132,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.nfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
@@ -167,6 +169,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nvmeof.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nvmeof.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nvmeof.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nvmeof.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nvmeof.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.nvmeof.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
@@ -202,6 +205,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.rbd.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.rbd.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.rbd.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.rbd.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.rbd.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.rbd.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
@@ -242,6 +246,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `operatorConfig.driverSpecDefaults.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |

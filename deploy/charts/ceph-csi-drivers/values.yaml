@@ -41,6 +41,8 @@ operatorConfig:
       # -- Log verbosity level (0-5) (default: 0)
       verbosity: 0
       rotation:
+        # -- Enable log rotation (default: true)
+        enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
@@ -132,6 +134,8 @@ drivers:
       # -- Log verbosity level (0-5) (default: 0)
       verbosity: 0
       rotation:
+        # -- Enable log rotation (default: true)
+        enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
@@ -213,6 +217,8 @@ drivers:
       # -- Log verbosity level (0-5) (default: 0)
       verbosity: 0
       rotation:
+        # -- Enable log rotation (default: true)
+        enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
@@ -294,6 +300,8 @@ drivers:
       # -- Log verbosity level (0-5) (default: 0)
       verbosity: 0
       rotation:
+        # -- Enable log rotation (default: true)
+        enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
@@ -375,6 +383,8 @@ drivers:
       # -- Log verbosity level (0-5) (default: 0)
       verbosity: 0
       rotation:
+        # -- Enable log rotation (default: true)
+        enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")

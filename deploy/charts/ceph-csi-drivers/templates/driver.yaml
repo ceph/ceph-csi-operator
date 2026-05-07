@@ -12,7 +12,7 @@ spec:
   {{- if $driver.log }}
   log:
     verbosity: {{ $driver.log.verbosity }}
-    {{- if $driver.log.rotation }}
+    {{- if and $driver.log.rotation (ne $driver.log.rotation.enabled false) }}
     rotation:
       maxFiles: {{ $driver.log.rotation.maxFiles }}
       maxLogSize: {{ $driver.log.rotation.maxLogSize }}
