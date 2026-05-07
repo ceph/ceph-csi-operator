@@ -12,5 +12,5 @@ roleRef:
   name: '{{ include "ceph-csi-operator.fullname" . }}-cephfs-nodeplugin-r'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "ceph-csi-operator.fullname" . }}-cephfs-nodeplugin-sa'
+  name: '{{ include "ceph-csi-operator.serviceAccountName" . }}'
   namespace: '{{ .Release.Namespace }}'

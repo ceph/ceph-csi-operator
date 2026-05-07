@@ -10,5 +10,5 @@ roleRef:
   name: '{{ include "ceph-csi-operator.fullname" . }}-nvmeof-ctrlplugin-cr'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "ceph-csi-operator.fullname" . }}-nvmeof-ctrlplugin-sa'
+  name: '{{ include "ceph-csi-operator.serviceAccountName" . }}'
   namespace: '{{ .Release.Namespace }}'

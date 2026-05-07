@@ -58,6 +58,8 @@ controllerManager:
   serviceAccount:
     # -- Annotations to add to the controller manager service account (default: {})
     annotations: {}
+  # -- Priority class name for the controller manager pod (default: "")
+  priorityClassName: ""
 # -- List of image pull secret names for pulling container images (default: [])
 imagePullSecrets: []
 # -- Kubernetes cluster domain used for DNS resolution (default: "cluster.local")

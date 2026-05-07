@@ -12,5 +12,5 @@ roleRef:
   name: '{{ include "ceph-csi-operator.fullname" . }}-rbd-nodeplugin-r'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "ceph-csi-operator.fullname" . }}-rbd-nodeplugin-sa'
+  name: '{{ include "ceph-csi-operator.serviceAccountName" . }}'
   namespace: '{{ .Release.Namespace }}'
