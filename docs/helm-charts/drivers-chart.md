@@ -79,6 +79,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.cephfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.cephfs.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.cephfs.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `drivers.cephfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
@@ -102,6 +103,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.name` | CSI driver name for CephFS (default: "cephfs.csi.ceph.com") | `"cephfs.csi.ceph.com"` |
 | `drivers.cephfs.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
 | `drivers.cephfs.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.cephfs.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.cephfs.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.cephfs.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
 | `drivers.cephfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
@@ -111,6 +113,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.nfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.nfs.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.nfs.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `drivers.nfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
@@ -134,6 +137,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.name` | CSI driver name for NFS (default: "nfs.csi.ceph.com") | `"nfs.csi.ceph.com"` |
 | `drivers.nfs.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
 | `drivers.nfs.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.nfs.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.nfs.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.nfs.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
 | `drivers.nfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
@@ -144,6 +148,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.nvmeof.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.nvmeof.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.nvmeof.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `drivers.nvmeof.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
@@ -167,6 +172,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.name` | CSI driver name for NVMe-oF (default: "nvmeof.csi.ceph.com") | `"nvmeof.csi.ceph.com"` |
 | `drivers.nvmeof.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
 | `drivers.nvmeof.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.nvmeof.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.nvmeof.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.nvmeof.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
 | `drivers.nvmeof.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
@@ -176,6 +182,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.rbd.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.rbd.clusterName` | Cluster name identifier (default: "") | `""` |
+| `drivers.rbd.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `drivers.rbd.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
@@ -199,6 +206,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.name` | CSI driver name for RBD (default: "rbd.csi.ceph.com") | `"rbd.csi.ceph.com"` |
 | `drivers.rbd.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
 | `drivers.rbd.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `drivers.rbd.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.rbd.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.rbd.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
 | `drivers.rbd.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
@@ -213,6 +221,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `operatorConfig.driverSpecDefaults.clusterName` | Cluster name identifier (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
@@ -235,6 +244,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.annotations` | Custom annotations for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath` | kubelet directory path (default: "/var/lib/kubelet") | `"/var/lib/kubelet"` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
