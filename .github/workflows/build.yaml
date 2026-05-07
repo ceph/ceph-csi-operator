@@ -28,6 +28,8 @@ jobs:
         run: make build
       - name: make build installer
         run: make build-installer
+      - name: make build openshift installer
+        run: make build-openshift-installer
       - name: run build multifile installer
         run: make build-multifile-installer
       - name: Generate operator helm charts
