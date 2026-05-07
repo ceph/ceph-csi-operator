@@ -208,20 +208,17 @@ build-openshift-installer: manifests generate kustomize ## Generate a consolidat
 
 .PHONY: build-helm-installer
 build-helm-installer: manifests generate kustomize helmify ## Generate helm charts for the operator.
-	mkdir -p build deploy
+	mkdir -p deploy
 	@# Preserve the manually maintained values.yaml (contains helm-docs comments)
 	@if [ -f deploy/charts/ceph-csi-operator/values.yaml ]; then \
 		cp deploy/charts/ceph-csi-operator/values.yaml deploy/charts/ceph-csi-operator/values.yaml.bak; \
 	fi
-	cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
-	cd build && $(KUSTOMIZE) edit add resource ../config/rbac ../config/manager ../config/crd
-	$(KUSTOMIZE) build build | $(HELMIFY) -preserve-ns -image-pull-secrets deploy/charts/ceph-csi-operator
+	$(KUSTOMIZE) build config/helm | $(HELMIFY) -preserve-ns -image-pull-secrets deploy/charts/ceph-csi-operator
 	hack/patch-csi-operator-helm-chart.sh deploy/charts/ceph-csi-operator
 	@# Restore the manually maintained values.yaml
 	@if [ -f deploy/charts/ceph-csi-operator/values.yaml.bak ]; then \
 		mv deploy/charts/ceph-csi-operator/values.yaml.bak deploy/charts/ceph-csi-operator/values.yaml; \
 	fi
-	rm -rf build
 
 .PHONY: build-multifile-installer
 build-multifile-installer: build-csi-rbac manifests generate kustomize
@@ -241,11 +238,8 @@ build-csi-rbac:
 
 .PHONY: verify-helm-values
 verify-helm-values: manifests generate kustomize helmify ## Verify operator values.yaml is in sync with generated output.
-	@mkdir -p build
-	@cd build && echo "$$BUILD_INSTALLER_OVERLAY" > kustomization.yaml
-	@cd build && $(KUSTOMIZE) edit add resource ../config/rbac ../config/manager ../config/crd
 	@mkdir -p build/tmp-chart
-	@$(KUSTOMIZE) build build | $(HELMIFY) -preserve-ns -image-pull-secrets build/tmp-chart > /dev/null 2>&1
+	@$(KUSTOMIZE) build config/helm | $(HELMIFY) -preserve-ns -image-pull-secrets build/tmp-chart > /dev/null 2>&1
 	@# Strip comments from both files
 	@grep -v '^[[:space:]]*#' deploy/charts/ceph-csi-operator/values.yaml | grep -v '^[[:space:]]*$$' > build/maintained-values-stripped.yaml
 	@grep -v '^[[:space:]]*#' build/tmp-chart/values.yaml | grep -v '^[[:space:]]*$$' > build/generated-values-stripped.yaml

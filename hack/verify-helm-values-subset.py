@@ -8,6 +8,13 @@ while ensuring all generated fields are present and have matching values.
 import sys
 import yaml
 
+# Fields that are allowed to have different values between generated and maintained
+# These are fields where we use a placeholder in the kustomize patch for helmify
+# but want a more meaningful default in the maintained values.yaml
+ALLOWED_VALUE_DIFFS = {
+    "controllerManager.priorityClassName",
+}
+
 
 def check_subset(generated, maintained, path=""):
     """
@@ -42,6 +49,10 @@ def check_subset(generated, maintained, path=""):
                 return False
 
     elif generated != maintained:
+        # Check if this field is allowed to have different values
+        if path in ALLOWED_VALUE_DIFFS:
+            # Field is allowed to differ - just verify the key exists
+            return True
         print(f"ERROR: Value mismatch at {path}")
         print(f"  Generated: {generated}")
         print(f"  Maintained: {maintained}")

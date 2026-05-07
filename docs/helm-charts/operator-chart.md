@@ -76,6 +76,7 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.manager.resources.requests.memory` | Memory request for the manager container (default: "64Mi") | `"64Mi"` |
 | `controllerManager.nodeSelector` | Node selector for the controller manager pod (default: {}) | `{}` |
 | `controllerManager.podSecurityContext.runAsNonRoot` | Run the pod as a non-root user (default: true) | `true` |
+| `controllerManager.priorityClassName` | Priority class name for the controller manager pod (default: "") | `""` |
 | `controllerManager.replicas` | Number of controller manager replicas (default: 1) | `1` |
 | `controllerManager.serviceAccount.annotations` | Annotations to add to the controller manager service account (default: {}) | `{}` |
 | `controllerManager.tolerations` | Tolerations for the controller manager pod (default: []) | `[]` |

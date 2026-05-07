@@ -50,6 +50,8 @@ controllerManager:
     annotations: {}
   # -- Node selector for the controller manager pod (default: {})
   nodeSelector: {}
+  # -- Priority class name for the controller manager pod (default: "")
+  priorityClassName: ""
   # -- Tolerations for the controller manager pod (default: [])
   tolerations: []
   # -- Topology spread constraints for the controller manager pod (default: [])
