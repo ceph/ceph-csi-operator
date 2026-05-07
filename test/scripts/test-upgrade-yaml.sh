@@ -114,7 +114,7 @@ function upgrade_to_pr_version() {
 
     # Apply the upgrade
     echo "Applying PR version manifests"
-    kubectl_retry apply -f deploy/all-in-one/install.yaml
+    kubectl_retry replace -f deploy/all-in-one/install.yaml
 
     # Wait a bit for the upgrade to start
     sleep 5
