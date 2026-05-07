@@ -16,7 +16,7 @@ spec:
     {{- if $config.driverSpecDefaults.log }}
     log:
       verbosity: {{ $config.driverSpecDefaults.log.verbosity }}
-      {{- if $config.driverSpecDefaults.log.rotation }}
+      {{- if and $config.driverSpecDefaults.log.rotation (ne $config.driverSpecDefaults.log.rotation.enabled false) }}
       rotation:
         maxFiles: {{ $config.driverSpecDefaults.log.rotation.maxFiles }}
         maxLogSize: {{ $config.driverSpecDefaults.log.rotation.maxLogSize }}
