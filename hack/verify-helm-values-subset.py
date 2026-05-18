@@ -13,6 +13,7 @@ import yaml
 # but want a more meaningful default in the maintained values.yaml
 ALLOWED_VALUE_DIFFS = {
     "controllerManager.priorityClassName",
+    "controllerManager.manager.image.tag",
 }
 
 
