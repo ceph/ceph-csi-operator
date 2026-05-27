@@ -25,8 +25,8 @@ controllerManager:
     image:
       # -- Repository for the ceph-csi-operator image (default: "quay.io/cephcsi/ceph-csi-operator")
       repository: quay.io/cephcsi/ceph-csi-operator
-      # -- Tag for the ceph-csi-operator image (default: "v1.0.0")
-      tag: v1.0.0
+      # -- Tag for the ceph-csi-operator image (default: "v1.0.1")
+      tag: v1.0.1
     # Resource limits and requests for the manager container
     resources:
       limits:
