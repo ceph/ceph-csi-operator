@@ -1,7 +1,7 @@
 # Guide for RBD Deployment with CSI Snapshot-Metadata Sidecar
 
-> ⚠️ **Warning - Alpha Feature**:
-> This feature is currently in **alpha** and is subject to change in future releases.
+> ⚠️ **Warning - Beta Feature**:
+> This feature is currently in **beta** and is subject to change in future releases.
 > This feature should only be used for testing and evaluation purposes.
 
 [KEP-3314](https://github.com/kubernetes/enhancements/tree/master/keps/sig-storage/3314-csi-changed-block-tracking)
@@ -21,10 +21,10 @@ of the RBD controller plugin with the `external-snapshot-metadata` sidecar.
 
 Users need to perform the following manual setup:
 
-1. Install the [SnapshotMetadataService CRD](https://github.com/kubernetes-csi/external-snapshot-metadata/blob/v0.1.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml)
+1. Install the [SnapshotMetadataService CRD](https://github.com/kubernetes-csi/external-snapshot-metadata/blob/v1.0.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml)
 
    ```bash
-   kubectl create -f https://raw.githubusercontent.com/kubernetes-csi/external-snapshot-metadata/refs/tags/v0.1.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml
+   kubectl create -f https://raw.githubusercontent.com/kubernetes-csi/external-snapshot-metadata/refs/tags/v1.0.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml
    ```
 
 2. Create a Service to expose the RBD driver pod
@@ -79,7 +79,7 @@ Users need to perform the following manual setup:
    **Example:**
 
    ```yaml
-   apiVersion: cbt.storage.k8s.io/v1alpha1
+   apiVersion: cbt.storage.k8s.io/v1beta1
    kind: SnapshotMetadataService
    metadata:
      name: <driver-name>
