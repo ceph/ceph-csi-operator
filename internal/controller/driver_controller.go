@@ -51,7 +51,7 @@ import (
 
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
-	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1alpha1"
+	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1beta1"
 )
 
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=drivers,verbs=get;list;watch;create;update;patch;delete

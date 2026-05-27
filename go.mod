@@ -1,11 +1,11 @@
 module github.com/ceph/ceph-csi-operator
 
-go 1.25.0
+go 1.25.8
 
 require (
 	github.com/ceph/ceph-csi-operator/api v0.0.0-20260211052505-60308e55e5d9
 	github.com/go-logr/logr v1.4.3
-	github.com/kubernetes-csi/external-snapshot-metadata/client v0.2.0
+	github.com/kubernetes-csi/external-snapshot-metadata/client v1.0.0
 	github.com/onsi/ginkgo/v2 v2.29.0
 	github.com/onsi/gomega v1.41.0
 	github.com/stretchr/testify v1.11.1
