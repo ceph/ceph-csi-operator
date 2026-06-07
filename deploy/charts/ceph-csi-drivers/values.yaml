@@ -46,7 +46,7 @@ operatorConfig:
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
-        maxLogSize: "10Gi"
+        maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
@@ -139,7 +139,7 @@ drivers:
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
-        maxLogSize: "10Gi"
+        maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
@@ -222,7 +222,7 @@ drivers:
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
-        maxLogSize: "10Gi"
+        maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
@@ -305,7 +305,7 @@ drivers:
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
-        maxLogSize: "10Gi"
+        maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
@@ -388,7 +388,7 @@ drivers:
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
         # -- Maximum size of each log file (default: "10Gi")
-        maxLogSize: "10Gi"
+        maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")

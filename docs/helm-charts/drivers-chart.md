@@ -99,7 +99,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.cephfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.cephfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
-| `drivers.cephfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.cephfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.cephfs.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
 | `drivers.cephfs.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
 | `drivers.cephfs.name` | CSI driver name for CephFS (default: "cephfs.csi.ceph.com") | `"cephfs.csi.ceph.com"` |
@@ -135,7 +135,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
-| `drivers.nfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.nfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.nfs.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
 | `drivers.nfs.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
 | `drivers.nfs.name` | CSI driver name for NFS (default: "nfs.csi.ceph.com") | `"nfs.csi.ceph.com"` |
@@ -172,7 +172,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nvmeof.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nvmeof.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
-| `drivers.nvmeof.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.nvmeof.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.nvmeof.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
 | `drivers.nvmeof.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
 | `drivers.nvmeof.name` | CSI driver name for NVMe-oF (default: "nvmeof.csi.ceph.com") | `"nvmeof.csi.ceph.com"` |
@@ -208,7 +208,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.rbd.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.rbd.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
-| `drivers.rbd.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `drivers.rbd.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.rbd.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
 | `drivers.rbd.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
 | `drivers.rbd.name` | CSI driver name for RBD (default: "rbd.csi.ceph.com") | `"rbd.csi.ceph.com"` |
@@ -249,7 +249,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
-| `operatorConfig.driverSpecDefaults.log.rotation.maxLogSize` | Maximum size of each log file (default: "10Gi") | `"10Gi"` |
+| `operatorConfig.driverSpecDefaults.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `operatorConfig.driverSpecDefaults.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
 | `operatorConfig.driverSpecDefaults.log.verbosity` | Log verbosity level (0-5) (default: 0) | `0` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.affinity` | Affinity settings for the pod (default: {}) | `{}` |
