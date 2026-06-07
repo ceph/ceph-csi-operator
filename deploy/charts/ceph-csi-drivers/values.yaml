@@ -45,7 +45,7 @@ operatorConfig:
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
-        # -- Maximum size of each log file (default: "10Gi")
+        # -- Maximum size of each log file (default: "10G")
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
@@ -138,7 +138,7 @@ drivers:
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
-        # -- Maximum size of each log file (default: "10Gi")
+        # -- Maximum size of each log file (default: "10G")
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
@@ -221,7 +221,7 @@ drivers:
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
-        # -- Maximum size of each log file (default: "10Gi")
+        # -- Maximum size of each log file (default: "10G")
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
@@ -304,7 +304,7 @@ drivers:
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
-        # -- Maximum size of each log file (default: "10Gi")
+        # -- Maximum size of each log file (default: "10G")
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
@@ -387,7 +387,7 @@ drivers:
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
-        # -- Maximum size of each log file (default: "10Gi")
+        # -- Maximum size of each log file (default: "10G")
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
