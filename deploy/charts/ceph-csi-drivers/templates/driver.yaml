@@ -70,11 +70,11 @@ spec:
     {{- end }}
     {{- if $driver.nodePlugin.resources }}
     resources:
-      registrar: {{ $driver.nodePlugin.resources.registrar | toYaml | nindent 8 }}
-      liveness: {{ $driver.nodePlugin.resources.liveness | toYaml | nindent 8 }}
-      addons: {{ $driver.nodePlugin.resources.addons | toYaml | nindent 8 }}
-      logRotator: {{ $driver.nodePlugin.resources.logRotator | toYaml | nindent 8 }}
-      plugin: {{ $driver.nodePlugin.resources.plugin | toYaml | nindent 8 }}
+      registrar: {{ $driver.nodePlugin.resources.registrar | default dict | toYaml | nindent 8 }}
+      liveness: {{ $driver.nodePlugin.resources.liveness | default dict | toYaml | nindent 8 }}
+      addons: {{ $driver.nodePlugin.resources.addons | default dict | toYaml | nindent 8 }}
+      logRotator: {{ $driver.nodePlugin.resources.logRotator | default dict | toYaml | nindent 8 }}
+      plugin: {{ $driver.nodePlugin.resources.plugin | default dict | toYaml | nindent 8 }}
     {{- end }}
     {{- if $driver.nodePlugin.kubeletDirPath }}
     kubeletDirPath: {{ $driver.nodePlugin.kubeletDirPath }}
@@ -125,15 +125,15 @@ spec:
     replicas: {{ $driver.controllerPlugin.replicas | default 2 }}
     {{- if $driver.controllerPlugin.resources }}
     resources:
-      attacher: {{ $driver.controllerPlugin.resources.attacher | toYaml | nindent 8 }}
-      snapshotter: {{ $driver.controllerPlugin.resources.snapshotter | toYaml | nindent 8 }}
-      resizer: {{ $driver.controllerPlugin.resources.resizer | toYaml | nindent 8 }}
-      provisioner: {{ $driver.controllerPlugin.resources.provisioner | toYaml | nindent 8 }}
-      omapGenerator: {{ $driver.controllerPlugin.resources.omapGenerator | toYaml | nindent 8 }}
-      liveness: {{ $driver.controllerPlugin.resources.liveness | toYaml | nindent 8 }}
-      addons: {{ $driver.controllerPlugin.resources.addons | toYaml | nindent 8 }}
-      logRotator: {{ $driver.controllerPlugin.resources.logRotator | toYaml | nindent 8 }}
-      plugin: {{ $driver.controllerPlugin.resources.plugin | toYaml | nindent 8 }}
+      attacher: {{ $driver.controllerPlugin.resources.attacher | default dict | toYaml | nindent 8 }}
+      snapshotter: {{ $driver.controllerPlugin.resources.snapshotter | default dict | toYaml | nindent 8 }}
+      resizer: {{ $driver.controllerPlugin.resources.resizer | default dict | toYaml | nindent 8 }}
+      provisioner: {{ $driver.controllerPlugin.resources.provisioner | default dict | toYaml | nindent 8 }}
+      omapGenerator: {{ $driver.controllerPlugin.resources.omapGenerator | default dict | toYaml | nindent 8 }}
+      liveness: {{ $driver.controllerPlugin.resources.liveness | default dict | toYaml | nindent 8 }}
+      addons: {{ $driver.controllerPlugin.resources.addons | default dict | toYaml | nindent 8 }}
+      logRotator: {{ $driver.controllerPlugin.resources.logRotator | default dict | toYaml | nindent 8 }}
+      plugin: {{ $driver.controllerPlugin.resources.plugin | default dict | toYaml | nindent 8 }}
     {{- end }}
     privileged: {{ $driver.controllerPlugin.privileged | default false }}
     {{- if $driver.controllerPlugin.priorityClassName }}
