@@ -72,3 +72,29 @@ jobs:
             ./kubernetes/test/bin/e2e.test \
             -- \
             -storage.testdriver="$(pwd)/test/scripts/k8s-storage/driver-${{ matrix.driver }}.yaml"
+
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+            LOG_DIR="${GITHUB_WORKSPACE}/logs-${{ matrix.driver }}"
+            mkdir -p "${LOG_DIR}"
+
+            kubectl get pods --all-namespaces -o wide > "${LOG_DIR}/all-pods.txt" 2>&1 || true
+            kubectl get events --all-namespaces --sort-by='.lastTimestamp' > "${LOG_DIR}/all-events.txt" 2>&1 || true
+            kubectl describe pods --all-namespaces > "${LOG_DIR}/all-pods-describe.txt" 2>&1 || true
+
+            for ns in $(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}'); do
+              for pod in $(kubectl get pods -n "${ns}" -o jsonpath='{.items[*].metadata.name}'); do
+                for container in $(kubectl get pod "${pod}" -n "${ns}" -o jsonpath='{.spec.containers[*].name}'); do
+                  kubectl logs "${pod}" -n "${ns}" -c "${container}" --tail=500 \
+                    > "${LOG_DIR}/${ns}_${pod}_${container}.log" 2>&1 || true
+                done
+              done
+            done
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+            name: e2e-logs-${{ matrix.driver }}
+            path: logs-${{ matrix.driver }}
