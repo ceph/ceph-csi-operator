@@ -476,7 +476,7 @@ func (r *driverReconcile) reconcileK8sCsiDriver() error {
 			return err
 		}
 
-		csiDriver.Spec.PodInfoOnMount = ptr.To(false)
+		csiDriver.Spec.PodInfoOnMount = ptr.To(true)
 		csiDriver.Spec.AttachRequired = cmp.Or(
 			r.driver.Spec.AttachRequired,
 			ptr.To(true),
