@@ -83,6 +83,10 @@ type csiClusterInfoRecord struct {
 			Name      string `json:"name,omitempty"`
 			Namespace string `json:"namespace,omitempty"`
 		} `json:"controllerPublishSecretRef,omitempty"`
+		NodePublishSecretRef struct {
+			Name      string `json:"name,omitempty"`
+			Namespace string `json:"namespace,omitempty"`
+		} `json:"nodePublishSecretRef,omitempty"`
 	} `json:"rbd,omitempty"`
 	Nfs    struct{} `json:"nfs,omitempty"`
 	Nvmeof struct {
@@ -348,6 +352,8 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *c
 		if cephCsiSecrets := rbd.CephCsiSecrets; cephCsiSecrets != nil {
 			record.Rbd.ControllerPublishSecretRef.Name = cephCsiSecrets.ControllerPublishSecret.Name
 			record.Rbd.ControllerPublishSecretRef.Namespace = cephCsiSecrets.ControllerPublishSecret.Namespace
+			record.Rbd.NodePublishSecretRef.Name = cephCsiSecrets.NodePublishSecret.Name
+			record.Rbd.NodePublishSecretRef.Namespace = cephCsiSecrets.NodePublishSecret.Namespace
 		}
 	}
 	if nvmeof := clientProfile.Spec.Nvmeof; nvmeof != nil {
