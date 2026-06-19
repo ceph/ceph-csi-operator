@@ -65,7 +65,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `cephConnections[0].crushLocationLabels` | Labels to be used for CRUSH location selection (default: {}) | `{}` |
+| `cephConnections[0].crushLocationLabels` | Labels to be used for CRUSH location selection (default: []) Leave empty to disable read affinity. When set, it must be a non-empty list of node label keys, e.g. ["topology.kubernetes.io/zone"]. | `[]` |
 | `cephConnections[0].monitors` | Ceph monitors (key-value pairs, typically IP addresses of the Ceph monitors) (default: {}) | `{}` |
 | `cephConnections[0].name` | Name for the Ceph connection (default: "") | `""` |
 | `cephConnections[0].rbdMirrorDaemonCount` | Number of RBD mirror daemons (default: 1) | `1` |
