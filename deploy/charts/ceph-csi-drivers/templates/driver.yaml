@@ -99,8 +99,8 @@ spec:
     imagePullPolicy: {{ $driver.nodePlugin.imagePullPolicy }}
     {{- end }}
     {{- if $driver.nodePlugin.topology }}
-      topology:
-        domainLabels:
+    topology:
+      domainLabels:
         {{ $driver.nodePlugin.topology.domainLabels | toYaml | nindent 8 }}
     {{- end }}
     volumes:
