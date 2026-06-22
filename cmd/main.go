@@ -42,7 +42,6 @@ import (
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	"github.com/ceph/ceph-csi-operator/internal/controller"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
-	sm "github.com/kubernetes-csi/external-snapshot-metadata/client/apis/snapshotmetadataservice/v1beta1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -55,7 +54,6 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(csiv1.AddToScheme(scheme))
-	utilruntime.Must(sm.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
