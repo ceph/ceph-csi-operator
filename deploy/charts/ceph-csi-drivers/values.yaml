@@ -6,8 +6,9 @@ cephConnections:
     monitors: {}
     # -- Number of RBD mirror daemons (default: 1)
     rbdMirrorDaemonCount: 1
-    # -- Labels to be used for CRUSH location selection (default: {})
-    crushLocationLabels: {}
+    # -- Labels to be used for CRUSH location selection (default: [])
+    # Leave empty to disable read affinity. When set, it must be a non-empty list of node label keys, e.g. ["topology.kubernetes.io/zone"].
+    crushLocationLabels: []
 # Configuration for Client Profiles
 clientProfiles:
   - # -- Name of the client profile (default: "")
