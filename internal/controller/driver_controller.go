@@ -62,6 +62,7 @@ import (
 //+kubebuilder:rbac:groups=storage.k8s.io,resources=csidrivers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=nodes,verbs=list;watch
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="cbt.storage.k8s.io",resources=snapshotmetadataservices,verbs=get;list;watch;
 
@@ -579,8 +580,10 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		nodePluginSpec := cmp.Or(r.driver.Spec.NodePlugin, &csiv1.NodePluginSpec{})
 		topology := r.isRbdDriver() && nodePluginSpec.Topology != nil
 
+		replicas := r.getControllerPluginReplicas(log, pluginSpec.Replicas)
+
 		deploy.Spec = appsv1.DeploymentSpec{
-			Replicas: pluginSpec.Replicas,
+			Replicas: replicas,
 			Selector: &appSelector,
 			Strategy: ptr.Deref(pluginSpec.DeploymentStrategy, defaultDeploymentStrategy),
 			Template: corev1.PodTemplateSpec{
@@ -1683,6 +1686,31 @@ func (r *driverReconcile) generateServiceName(suffix string) string {
 	re := regexp.MustCompile(`[^a-z0-9-]`)
 	// Replace all special characters with a hyphen
 	return re.ReplaceAllString(name, "-")
+}
+
+func (r *driverReconcile) getControllerPluginReplicas(
+	log logr.Logger,
+	specReplicas *int32,
+) *int32 {
+	if specReplicas != nil {
+		return specReplicas
+	}
+
+	var replicas int32 = defaultControllerPluginReplicas
+	nodeList := &corev1.NodeList{}
+	if err := r.List(r.ctx, nodeList); err != nil {
+		log.Error(err, "Failed to list nodes for replica calculation")
+		return &replicas
+	}
+
+	nodeCount := len(nodeList.Items)
+	if nodeCount > 0 && nodeCount < int(replicas) {
+		replicas = 1
+		log.Info("Capping controller replicas to node count",
+			"default", defaultControllerPluginReplicas, "nodeCount", nodeCount)
+	}
+
+	return &replicas
 }
 
 func getControllerPluginPodAffinity(

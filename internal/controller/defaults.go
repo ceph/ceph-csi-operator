@@ -39,10 +39,11 @@ var imageDefaults = map[string]string{
 }
 
 const (
-	defaultGRrpcTimeout      = 150
-	defaultKubeletDirPath    = "/var/lib/kubelet"
-	defaultLogHostPath       = "/var/lib/cephcsi"
-	defaultLogRotateMaxFiles = 7
+	defaultGRrpcTimeout                   = 150
+	defaultKubeletDirPath                 = "/var/lib/kubelet"
+	defaultLogHostPath                    = "/var/lib/cephcsi"
+	defaultLogRotateMaxFiles              = 7
+	defaultControllerPluginReplicas int32 = 2
 )
 
 var defaultLeaderElection = csiv1.LeaderElectionSpec{
