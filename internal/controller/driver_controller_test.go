@@ -18,11 +18,15 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -79,6 +83,87 @@ var _ = Describe("Driver Controller", func() {
 			Expect(err).NotTo(HaveOccurred())
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
+		})
+	})
+
+	Context("getControllerPluginReplicas", func() {
+		var (
+			reconciler driverReconcile
+			log        = zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
+		)
+
+		BeforeEach(func() {
+			reconciler = driverReconcile{
+				DriverReconciler: DriverReconciler{
+					Client: k8sClient,
+					Scheme: k8sClient.Scheme(),
+				},
+				ctx: context.Background(),
+				log: log,
+			}
+		})
+
+		It("should return specReplicas when explicitly set", func() {
+			specReplicas := ptr.To(int32(5))
+			result := reconciler.getControllerPluginReplicas(log, specReplicas)
+			Expect(result).To(Equal(specReplicas))
+		})
+
+		It("should return default replicas when no nodes exist", func() {
+			result := reconciler.getControllerPluginReplicas(log, nil)
+			Expect(*result).To(Equal(defaultControllerPluginReplicas))
+		})
+
+		It("should cap replicas to 1 on a single-node cluster", func() {
+			node := &corev1.Node{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "single-node",
+				},
+			}
+			Expect(k8sClient.Create(context.Background(), node)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(context.Background(), node)).To(Succeed())
+			}()
+
+			result := reconciler.getControllerPluginReplicas(log, nil)
+			Expect(*result).To(Equal(int32(1)))
+		})
+
+		It("should return default replicas when node count meets default", func() {
+			nodes := make([]*corev1.Node, defaultControllerPluginReplicas)
+			for i := range nodes {
+				nodes[i] = &corev1.Node{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: fmt.Sprintf("node-%d", i),
+					},
+				}
+				Expect(k8sClient.Create(context.Background(), nodes[i])).To(Succeed())
+			}
+			defer func() {
+				for _, n := range nodes {
+					Expect(k8sClient.Delete(context.Background(), n)).To(Succeed())
+				}
+			}()
+
+			result := reconciler.getControllerPluginReplicas(log, nil)
+			Expect(*result).To(Equal(defaultControllerPluginReplicas))
+		})
+
+		It("should not cap when specReplicas is set even on single-node cluster", func() {
+			node := &corev1.Node{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "only-node",
+				},
+			}
+			Expect(k8sClient.Create(context.Background(), node)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(context.Background(), node)).To(Succeed())
+			}()
+
+			specReplicas := ptr.To(int32(3))
+			result := reconciler.getControllerPluginReplicas(log, specReplicas)
+			Expect(result).To(Equal(specReplicas))
+			Expect(*result).To(Equal(int32(3)))
 		})
 	})
 })

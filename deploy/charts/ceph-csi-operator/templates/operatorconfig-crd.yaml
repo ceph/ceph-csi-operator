@@ -1082,8 +1082,11 @@ spec:
                           For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
                         type: boolean
                       replicas:
-                        description: Set replicas for controller plugin's deployment.
-                          Defaults to 2
+                        default: 2
+                        description: |-
+                          Set replicas for controller plugin's deployment. Defaults to 2.
+                          On single-node clusters, the operator automatically caps the replica
+                          count to the number of available nodes when this field is not set.
                         format: int32
                         minimum: 1
                         type: integer
