@@ -5,7 +5,6 @@ go 1.25.8
 require (
 	github.com/ceph/ceph-csi-operator/api v0.0.0-20260211052505-60308e55e5d9
 	github.com/go-logr/logr v1.4.3
-	github.com/kubernetes-csi/external-snapshot-metadata/client v1.0.0
 	github.com/onsi/ginkgo/v2 v2.31.0
 	github.com/onsi/gomega v1.42.0
 	github.com/stretchr/testify v1.11.1
@@ -26,6 +25,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
+	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect

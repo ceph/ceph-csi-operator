@@ -73,8 +73,41 @@ Users need to perform the following manual setup:
    > - Replace `<driver-namespace>` with the namespace where your RBD driver is deployed
    > - Ensure certificates are valid for the domain: `<service-name>.<driver-namespace>` (using the service name from step 2)
 
-4. Create a SnapshotMetadataService CR for the RBD driver that will deploy the `external-snapshot-metadata` sidecar.
-   The name of this CR must match the RBD driver CR name.
+4. Provide the TLS secret as a `tls-key` volume in the RBD Driver CR.
+
+   This is the trigger for sidecar deployment: the operator deploys the
+   `external-snapshot-metadata` sidecar whenever it finds a volume named `tls-key`
+   in `spec.controllerPlugin.volumes` of an RBD Driver CR.
+
+   **Example:**
+
+   ```yaml
+   apiVersion: csi.ceph.io/v1
+   kind: Driver
+   metadata:
+     name: <driver-name>
+     namespace: <driver-namespace>
+   spec:
+     # ... other fields ...
+     controllerPlugin:
+       volumes:
+       - mount:
+           mountPath: /tmp/certificates  # Must be /tmp/certificates - required by sidecar
+           name: tls-key
+         volume:
+           name: tls-key # Must be "tls-key"
+           secret:
+             secretName: snapshot-metadata-tls  # The TLS secret name from step 3
+   ```
+
+   > **Note:**
+   > - **mountPath must be `/tmp/certificates`**: This path is required by the snapshot metadata sidecar to locate TLS certificates.
+   > - **Volume name and mount name must be `tls-key`**: The operator specifically looks for this name to deploy the sidecar.
+   > - Replace `<driver-name>` with your RBD driver name (e.g., `rbd.csi.ceph.com`)
+   > - Replace `<driver-namespace>` with the namespace where your RBD driver is deployed
+
+5. Create a SnapshotMetadataService CR for the RBD driver so backup vendors can
+   discover the sidecar endpoint. The name of this CR must match the RBD driver CR name.
 
    **Example:**
 
@@ -94,41 +127,9 @@ Users need to perform the following manual setup:
    > - `audience`: Recommended to use the CSI driver name for consistency
    > - `caCert`: Base64-encoded CA certificate bundle
 
-5. Provide the TLS secret required for the `external-snapshot-metadata` sidecar as a volume mount in the RBD driver CR.
-
-   **Example:**
-
-   ```yaml
-   apiVersion: csi.ceph.io/v1
-   kind: Driver
-   metadata:
-     name: <driver-name>
-     namespace: <driver-namespace>
-   spec:
-     # ... other fields ...
-     controllerPlugin:
-       volumes:
-       - mount:
-           mountPath: /tmp/certificates  # Must be /tmp/certificates - required by sidecar
-           name: tls-key 
-         volume:
-           name: tls-key # Must be "tls-key"
-           secret:
-             secretName: snapshot-metadata-tls  # The TLS secret name
-   ```
-
-   > **Note:**
-   > - **mountPath must be `/tmp/certificates`**: This path is required by the snapshot metadata sidecar to locate TLS certificates.
-   > - **Volume name and mount name must be `tls-key`**: The operator specifically filters for volumes with this exact name to mount in the snapshot-metadata sidecar container.
-   > - Replace `<driver-name>` with your RBD driver name (e.g., `rbd.csi.ceph.com`)
-   > - Replace `<driver-namespace>` with the namespace where your RBD driver is deployed
-
 ## Ceph-CSI Operator Responsibilities
 
 The operator will perform the following actions for the RBD controller plugin deployment:
 
-- Check for the existence of the SnapshotMetadataService CR (name must be the same as the RBD driver CR)
-- Check for the volume of type SecretVolumeSource (name must be the same as the RBD driver CR)
-
-> ⚠️ **Note**: If the SnapshotMetadataService CR is created after adding the volume configuration
-> in the RBD driver CR, the ceph-csi-operator pod needs to be restarted manually.
+- Check for a volume named `tls-key` in `spec.controllerPlugin.volumes` of the RBD Driver CR
+- If present, inject the `csi-snapshot-metadata` sidecar into the controller plugin deployment and mount the TLS certificates at `/tmp/certificates`
