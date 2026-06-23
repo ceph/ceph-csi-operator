@@ -90,7 +90,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.enableFencing` | Flag to enable fencing (default: false) | `false` |
 | `drivers.cephfs.enabled` | Enable the CephFS driver (default: true) | `true` |
 | `drivers.cephfs.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
-| `drivers.cephfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None") | `"None"` |
+| `drivers.cephfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
 | `drivers.cephfs.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
 | `drivers.cephfs.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
 | `drivers.cephfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
@@ -126,7 +126,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.enableFencing` | Flag to enable fencing (default: false) | `false` |
 | `drivers.nfs.enabled` | Enable the NFS driver (default: true) | `true` |
 | `drivers.nfs.encryption.configMapRef.name` | Name of the ConfigMap for encryption settings (default: "") | `""` |
-| `drivers.nfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None") | `"None"` |
+| `drivers.nfs.fsGroupPolicy` | File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File") | `"File"` |
 | `drivers.nfs.fuseMountOptions` | FUSE mount options (default: {}) | `{}` |
 | `drivers.nfs.generateOMapInfo` | Flag to generate OMap info (default: false) | `false` |
 | `drivers.nfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |

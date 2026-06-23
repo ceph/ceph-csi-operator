@@ -324,8 +324,8 @@ drivers:
     snapshotPolicy: "volumeSnapshot"
     # -- Flag to generate OMap info (default: false)
     generateOMapInfo: false
-    # -- File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None")
-    fsGroupPolicy: "None"
+    # -- File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")
+    fsGroupPolicy: "File"
     encryption:
       configMapRef:
         # -- Name of the ConfigMap for encryption settings (default: "")
@@ -407,8 +407,8 @@ drivers:
     snapshotPolicy: "volumeSnapshot"
     # -- Flag to generate OMap info (default: false)
     generateOMapInfo: false
-    # -- File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "None")
-    fsGroupPolicy: "None"
+    # -- File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")
+    fsGroupPolicy: "File"
     encryption:
       configMapRef:
         # -- Name of the ConfigMap for encryption settings (default: "")
