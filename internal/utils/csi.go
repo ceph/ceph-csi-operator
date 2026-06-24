@@ -409,6 +409,10 @@ var SnapshotMetadataGrpcServicePortArg = fmt.Sprintf("--port=%d", SnapshotMetada
 var SnapshotMetadataTlsCertArg = "--tls-cert=/tmp/certificates/tls.crt"
 var SnapshotMetadataTlsKeyArg = "--tls-key=/tmp/certificates/tls.key"
 
+func SnapshotMetadataAudienceArg(driverName string) string {
+	return fmt.Sprintf("--audience=%s", driverName)
+}
+
 func LogVerbosityContainerArg(level int) string {
 	return fmt.Sprintf("--v=%d", Clamp(level, 0, 5))
 }

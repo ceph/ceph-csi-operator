@@ -124,7 +124,7 @@ Users need to perform the following manual setup:
 
    > **Note:**
    > - `address`: Should point to the service created in step 2, replace `<service-name>`, `<driver-namespace>`, and `<service-port>` with your actual values from step 2
-   > - `audience`: Recommended to use the CSI driver name for consistency
+   > - `audience`: Must be set to your RBD driver name (e.g., `rbd.csi.ceph.com`) as configured in the Driver CR name (step 5)
    > - `caCert`: Base64-encoded CA certificate bundle
 
 ## Ceph-CSI Operator Responsibilities

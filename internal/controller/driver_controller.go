@@ -975,6 +975,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 											utils.CsiAddressContainerArg,
 											utils.SnapshotMetadataTlsCertArg,
 											utils.SnapshotMetadataTlsKeyArg,
+											utils.SnapshotMetadataAudienceArg(r.driver.Name),
 										},
 									),
 									Ports: []corev1.ContainerPort{
