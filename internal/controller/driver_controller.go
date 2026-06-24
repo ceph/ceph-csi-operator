@@ -1307,11 +1307,16 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
-					HostNetwork:        true,
+					HostNetwork:        ptr.Deref(pluginSpec.HostNetwork, true),
 					HostPID:            r.isRbdOrNvemofDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
-					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
+					DNSPolicy: utils.Call(func() corev1.DNSPolicy {
+						if ptr.Deref(pluginSpec.HostNetwork, true) {
+							return corev1.DNSClusterFirstWithHostNet
+						}
+						return corev1.DNSClusterFirst
+					}),
 					Tolerations: pluginSpec.Tolerations,
 					Affinity:    pluginSpec.Affinity,
 					Containers: utils.Call(func() []corev1.Container {

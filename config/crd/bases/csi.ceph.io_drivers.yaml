@@ -4764,6 +4764,13 @@ spec:
                     description: Control the host mount of /etc/selinux for csi plugin
                       pods. Defaults to false
                     type: boolean
+                  hostNetwork:
+                    description: |-
+                      hostNetwork setting to be propagated to CSI node plugin pods.
+                      Defaults to true for compatibility with Ceph mon FQDN resolution and
+                      host-level block device operations. Set to false to allow Istio sidecar
+                      injection (required for mTLS mesh environments).
+                    type: boolean
                   imagePullPolicy:
                     description: To indicate the image pull policy to be applied to
                       all the containers in the csi driver pods.

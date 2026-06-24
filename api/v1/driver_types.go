@@ -156,6 +156,13 @@ type TopologySpec struct {
 	DomainLabels []string `json:"domainLabels,omitempty"`
 }
 type NodePluginSpec struct {
+	// hostNetwork setting to be propagated to CSI node plugin pods.
+	// Defaults to true for compatibility with Ceph mon FQDN resolution and
+	// host-level block device operations. Set to false to allow Istio sidecar
+	// injection (required for mTLS mesh environments).
+	//+kubebuilder:validation:Optional
+	HostNetwork *bool `json:"hostNetwork,omitempty"`
+
 	// Embedded common pods spec
 	PodCommonSpec `json:",inline"`
 
