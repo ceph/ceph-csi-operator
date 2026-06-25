@@ -220,6 +220,14 @@ spec:
               ClientProfileStatus defines the observed state of Ceph CSI
               configuration for volumes and snapshots configured to use
               this profile
+            properties:
+              message:
+                description: Message provides human-readable details about the current
+                  phase
+                type: string
+              phase:
+                description: Phase indicates the current state of this CR
+                type: string
             type: object
         type: object
     served: true
