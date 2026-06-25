@@ -13,26 +13,28 @@ if [ ! -f "$SA_FILE" ]; then
   exit 1
 fi
 
-TEMPLATE_SNIPPET=$(
-  cat <<'EOF'
-{{- with .Values.imagePullSecrets }}
-imagePullSecrets:
-{{ toYaml . | indent 2 }}
-{{- end }}
-EOF
-)
-
 echo "Patching $SA_FILE for imagePullSecrets"
 
-awk -v snippet="$TEMPLATE_SNIPPET" '
+# Use awk to insert the snippet before each '---' separator and at the end
+awk '
   # Before printing a separator, print the snippet
-  /^---/ { print snippet }
+  /^---/ {
+    print "{{- with .Values.imagePullSecrets }}"
+    print "imagePullSecrets:"
+    print "{{ toYaml . | indent 2 }}"
+    print "{{- end }}"
+  }
 
   # Print the current line
   { print }
 
   # At the end of the file, print the snippet for the last section
-  END { print snippet }
+  END {
+    print "{{- with .Values.imagePullSecrets }}"
+    print "imagePullSecrets:"
+    print "{{ toYaml . | indent 2 }}"
+    print "{{- end }}"
+  }
 ' "$SA_FILE" >"${SA_FILE}.tmp"
 
 mv "${SA_FILE}.tmp" "$SA_FILE"
@@ -51,12 +53,12 @@ if [[ "$CHART_DIR" == *"ceph-csi-operator"* ]]; then
 
       # Check if the file already has the $root variable definition
       if ! grep -q "{{- \$root := . -}}" "$file"; then
-        # Add the $root variable definition at the top of the file
-        sed -i "1i{{- \$root := . -}}" "$file"
+        # Add the $root variable definition at the top of the file using a temp file
+        echo "{{- \$root := . -}}" | cat - "$file" > "$file.tmp" && mv "$file.tmp" "$file"
       fi
 
-      # Replace the namespace string
-      sed -i "s/namespace: ceph-csi-operator-system/namespace: {{ \$root.Release.Namespace }}/g" "$file"
+      # Replace the namespace string using a temp file (portable across all platforms)
+      sed "s/namespace: ceph-csi-operator-system/namespace: {{ \$root.Release.Namespace }}/g" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
     fi
   done
 
