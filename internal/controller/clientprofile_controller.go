@@ -26,13 +26,16 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 	"github.com/ceph/ceph-csi-operator/internal/utils"
@@ -42,6 +45,7 @@ import (
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=clientprofiles/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=clientprofiles/finalizers,verbs=update
 //+kubebuilder:rbac:groups=csi.ceph.io,resources=cephconnections,verbs=get;list;watch;update;delete
+//+kubebuilder:rbac:groups=csi.ceph.io,resources=clientprofilereplications,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 
 // ClientProfileReconciler reconciles a ClientProfile object
@@ -54,11 +58,12 @@ type ClientProfileReconciler struct {
 type ClientProfileReconcile struct {
 	ClientProfileReconciler
 
-	ctx           context.Context
-	log           logr.Logger
-	clientProfile csiv1.ClientProfile
-	cephConn      csiv1.CephConnection
-	cleanUp       bool
+	ctx                      context.Context
+	log                      logr.Logger
+	clientProfile            csiv1.ClientProfile
+	cephConn                 csiv1.CephConnection
+	clientProfileReplication csiv1.ClientProfileReplication
+	cleanUp                  bool
 }
 
 // csiClusterRrcordInfo represent the structure of a serialized csi record
@@ -100,6 +105,20 @@ type csiClusterInfoRecord struct {
 		Enabled             bool     `json:"enabled,omitempty"`
 		CrushLocationLabels []string `json:"crushLocationLabels,omitempty"`
 	} `json:"readAffinity,omitempty"`
+	ReplicationDestination *replicationDestinationInfo `json:"replicationDestination,omitempty"`
+}
+
+type replicationDestinationInfo struct {
+	RemoteClusterID string            `json:"remoteClusterID"`
+	RBD             *remoteRBDDetails `json:"rbd,omitempty"`
+}
+
+type remoteRBDDetails struct {
+	RemotePoolMapping map[string]remotePoolDetails `json:"remotePoolMapping,omitempty"`
+}
+
+type remotePoolDetails struct {
+	PoolID string `json:"poolID"`
 }
 
 const (
@@ -125,6 +144,25 @@ func (r *ClientProfileReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			&corev1.ConfigMap{},
 			builder.MatchEveryOwner,
 			builder.WithPredicates(genChangedPredicate),
+		).
+		// Watch ClientProfileReplication CRs to trigger reconciliation when they change
+		Watches(
+			&csiv1.ClientProfileReplication{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
+				cpr := obj.(*csiv1.ClientProfileReplication)
+				// Trigger reconciliation of the referenced ClientProfile
+				return []reconcile.Request{
+					{
+						NamespacedName: types.NamespacedName{
+							Name:      cpr.Spec.LocalClientProfile,
+							Namespace: cpr.Namespace,
+						},
+					},
+				}
+			}),
+			builder.WithPredicates(
+				utils.EventTypePredicate(true, true, true, false),
+			),
 		).
 		Complete(r)
 }
@@ -162,21 +200,51 @@ func (r *ClientProfileReconcile) reconcile() error {
 		}
 	}
 
+	reconcileErr := r.reconcilePhases()
+
+	statusErr := r.Status().Update(r.ctx, &r.clientProfile)
+	if statusErr != nil {
+		r.log.Error(statusErr, "Failed to update ClientProfile status.")
+	}
+	if reconcileErr != nil {
+		return reconcileErr
+	} else if statusErr != nil {
+		return statusErr
+	}
+	return nil
+}
+
+func (r *ClientProfileReconcile) reconcilePhases() error {
+	r.clientProfile.Status.Phase = csiv1.ClientProfilePhasePending
+
 	if err := r.reconcileCephConnection(); err != nil {
+		r.clientProfile.Status.Phase = csiv1.ClientProfilePhaseFailed
+		r.clientProfile.Status.Message = fmt.Sprintf("failed to reconcile CephConnection: %v", err)
+		return err
+	}
+	if err := r.reconcileClientProfileReplication(); err != nil {
+		r.clientProfile.Status.Phase = csiv1.ClientProfilePhaseFailed
+		r.clientProfile.Status.Message = fmt.Sprintf("failed to reconcile ClientProfileReplication: %v", err)
 		return err
 	}
 	if err := r.reconcileCephCsiClusterInfo(); err != nil {
+		r.clientProfile.Status.Phase = csiv1.ClientProfilePhaseFailed
+		r.clientProfile.Status.Message = fmt.Sprintf("failed to reconcile ConfigMap: %v", err)
 		return err
 	}
 
 	if r.cleanUp {
 		ctrlutil.RemoveFinalizer(&r.clientProfile, cleanupFinalizer)
 		if err := r.Update(r.ctx, &r.clientProfile); err != nil {
-			r.log.Error(err, "Failed to add a cleanup finalizer on config resource")
+			r.log.Error(err, "Failed to remove cleanup finalizer on ClientProfile")
+			r.clientProfile.Status.Phase = csiv1.ClientProfilePhaseFailed
+			r.clientProfile.Status.Message = fmt.Sprintf("failed to remove finalizer: %v", err)
 			return err
 		}
 	}
 
+	r.clientProfile.Status.Phase = csiv1.ClientProfilePhaseReady
+	r.clientProfile.Status.Message = "ClientProfile reconciled successfully"
 	return nil
 }
 
@@ -250,6 +318,60 @@ func (r *ClientProfileReconcile) reconcileCephConnection() error {
 	return nil
 }
 
+func (r *ClientProfileReconcile) reconcileClientProfileReplication() error {
+	log := r.log
+	log.Info("Reconciling ClientProfileReplication")
+
+	// Look up ClientProfileReplication CRs using the field index
+	var replicationList csiv1.ClientProfileReplicationList
+	err := r.List(r.ctx, &replicationList,
+		client.InNamespace(r.clientProfile.Namespace),
+		client.MatchingFields{clientProfileIndexKey: r.clientProfile.Name})
+	if err != nil {
+		log.Error(err, "failed to list ClientProfileReplication CRs by localClientProfile")
+		return err
+	}
+
+	// Filter for Ready state
+	var readyCRs []csiv1.ClientProfileReplication
+	for _, item := range replicationList.Items {
+		if item.Status.Phase == csiv1.ClientProfileReplicationPhaseReady {
+			readyCRs = append(readyCRs, item)
+		}
+	}
+
+	if len(readyCRs) > 1 {
+		crNames := make([]string, len(readyCRs))
+		for i, item := range readyCRs {
+			crNames[i] = item.Name
+		}
+		err := fmt.Errorf("multiple Ready ClientProfileReplication CRs found: %v", crNames)
+		log.Error(err, "invalid state: multiple Ready ClientProfileReplication CRs")
+		return err
+	}
+
+	// If deletion is requested, check for referencing ClientProfileReplication CRs
+	if r.cleanUp {
+		if len(replicationList.Items) > 0 {
+			crNames := make([]string, len(replicationList.Items))
+			for i, item := range replicationList.Items {
+				crNames[i] = item.Name
+			}
+			err := fmt.Errorf("cannot delete: ClientProfileReplication CRs still reference this profile: %v", crNames)
+			log.Error(err, "deletion blocked by referencing ClientProfileReplication CRs")
+			return err
+		}
+	} else if len(readyCRs) > 0 {
+		// Store the ready CR for use in ConfigMap composition
+		r.clientProfileReplication = readyCRs[0]
+		log.Info("found Ready ClientProfileReplication", "name", r.clientProfileReplication.Name)
+	} else {
+		log.Info("no Ready ClientProfileReplication found")
+	}
+
+	return nil
+}
+
 func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 	csiConfigMap := corev1.ConfigMap{}
 	csiConfigMap.Name = utils.CsiConfigVolume.Name
@@ -296,7 +418,7 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 
 		if !r.cleanUp {
 			// Overwrite an existing entry or append a new one
-			record := composeCsiClusterInfoRecord(&r.clientProfile, &r.cephConn)
+			record := composeCsiClusterInfoRecord(&r.clientProfile, &r.cephConn, &r.clientProfileReplication)
 			if index > -1 {
 				clusterInfoList[index] = record
 			} else {
@@ -328,7 +450,7 @@ func (r *ClientProfileReconcile) reconcileCephCsiClusterInfo() error {
 
 // ComposeCsiClusterInfoRecord composes the desired csi cluster info record for
 // a given ClientProfile and CephConnection specs
-func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *csiv1.CephConnection) *csiClusterInfoRecord {
+func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *csiv1.CephConnection, clientProfileReplication *csiv1.ClientProfileReplication) *csiClusterInfoRecord {
 	record := csiClusterInfoRecord{}
 	record.ClusterId = clientProfile.Name
 	record.Monitors = cephConn.Spec.Monitors
@@ -367,5 +489,27 @@ func composeCsiClusterInfoRecord(clientProfile *csiv1.ClientProfile, cephConn *c
 		record.ReadAffinity.Enabled = true
 		record.ReadAffinity.CrushLocationLabels = readAffinity.CrushLocationLabels
 	}
+
+	// Add replication destination if a Ready ClientProfileReplication exists
+	if clientProfileReplication != nil && clientProfileReplication.Status.Phase == csiv1.ClientProfileReplicationPhaseReady {
+		replDest := &replicationDestinationInfo{
+			RemoteClusterID: clientProfileReplication.Spec.RemoteClientProfile,
+		}
+
+		// Add RBD pool mapping if specified
+		if clientProfileReplication.Spec.RBD != nil && len(clientProfileReplication.Spec.RBD.PoolMapping) > 0 {
+			replDest.RBD = &remoteRBDDetails{
+				RemotePoolMapping: make(map[string]remotePoolDetails),
+			}
+			for _, poolMapping := range clientProfileReplication.Spec.RBD.PoolMapping {
+				replDest.RBD.RemotePoolMapping[poolMapping.Name] = remotePoolDetails{
+					PoolID: poolMapping.RemoteID,
+				}
+			}
+		}
+
+		record.ReplicationDestination = replDest
+	}
+
 	return &record
 }
