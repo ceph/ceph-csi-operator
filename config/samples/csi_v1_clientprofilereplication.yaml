@@ -1,0 +1,16 @@
+apiVersion: csi.ceph.io/v1
+kind: ClientProfileReplication
+metadata:
+  labels:
+    app.kubernetes.io/name: ceph-csi-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: clientprofilereplication-sample
+spec:
+  localClientProfile: local
+  remoteClientProfile: remote
+  rbd:
+    poolMapping:
+    - name: "cephblockpool-a"
+      remoteID: "3"
+    - name: "cephblockpool-b"
+      remoteID: "2"
