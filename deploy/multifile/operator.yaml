@@ -186,6 +186,77 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: ceph-csi-operator
+  name: ceph-csi-operator-clientprofilereplication-admin-role
+rules:
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications
+  verbs:
+  - '*'
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ceph-csi-operator
+  name: ceph-csi-operator-clientprofilereplication-editor-role
+rules:
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ceph-csi-operator
+  name: ceph-csi-operator-clientprofilereplication-viewer-role
+rules:
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: ceph-csi-operator
   name: ceph-csi-operator-clientprofiles-editor-role
 rules:
 - apiGroups:
@@ -309,6 +380,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings
+  - clientprofilereplications
   - clientprofiles
   - drivers
   verbs:
@@ -323,6 +395,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings/finalizers
+  - clientprofilereplications/finalizers
   - clientprofiles/finalizers
   - drivers/finalizers
   verbs:
@@ -331,6 +404,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings/status
+  - clientprofilereplications/status
   - clientprofiles/status
   - drivers/status
   verbs:

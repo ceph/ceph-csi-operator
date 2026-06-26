@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -33,11 +34,11 @@ import (
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 )
 
-var _ = Describe("ClientProfile Controller with Fake Client", func() {
+var _ = Describe("ClientProfileReplication Controller with Fake Client", func() {
 	var (
 		ctx                context.Context
 		fakeClient         client.Client
-		reconciler         *ClientProfileReconciler
+		reconciler         *ClientProfileReplicationReconciler
 		testScheme         *runtime.Scheme
 		testClientProfile  *csiv1.ClientProfile
 		testCephConnection *csiv1.CephConnection
@@ -78,7 +79,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 		fakeClient = fake.NewClientBuilder().
 			WithScheme(testScheme).
 			WithObjects(testCephConnection, testClientProfile).
-			WithStatusSubresource(&csiv1.ClientProfile{}).
+			WithStatusSubresource(&csiv1.ClientProfileReplication{}).
 			WithIndex(&csiv1.ClientProfileReplication{}, clientProfileIndexKey, func(obj client.Object) []string {
 				cpr := obj.(*csiv1.ClientProfileReplication)
 				if cpr.Spec.LocalClientProfile != "" {
@@ -88,35 +89,51 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			}).
 			Build()
 
-		reconciler = &ClientProfileReconciler{
+		reconciler = &ClientProfileReplicationReconciler{
 			Client: fakeClient,
 			Scheme: testScheme,
 		}
 	})
 
-	Context("When no ClientProfileReplication exists", func() {
-		It("should reconcile successfully without replication destination", func() {
+	Context("When ClientProfile does not exist", func() {
+		It("should reject the ClientProfileReplication CR", func() {
+			cpr := &csiv1.ClientProfileReplication{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-cpr-no-profile",
+					Namespace: "default",
+				},
+				Spec: csiv1.ClientProfileReplicationSpec{
+					LocalClientProfile:  "nonexistent-profile",
+					RemoteClientProfile: "remote-profile",
+				},
+			}
+			Expect(fakeClient.Create(ctx, cpr)).To(Succeed())
+
+			// Reconcile
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Name:      testClientProfile.Name,
-					Namespace: testClientProfile.Namespace,
+					Name:      cpr.Name,
+					Namespace: cpr.Namespace,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
 
 			// Verify status
-			updated := &csiv1.ClientProfile{}
-			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(testClientProfile), updated)).To(Succeed())
-			Expect(updated.Status.Phase).To(Equal(csiv1.ClientProfilePhaseReady))
+			updated := &csiv1.ClientProfileReplication{}
+			Expect(fakeClient.Get(ctx, types.NamespacedName{
+				Name:      cpr.Name,
+				Namespace: cpr.Namespace,
+			}, updated)).To(Succeed())
+			Expect(updated.Status.Phase).To(Equal(csiv1.ClientProfileReplicationPhaseRejected))
+			Expect(updated.Status.Message).To(ContainSubstring("ClientProfile 'nonexistent-profile' not found"))
 		})
 	})
 
-	Context("When a Ready ClientProfileReplication exists", func() {
-		It("should reconcile successfully with replication destination", func() {
-			// Create a Ready ClientProfileReplication
+	Context("When single ClientProfileReplication exists", func() {
+		It("should mark it as Ready", func() {
 			cpr := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-replication",
+					Name:      "test-cpr-single",
 					Namespace: "default",
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
@@ -128,130 +145,99 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 						},
 					},
 				},
-				Status: csiv1.ClientProfileReplicationStatus{
-					Phase:   csiv1.ClientProfileReplicationPhaseReady,
-					Message: "accepted",
-				},
 			}
 			Expect(fakeClient.Create(ctx, cpr)).To(Succeed())
 
+			// Reconcile
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Name:      testClientProfile.Name,
-					Namespace: testClientProfile.Namespace,
+					Name:      cpr.Name,
+					Namespace: cpr.Namespace,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
 
 			// Verify status
-			updated := &csiv1.ClientProfile{}
-			Expect(fakeClient.Get(ctx, client.ObjectKeyFromObject(testClientProfile), updated)).To(Succeed())
-			Expect(updated.Status.Phase).To(Equal(csiv1.ClientProfilePhaseReady))
+			updated := &csiv1.ClientProfileReplication{}
+			Expect(fakeClient.Get(ctx, types.NamespacedName{
+				Name:      cpr.Name,
+				Namespace: cpr.Namespace,
+			}, updated)).To(Succeed())
+			Expect(updated.Status.Phase).To(Equal(csiv1.ClientProfileReplicationPhaseReady))
+			Expect(updated.Status.Message).To(Equal("accepted"))
 		})
 	})
 
-	Context("When multiple Ready ClientProfileReplication CRs exist", func() {
-		It("should fail reconciliation", func() {
-			// Create two Ready ClientProfileReplication CRs
+	Context("When multiple ClientProfileReplication CRs exist", func() {
+		It("should mark oldest as Ready and others as Rejected", func() {
+			// Pre-create objects with explicit timestamps
+			oldTime := metav1.NewTime(time.Now().Add(-10 * time.Minute))
+			newTime := metav1.Now()
+
 			cpr1 := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-replication-1",
-					Namespace: "default",
+					Name:              "test-cpr-oldest",
+					Namespace:         "default",
+					CreationTimestamp: oldTime,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  testClientProfile.Name,
 					RemoteClientProfile: "remote-profile-1",
 				},
-				Status: csiv1.ClientProfileReplicationStatus{
-					Phase:   csiv1.ClientProfileReplicationPhaseReady,
-					Message: "accepted",
-				},
 			}
-			Expect(fakeClient.Create(ctx, cpr1)).To(Succeed())
 
 			cpr2 := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-replication-2",
-					Namespace: "default",
+					Name:              "test-cpr-newer",
+					Namespace:         "default",
+					CreationTimestamp: newTime,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  testClientProfile.Name,
 					RemoteClientProfile: "remote-profile-2",
 				},
-				Status: csiv1.ClientProfileReplicationStatus{
-					Phase:   csiv1.ClientProfileReplicationPhaseReady,
-					Message: "accepted",
-				},
-			}
-			Expect(fakeClient.Create(ctx, cpr2)).To(Succeed())
-
-			_, err := reconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      testClientProfile.Name,
-					Namespace: testClientProfile.Namespace,
-				},
-			})
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("multiple Ready ClientProfileReplication CRs found"))
-		})
-	})
-
-	Context("When ClientProfile is being deleted with referencing ClientProfileReplication", func() {
-		It("should fail to delete", func() {
-			// Create objects with ClientProfile marked for deletion
-			now := metav1.Now()
-			deletingProfile := &csiv1.ClientProfile{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:              "deleting-profile",
-					Namespace:         "default",
-					DeletionTimestamp: &now,
-					Finalizers:        []string{cleanupFinalizer},
-				},
-				Spec: csiv1.ClientProfileSpec{
-					CephConnectionRef: corev1.LocalObjectReference{
-						Name: testCephConnection.Name,
-					},
-				},
 			}
 
-			cpr := &csiv1.ClientProfileReplication{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-replication",
-					Namespace: "default",
-				},
-				Spec: csiv1.ClientProfileReplicationSpec{
-					LocalClientProfile:  deletingProfile.Name,
-					RemoteClientProfile: "remote-profile",
-				},
-			}
-
-			// Create a new fake client with these objects
+			// Create a new fake client with both objects pre-populated
 			testFakeClient := fake.NewClientBuilder().
 				WithScheme(testScheme).
-				WithObjects(testCephConnection, deletingProfile, cpr).
-				WithStatusSubresource(&csiv1.ClientProfile{}).
+				WithObjects(testCephConnection, testClientProfile, cpr1, cpr2).
+				WithStatusSubresource(&csiv1.ClientProfileReplication{}).
 				WithIndex(&csiv1.ClientProfileReplication{}, clientProfileIndexKey, func(obj client.Object) []string {
-					cprObj := obj.(*csiv1.ClientProfileReplication)
-					if cprObj.Spec.LocalClientProfile != "" {
-						return []string{cprObj.Spec.LocalClientProfile}
+					cpr := obj.(*csiv1.ClientProfileReplication)
+					if cpr.Spec.LocalClientProfile != "" {
+						return []string{cpr.Spec.LocalClientProfile}
 					}
 					return nil
 				}).
 				Build()
 
-			testReconciler := &ClientProfileReconciler{
+			testReconciler := &ClientProfileReplicationReconciler{
 				Client: testFakeClient,
 				Scheme: testScheme,
 			}
 
+			// Reconcile both
 			_, err := testReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Name:      deletingProfile.Name,
-					Namespace: deletingProfile.Namespace,
-				},
+				NamespacedName: types.NamespacedName{Name: cpr1.Name, Namespace: cpr1.Namespace},
 			})
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("ClientProfileReplication CRs still reference this profile"))
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = testReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{Name: cpr2.Name, Namespace: cpr2.Namespace},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify oldest is Ready
+			updated1 := &csiv1.ClientProfileReplication{}
+			Expect(testFakeClient.Get(ctx, types.NamespacedName{Name: cpr1.Name, Namespace: cpr1.Namespace}, updated1)).To(Succeed())
+			Expect(updated1.Status.Phase).To(Equal(csiv1.ClientProfileReplicationPhaseReady))
+
+			// Verify newer is Rejected
+			updated2 := &csiv1.ClientProfileReplication{}
+			Expect(testFakeClient.Get(ctx, types.NamespacedName{Name: cpr2.Name, Namespace: cpr2.Namespace}, updated2)).To(Succeed())
+			Expect(updated2.Status.Phase).To(Equal(csiv1.ClientProfileReplicationPhaseRejected))
+			Expect(updated2.Status.Message).To(ContainSubstring(cpr1.Name))
 		})
 	})
 })
