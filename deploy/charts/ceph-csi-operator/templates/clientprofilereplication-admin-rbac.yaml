@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "ceph-csi-operator.fullname" . }}-clientprofilereplication-admin-role
+  labels:
+  {{- include "ceph-csi-operator.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications
+  verbs:
+  - '*'
+- apiGroups:
+  - csi.ceph.io
+  resources:
+  - clientprofilereplications/status
+  verbs:
+  - get

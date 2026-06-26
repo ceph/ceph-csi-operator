@@ -52,6 +52,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings
+  - clientprofilereplications
   - clientprofiles
   - drivers
   verbs:
@@ -66,6 +67,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings/finalizers
+  - clientprofilereplications/finalizers
   - clientprofiles/finalizers
   - drivers/finalizers
   verbs:
@@ -74,6 +76,7 @@ rules:
   - csi.ceph.io
   resources:
   - clientprofilemappings/status
+  - clientprofilereplications/status
   - clientprofiles/status
   - drivers/status
   verbs:
