@@ -229,9 +229,12 @@ type ControllerPluginSpec struct {
 	//+kubebuilder:validation:Optional
 	DeploymentStrategy *appsv1.DeploymentStrategy `json:"deploymentStrategy,omitempty"`
 
-	// Set replicas for controller plugin's deployment. Defaults to 2
+	// Set replicas for controller plugin's deployment. Defaults to 2.
+	// On single-node clusters, the operator automatically caps the replica
+	// count to the number of available nodes when this field is not set.
 	//+kubebuilder:validation:Optional
 	//+kubebuilder:validation:Minimum:=1
+	//+kubebuilder:default:=2
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// Resource requirements for controller plugin's containers
