@@ -69,7 +69,7 @@ The following table lists the configurable parameters of the ceph-csi-operator c
 | `controllerManager.manager.env.csiServiceAccountPrefix` | Prefix for CSI service account names created by the operator (default: "ceph-csi-operator-") | `"ceph-csi-operator-"` |
 | `controllerManager.manager.env.watchNamespace` | Namespace to watch for resources, empty for all namespaces (default: "") | `""` |
 | `controllerManager.manager.image.repository` | Repository for the ceph-csi-operator image (default: "quay.io/cephcsi/ceph-csi-operator") | `"quay.io/cephcsi/ceph-csi-operator"` |
-| `controllerManager.manager.image.tag` | Tag for the ceph-csi-operator image (default: "v1.0.2") | `"v1.0.2"` |
+| `controllerManager.manager.image.tag` | Tag for the ceph-csi-operator image (default: "v1.0.3") | `"v1.0.3"` |
 | `controllerManager.manager.resources.limits.cpu` | CPU limit for the manager container (default: "500m") | `"500m"` |
 | `controllerManager.manager.resources.limits.memory` | Memory limit for the manager container (default: "128Mi") | `"128Mi"` |
 | `controllerManager.manager.resources.requests.cpu` | CPU request for the manager container (default: "10m") | `"10m"` |
