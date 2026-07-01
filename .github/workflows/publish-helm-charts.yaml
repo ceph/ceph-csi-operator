@@ -22,7 +22,9 @@ jobs:
 
       - name: Set release version
         id: release_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        run: echo "VERSION=${TAG_NAME#v}" >> $GITHUB_ENV
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
 
 
       - name: Install helm
