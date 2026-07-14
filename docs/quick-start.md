@@ -6,7 +6,8 @@
     - [3. Deploy Ceph-CSI Drivers](#3-deploy-ceph-csi-drivers)
       - [3.1 Deploy the RBD Driver](#31-deploy-the-rbd-driver)
       - [3.2 Deploy the CephFS Driver](#32-deploy-the-cephfs-driver)
-    - [3.3 Deploy the Ceph-NFS Driver](#33-deploy-the-ceph-nfs-driver)
+      - [3.3 Deploy the NVMe-oF Driver](#33-deploy-the-nvme-of-driver)
+      - [3.4 Deploy the Ceph-NFS Driver](#34-deploy-the-ceph-nfs-driver)
   - [4. Verify Installation](#4-verify-installation)
   - [5. Create CephConnection](#5-create-cephconnection)
   - [6. Create ClientProfile](#6-create-clientprofile)
@@ -80,7 +81,19 @@ metadata:
 ' | kubectl create -f -
 ```
 
-### 3.3 Deploy the Ceph-NFS Driver
+### 3.3 Deploy the NVMe-oF Driver
+
+```console
+echo '
+apiVersion: csi.ceph.io/v1
+kind: Driver
+metadata:
+  name: nvmeof.csi.ceph.com
+  namespace: ceph-csi-operator-system
+' | kubectl create -f -
+```
+
+### 3.4 Deploy the Ceph-NFS Driver
 
 ```console
 echo '
@@ -97,11 +110,13 @@ metadata:
 To verify the installation, check the status of the Ceph-CSI components:
 
 ```bash
-kubectl get pod -nceph-csi-operator-system
+kubectl get pod -n ceph-csi-operator-system
 NAME                                                    READY   STATUS    RESTARTS   AGE
 ceph-csi-operator-controller-manager-744dc99cb5-scxxh   2/2     Running   0          45s
 cephfs.csi.ceph.com-ctrlplugin-5847c998b5-xf85m         5/5     Running   0          27s
 cephfs.csi.ceph.com-nodeplugin-r6pkt                    2/2     Running   0          27s
+nvmeof.csi.ceph.com-ctrlplugin-6936b889a4-ya99h         5/5     Running   0          27s
+nvmeof.csi.ceph.com-nodeplugin-ab67g                    2/2     Running   0          27s
 nfs.csi.ceph.com-ctrlplugin-76fd4f5b4c-smk2g            5/5     Running   0          27s
 nfs.csi.ceph.com-nodeplugin-kbzms                       2/2     Running   0          27s
 rbd.csi.ceph.com-ctrlplugin-6965dcfdb8-w88kn            5/5     Running   0          4m35s
@@ -170,6 +185,7 @@ Create StorageClasses using the upstream Ceph-CSI examples:
 - [RBD StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml)
 - [CephFS StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml)
 - [NFS StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml)
+- [NVMe-oF StorageClass Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nvmeof/storageclass.yaml)
 
 > [!IMPORTANT]
 > **ClusterID and ClientProfile Mapping**
@@ -204,6 +220,7 @@ Test your setup using the [Ceph-CSI PVC examples](https://github.com/ceph/ceph-c
 - [RBD PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/pvc.yaml)
 - [CephFS PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/pvc.yaml)
 - [NFS PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/pvc.yaml)
+- [NVMe-oF PVC Example](https://github.com/ceph/ceph-csi/blob/devel/examples/nvmeof/pvc.yaml)
 
 The PVC should reach `Bound` status, indicating successful provisioning.
 
@@ -216,6 +233,7 @@ kubectl delete cephconnection ceph-connection -n ceph-csi-operator-system
 kubectl delete clientprofile storage -n ceph-csi-operator-system
 kubectl delete driver rbd.csi.ceph.com -n ceph-csi-operator-system
 kubectl delete driver cephfs.csi.ceph.com -n ceph-csi-operator-system
+kubectl delete driver nvmeof.csi.ceph.com -n ceph-csi-operator-system
 kubectl delete driver nfs.csi.ceph.com -n ceph-csi-operator-system
 ```
 
