@@ -968,15 +968,18 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 									ImagePullPolicy: imagePullPolicy,
 									Image:           r.images["snapshot-metadata"],
 									Args: utils.DeleteZeroValues(
-										[]string{
-											utils.LogVerbosityContainerArg(logVerbosity),
-											utils.TimeoutContainerArg(grpcTimeout),
-											utils.SnapshotMetadataGrpcServicePortArg,
-											utils.CsiAddressContainerArg,
-											utils.SnapshotMetadataTlsCertArg,
-											utils.SnapshotMetadataTlsKeyArg,
-											utils.SnapshotMetadataAudienceArg(r.driver.Name),
-										},
+										append(
+											[]string{
+												utils.LogVerbosityContainerArg(logVerbosity),
+												utils.TimeoutContainerArg(grpcTimeout),
+												utils.SnapshotMetadataGrpcServicePortArg,
+												utils.CsiAddressContainerArg,
+												utils.SnapshotMetadataTlsCertArg,
+												utils.SnapshotMetadataTlsKeyArg,
+												utils.SnapshotMetadataAudienceArg(r.driver.Name),
+											},
+											utils.GetExtraArgsForContainer("csi-snapshot-metadata", pluginSpec.ContainerExtraArgs)...,
+										),
 									),
 									Ports: []corev1.ContainerPort{
 										utils.SnapshotMetadataGrpcPort,
