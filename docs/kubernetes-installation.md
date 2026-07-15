@@ -495,3 +495,23 @@ Expected output:
 ```text
 No resources found in ceph-csi-operator-system namespace.
 ```
+
+## 6. NetworkPolicies
+
+NetworkPolicies are included in all generated manifests by default.
+
+- The **operator pod** gets a policy that denies all ingress and allows open
+  egress (required for API server access).
+- Each **controller-plugin** pod gets a policy allowing ingress only from the
+  csi-addons controller-manager on the csi-addons gRPC port, and (for RBD)
+  from any pod on port 50051 for snapshot-metadata gRPC.
+- Each **csi-addons nodeplugin** pod (when `deployCsiAddons: true`) gets a
+  policy allowing ingress only from the csi-addons controller-manager on
+  port 9071.
+- The **node-plugin** DaemonSet runs with `hostNetwork: true` and is exempt
+  from NetworkPolicies.
+
+Driver pod NetworkPolicies are created by the operator for every
+reconciled driver.
+
+For design details, see [docs/design/network-policy.md](design/network-policy.md).

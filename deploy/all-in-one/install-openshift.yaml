@@ -16969,6 +16969,21 @@ spec:
       serviceAccountName: ceph-csi-operator-controller-manager
       terminationGracePeriodSeconds: 10
 ---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ceph-csi-operator-ceph-csi-controller-manager
+  namespace: ceph-csi-operator-system
+spec:
+  egress:
+  - {}
+  podSelector:
+    matchLabels:
+      control-plane: ceph-csi-op-controller-manager
+  policyTypes:
+  - Ingress
+  - Egress
+---
 allowHostDirVolumePlugin: true
 allowHostIPC: true
 allowHostNetwork: true
