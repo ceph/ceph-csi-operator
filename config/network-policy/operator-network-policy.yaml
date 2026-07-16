@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ceph-csi-controller-manager
+spec:
+  podSelector:
+    matchLabels:
+      control-plane: ceph-csi-op-controller-manager
+  # Ingress is not specified — deny all inbound traffic.
+  egress:
+  - {}
+  policyTypes:
+  - Ingress
+  - Egress
