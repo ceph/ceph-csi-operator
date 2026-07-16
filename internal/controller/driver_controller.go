@@ -32,6 +32,7 @@ import (
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,6 +63,7 @@ import (
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=nodes,verbs=list;watch
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
 
 type DriverType string
 
@@ -186,6 +188,10 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			builder.WithPredicates(genChangedPredicate),
 		).
 		Owns(
+			&networkingv1.NetworkPolicy{},
+			builder.WithPredicates(genChangedPredicate),
+		).
+		Owns(
 			&corev1.ConfigMap{},
 			builder.MatchEveryOwner,
 			builder.WithPredicates(
@@ -241,9 +247,11 @@ func (r *driverReconcile) reconcile() error {
 		r.reconcileLogRotateConfigMap,
 		r.reconcileK8sCsiDriver,
 		r.reconcileControllerPluginDeployment,
+		r.reconcileControllerPluginNetworkPolicy,
 		r.reconcileNodePluginDaemonSet,
 		r.reconcileLivenessService,
 		r.reconcileNodePluginDaemonSetForCsiAddons,
+		r.reconcileNodePluginCsiAddonsNetworkPolicy,
 	}
 
 	// Concurrently reconcile different aspects of the clusters actual state to meet
@@ -1041,6 +1049,75 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 	return err
 }
 
+func (r *driverReconcile) reconcileControllerPluginNetworkPolicy() error {
+	np := &networkingv1.NetworkPolicy{}
+	np.Name = r.generateName("ctrlplugin")
+	np.Namespace = r.driver.Namespace
+
+	pluginSpec := cmp.Or(r.driver.Spec.ControllerPlugin, &csiv1.ControllerPluginSpec{})
+	if ptr.Deref(pluginSpec.HostNetwork, false) {
+		if err := r.Delete(r.ctx, np); client.IgnoreNotFound(err) != nil {
+			return err
+		}
+		return nil
+	}
+
+	proto := corev1.ProtocolTCP
+	var ingress []networkingv1.NetworkPolicyIngressRule
+
+	if ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+		csiAddonsPort := r.controllerPluginCsiAddonsContainerPort()
+		ingress = append(ingress, networkingv1.NetworkPolicyIngressRule{
+			From: []networkingv1.NetworkPolicyPeer{{
+				NamespaceSelector: &metav1.LabelSelector{},
+				PodSelector: &metav1.LabelSelector{
+					MatchLabels: map[string]string{
+						"app.kubernetes.io/name": "csi-addons",
+						"control-plane":          "controller-manager",
+					},
+				},
+			}},
+			Ports: []networkingv1.NetworkPolicyPort{
+				{Port: &intstr.IntOrString{Type: intstr.Int, IntVal: csiAddonsPort.ContainerPort}, Protocol: &proto},
+			},
+		})
+	}
+
+	if r.isRbdDriver() {
+		tlsConfigured := slices.ContainsFunc(pluginSpec.Volumes, func(vol csiv1.VolumeSpec) bool {
+			return vol.Volume.Name == "tls-key"
+		})
+		if tlsConfigured {
+			ingress = append(ingress, networkingv1.NetworkPolicyIngressRule{
+				Ports: []networkingv1.NetworkPolicyPort{
+					{Port: &intstr.IntOrString{Type: intstr.Int, IntVal: utils.SnapshotMetadataGrpcPort.ContainerPort}, Protocol: &proto},
+				},
+			})
+		}
+	}
+
+	log := r.log.WithValues("networkPolicy", np.Name)
+	log.Info("Reconciling controller plugin network policy")
+
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, np, func() error {
+		if err := ctrlutil.SetControllerReference(&r.driver, np, r.Scheme); err != nil {
+			return err
+		}
+		np.Spec = networkingv1.NetworkPolicySpec{
+			PodSelector: metav1.LabelSelector{
+				MatchLabels: map[string]string{"app": np.Name},
+			},
+			Ingress:     ingress,
+			Egress:      []networkingv1.NetworkPolicyEgressRule{{}},
+			PolicyTypes: []networkingv1.PolicyType{networkingv1.PolicyTypeIngress, networkingv1.PolicyTypeEgress},
+		}
+		return nil
+	})
+
+	logCreateOrUpdateResult(log, "NetworkPolicy", np, opResult, err)
+	return err
+}
+
 func (r *driverReconcile) controllerPluginCsiAddonsContainerPort() corev1.ContainerPort {
 	// the cephFS and rbd drivers need to use different ports
 	// to avoid port collisions with host network.
@@ -1254,6 +1331,58 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 	})
 
 	logCreateOrUpdateResult(log, "csi addons node plugin daemonset", daemonSet, opResult, err)
+	return err
+}
+
+func (r *driverReconcile) reconcileNodePluginCsiAddonsNetworkPolicy() error {
+	if r.isNfsDriver() {
+		return nil
+	}
+
+	np := &networkingv1.NetworkPolicy{}
+	np.Name = r.generateName("nodeplugin-csi-addons")
+	np.Namespace = r.driver.Namespace
+
+	if !ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+		if err := r.Delete(r.ctx, np); client.IgnoreNotFound(err) != nil {
+			return err
+		}
+		return nil
+	}
+
+	log := r.log.WithValues("networkPolicy", np.Name)
+	log.Info("Reconciling csi-addons nodeplugin network policy")
+
+	proto := corev1.ProtocolTCP
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, np, func() error {
+		if err := ctrlutil.SetControllerReference(&r.driver, np, r.Scheme); err != nil {
+			return err
+		}
+		np.Spec = networkingv1.NetworkPolicySpec{
+			PodSelector: metav1.LabelSelector{
+				MatchLabels: map[string]string{"app": np.Name},
+			},
+			Ingress: []networkingv1.NetworkPolicyIngressRule{{
+				From: []networkingv1.NetworkPolicyPeer{{
+					NamespaceSelector: &metav1.LabelSelector{},
+					PodSelector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app.kubernetes.io/name": "csi-addons",
+							"control-plane":          "controller-manager",
+						},
+					},
+				}},
+				Ports: []networkingv1.NetworkPolicyPort{
+					{Port: &intstr.IntOrString{Type: intstr.Int, IntVal: utils.NodePluginCsiAddonsContainerPort.ContainerPort}, Protocol: &proto},
+				},
+			}},
+			Egress:      []networkingv1.NetworkPolicyEgressRule{{}},
+			PolicyTypes: []networkingv1.PolicyType{networkingv1.PolicyTypeIngress, networkingv1.PolicyTypeEgress},
+		}
+		return nil
+	})
+
+	logCreateOrUpdateResult(log, "NetworkPolicy", np, opResult, err)
 	return err
 }
 

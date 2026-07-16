@@ -36,17 +36,17 @@ ceph-csi-operator and the CSI driver pods it manages.
      applications (Velero, etc.) can run in any namespace with any labels.
      See [CSI snapshot-metadata](https://kubernetes-csi.github.io/docs/external-snapshot-metadata.html).
 - **Egress:** Open. Required for API server and Ceph cluster access.
-- **Deleted** when no ingress rules apply (no csi-addons, no
-  snapshot-metadata).
+- When no ingress rules apply, the NP is kept with an empty ingress
+  list (deny-all ingress) for defense-in-depth.
 
 ### csi-addons Nodeplugin
 
 - **Ingress:** csi-addons controller-manager → port 9071 only.
 - **Egress:** Open.
 - **Lifecycle:** Created when `DeployCsiAddons` is true. Not created for
-  NFS drivers. The csi-addons DaemonSet is set as an owner reference —
-  when the DaemonSet is deleted (DeployCsiAddons toggled false), the NP
-  is garbage collected automatically.
+  NFS drivers. Explicitly deleted when `DeployCsiAddons` is toggled
+  false. The Driver CR is the controller owner reference for watch
+  triggers and garbage collection on Driver deletion.
 
 ### Node-Plugin DaemonSet
 
