@@ -32,6 +32,10 @@ spec:
         name: {{ $config.driverSpecDefaults.imageSet.name }}
     {{- end }}
     {{- end }}
+    {{- if and $config.driverSpecDefaults.liveness.metricsPort $config.driverSpecDefaults.liveness.enabled }}
+    liveness:
+        metricsPort: {{ $config.driverSpecDefaults.liveness.metricsPort }}
+    {{- end }}
     {{- if $config.driverSpecDefaults.clusterName }}
     clusterName: {{ $config.driverSpecDefaults.clusterName }}
     {{- end }}

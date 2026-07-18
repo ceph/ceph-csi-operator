@@ -55,6 +55,11 @@ operatorConfig:
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
       name: ""
+    liveness:
+      # -- Enable metrics sidecar (default: false)
+      enabled: false
+      # -- Port to expose liveness metrics (default: 8080).
+      metricsPort: 8080
     # -- Cluster name identifier (default: "")
     clusterName: ""
     # -- Flag to enable fencing (default: false)
@@ -148,6 +153,11 @@ drivers:
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
       name: ""
+    liveness:
+      # -- Enable metrics sidecar (default: false)
+      enabled: false
+      # -- Port to expose liveness metrics (default: 8080).
+      metricsPort: 8080
     # -- Cluster name identifier (default: "")
     clusterName: ""
     # -- Flag to enable fencing (default: false)
@@ -231,6 +241,11 @@ drivers:
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
       name: ""
+    liveness:
+      # -- Enable metrics sidecar (default: false)
+      enabled: false
+      # -- Port to expose liveness metrics (default: 8080).
+      metricsPort: 8080
     # -- Cluster name identifier (default: "")
     clusterName: ""
     # -- Flag to enable fencing (default: false)
@@ -314,6 +329,11 @@ drivers:
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
       name: ""
+    liveness:
+      # -- Enable metrics sidecar (default: false)
+      enabled: false
+      # -- Port to expose liveness metrics (default: 8080).
+      metricsPort: 8080
     # -- Cluster name identifier (default: "")
     clusterName: ""
     # -- Flag to enable fencing (default: false)
@@ -397,6 +417,11 @@ drivers:
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
       name: ""
+    liveness:
+      # -- Enable metrics sidecar (default: false)
+      enabled: false
+      # -- Port to expose liveness metrics (default: 8080).
+      metricsPort: 8080
     # -- Cluster name identifier (default: "")
     clusterName: ""
     # -- Flag to enable fencing (default: false)
