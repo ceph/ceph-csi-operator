@@ -96,6 +96,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.cephfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.cephfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.cephfs.liveness.enabled` | Enable metrics sidecar (default: false) | `false` |
+| `drivers.cephfs.liveness.metricsPort` | Port to expose liveness metrics (default: 8080). | `8080` |
 | `drivers.cephfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.cephfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.cephfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -132,6 +134,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nfs.liveness.enabled` | Enable metrics sidecar (default: false) | `false` |
+| `drivers.nfs.liveness.metricsPort` | Port to expose liveness metrics (default: 8080). | `8080` |
 | `drivers.nfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -169,6 +173,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nvmeof.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nvmeof.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nvmeof.liveness.enabled` | Enable metrics sidecar (default: false) | `false` |
+| `drivers.nvmeof.liveness.metricsPort` | Port to expose liveness metrics (default: 8080). | `8080` |
 | `drivers.nvmeof.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nvmeof.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nvmeof.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -205,6 +211,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.rbd.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.rbd.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.rbd.liveness.enabled` | Enable metrics sidecar (default: false) | `false` |
+| `drivers.rbd.liveness.metricsPort` | Port to expose liveness metrics (default: 8080). | `8080` |
 | `drivers.rbd.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.rbd.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.rbd.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -246,6 +254,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `operatorConfig.driverSpecDefaults.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.liveness.enabled` | Enable metrics sidecar (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.liveness.metricsPort` | Port to expose liveness metrics (default: 8080). | `8080` |
 | `operatorConfig.driverSpecDefaults.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
