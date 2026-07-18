@@ -28,6 +28,10 @@ spec:
     name: {{ $driver.imageSet.name }}
   {{- end }}
   {{- end }}
+  {{- if and $driver.liveness.metricsPort $driver.liveness.enabled }}
+  liveness:
+      metricsPort: {{ driver.liveness.metricsPort }}
+  {{- end }}
   {{- if $driver.clusterName }}
   clusterName: {{ $driver.clusterName }}
   {{- end }}
