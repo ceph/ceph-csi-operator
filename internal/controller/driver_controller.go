@@ -1730,6 +1730,10 @@ func (r *driverReconcile) reconcileLivenessService() error {
 	service := &corev1.Service{}
 	service.Namespace = r.driver.Namespace
 	service.Name = r.generateServiceName("liveness")
+	service.Labels = map[string]string{
+		"app":    "csi-metrics",
+		"driver": r.driver.Name,
+	}
 
 	log := r.log.WithValues("service", service.Name)
 	log.Info("Reconciling liveness service")
