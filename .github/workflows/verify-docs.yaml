@@ -1,0 +1,19 @@
+---
+name: Verify Documentation
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+
+jobs:
+  verify-docs-nav:
+    runs-on: ubuntu-latest
+    steps:
+      # yamllint disable-line rule:line-length
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Verify documentation navigation
+        run: make verify-docs-nav

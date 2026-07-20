@@ -325,6 +325,27 @@ $(KUSTOMIZE): $(LOCALBIN)
 	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5,$(KUSTOMIZE_VERSION))
 
 .PHONY: controller-gen
+
+.PHONY: verify-docs-nav
+verify-docs-nav: ## Verify all design and feature docs are included in mkdocs.yml navigation
+	@echo "Checking Design section..."
+	@for file in docs/design/*.md; do \
+		filename=$$(basename $$file); \
+		if ! grep -q "design/$$filename" mkdocs.yml; then \
+			echo "ERROR: $$filename is not referenced in mkdocs.yml Design section"; \
+			exit 1; \
+		fi; \
+	done
+	@echo "Checking Features section..."
+	@for file in docs/features/*.md; do \
+		filename=$$(basename $$file); \
+		if ! grep -q "features/$$filename" mkdocs.yml; then \
+			echo "ERROR: $$filename is not referenced in mkdocs.yml Features section"; \
+			exit 1; \
+		fi; \
+	done
+	@echo "All documentation files are properly referenced in mkdocs.yml"
+
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
 $(CONTROLLER_GEN): $(LOCALBIN)
 	$(call go-install-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen,$(CONTROLLER_TOOLS_VERSION))
