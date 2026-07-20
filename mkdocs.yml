@@ -1,0 +1,63 @@
+---
+site_name: Ceph-CSI Operator Documentation
+site_description: Kubernetes Operator for managing Ceph-CSI drivers
+site_author: Ceph-CSI Operator Contributors
+site_url: https://ceph.github.io/ceph-csi-operator
+
+repo_name: ceph/ceph-csi-operator
+repo_url: https://github.com/ceph/ceph-csi-operator
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: quick-start.md
+      - Installation: installation.md
+      - Kubernetes Installation: kubernetes-installation.md
+  - Design:
+      - Operator Architecture: design/operator.md
+      - Host Network: design/hostNetwork.md
+      - Log Rotation: design/logrotate.md
+      - Network Policy: design/network-policy.md
+      - Replication: design/replication.md
+  - Features:
+      - RBD Snapshot Metadata: features/rbd-snapshot-metadata.md
+  - Helm Charts:
+      - Overview: helm-charts/helm-charts.md
+      - Operator Chart: helm-charts/operator-chart.md
+      - Drivers Chart: helm-charts/drivers-chart.md
+  - Operations:
+      - Migration: migration.md
+      - Custom Images: custom-images.md
+  - Contributing:
+      - Development Guide: development-guide.md
+      - Coding Conventions: coding.md
+      - Releases: releases.md
+      - DCO: DCO
