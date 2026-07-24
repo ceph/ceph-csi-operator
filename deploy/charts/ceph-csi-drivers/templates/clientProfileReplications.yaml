@@ -1,0 +1,24 @@
+{{- $root := . -}}
+{{- range $clientProfileReplication := .Values.clientProfileReplications -}}
+{{- if $clientProfileReplication.name -}}
+---
+apiVersion: csi.ceph.io/v1
+kind: ClientProfileReplication
+metadata:
+  name: {{  $clientProfileReplication.name  }}
+  namespace: {{ $root.Release.Namespace }}
+spec:
+  localClientProfile: {{  $clientProfileReplication.localClientProfile  }}
+  remoteClientProfile: {{  $clientProfileReplication.remoteClientProfile  }}
+  {{- if $clientProfileReplication.rbd }}
+  rbd:
+    {{- if $clientProfileReplication.rbd.poolMapping }}
+    poolMapping:
+      {{- range $poolMapping := $clientProfileReplication.rbd.poolMapping }}
+      - name: {{ $poolMapping.name }}
+        remoteID: {{ $poolMapping.remoteID | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

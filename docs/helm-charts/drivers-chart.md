@@ -69,6 +69,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `cephConnections[0].monitors` | Ceph monitors (key-value pairs, typically IP addresses of the Ceph monitors) (default: {}) | `{}` |
 | `cephConnections[0].name` | Name for the Ceph connection (default: "") | `""` |
 | `cephConnections[0].rbdMirrorDaemonCount` | Number of RBD mirror daemons (default: 1) | `1` |
+| `clientProfileReplications[0].localClientProfile` | Name of the local ClientProfile CR (default: "") | `""` |
+| `clientProfileReplications[0].name` | Name of the client profile replication (default: "") | `""` |
+| `clientProfileReplications[0].rbd.poolMapping` | Pool mappings from local pool names to remote pool IDs (default: []) | `[]` |
+| `clientProfileReplications[0].remoteClientProfile` | Name of the remote cluster's client profile (default: "") | `""` |
 | `clientProfiles[0].cephConnection.name` | Reference to the Ceph connection for this profile (default: "") | `""` |
 | `clientProfiles[0].cephFs.fuseMountOptions` | Mount options for CephFS with FUSE (default: {}) | `{}` |
 | `clientProfiles[0].cephFs.kernelMountOptions` | Mount options for CephFS with the kernel (default: {}) | `{}` |
