@@ -29,6 +29,20 @@ clientProfiles:
     nvmeof:
       # -- Namespace for RADOS block devices (default: "")
       radosNamespace: ""
+# Configuration for Client Profile Replications
+clientProfileReplications:
+  - # -- Name of the client profile replication (default: "")
+    name: ""
+    # -- Name of the local ClientProfile CR (default: "")
+    localClientProfile: ""
+    # -- Name of the remote cluster's client profile (default: "")
+    remoteClientProfile: ""
+    rbd:
+      # -- Pool mappings from local pool names to remote pool IDs (default: [])
+      poolMapping: []
+      # Example:
+      # - name: "my-pool"
+      #   remoteID: "2"
 # Operator configuration section
 operatorConfig:
   # -- Name of the operator config (default: "ceph-csi-operator-config")
