@@ -34,7 +34,7 @@ ceph-csi-drivers currently publishes artifacts of the ceph-csi drivers to tagged
 ### **Released version**
 
 ```console
-helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator-charts
+helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/
 helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver ceph-csi-operator/ceph-csi-drivers
 ```
 
@@ -45,7 +45,7 @@ For example settings, see the next section or [values.yaml](https://github.com/c
 For OpenShift clusters, you must enable OpenShift support and configure the SCC ClusterRole name to match the operator installation:
 
 ```console
-helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator-charts
+helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/
 helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver \
   --set openshift.enabled=true \
   --set openshift.sccClusterRoleName=ceph-csi-operator-scc-user \
