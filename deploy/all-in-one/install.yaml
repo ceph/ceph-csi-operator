@@ -15476,6 +15476,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - snapshot.storage.k8s.io
   resources:
@@ -16135,6 +16136,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - ""
   resources:
