@@ -1,0 +1,2699 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kubernetes Operator for managing Ceph-CSI drivers">
+      
+      
+        <meta name="author" content="Ceph-CSI Operator Contributors">
+      
+      
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/helm-charts/drivers-chart/">
+      
+      
+        <link rel="prev" href="../operator-chart/">
+      
+      
+        <link rel="next" href="../../migration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Ceph-CSI Driver Helm Chart - Ceph-CSI Operator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#prerequisites" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Ceph-CSI Operator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Ceph-CSI Driver Helm Chart
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../quick-start/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../design/operator/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../features/rbd-snapshot-metadata/" class="md-tabs__link">
+          
+  
+  
+  Features
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../helm-charts/" class="md-tabs__link">
+          
+  
+  
+  Helm Charts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../migration/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development-guide/" class="md-tabs__link">
+          
+  
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Ceph-CSI Operator Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kubernetes-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/operator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/hostNetwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/logrotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Log Rotation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/network-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/replication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Replication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/rbd-snapshot-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RBD Snapshot Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Charts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Helm Charts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operator-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drivers Chart
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drivers Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#released-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Released version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenShift Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling-the-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uninstalling the Chart
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Images
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DCO" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DCO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#released-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Released version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openshift-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenShift Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Build
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling-the-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uninstalling the Chart
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Drivers Chart</h1>
+
+<!---
+Document is generated by `make generate-helm-docs`. DO NOT EDIT.
+Edit the corresponding *.gotmpl.md file instead
+-->
+
+<p>Creates ceph-csi-operator resources to configure a <a href="https://github.com/ceph/ceph-csi">ceph-csi</a> drivers using the <a href="https://helm.sh">Helm</a> package manager.
+This chart is a simple packaging of templates that will optionally create ceph-csi-operator resources such as:</p>
+<ul>
+<li>Driver CRs (RBD,cephFS,NFS)</li>
+<li>CephConnection that contains the ceph details</li>
+<li>ClientProfile for the RBD/CephFS/NFS clusterID and corresponding configurations</li>
+<li>ClientProfileMapping for disaster recovery</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Kubernetes 1.32+</li>
+<li>Helm 3.x</li>
+</ul>
+<p>See the <a href="https://helm.sh/docs/topics/version_skew/">Helm support matrix</a> for more details.</p>
+<h2 id="installing">Installing<a class="headerlink" href="#installing" title="Permanent link">&para;</a></h2>
+<p>The Ceph-CSI Drivers helm chart will install the basic components necessary to install <a href="https://github.com/ceph/ceph-csi">ceph-csi</a> on Kubernetes cluster.</p>
+<ol>
+<li>Install the Helm chart</li>
+</ol>
+<p>The <code>helm install</code> command deploys ceph-csi-drivers on the Kubernetes cluster in the default configuration. The <a href="#configuration">configuration</a> section lists the parameters that can be configured during installation.</p>
+<p>ceph-csi-drivers currently publishes artifacts of the ceph-csi drivers to tagged versions.</p>
+<h3 id="released-version"><strong>Released version</strong><a class="headerlink" href="#released-version" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver ceph-csi-operator/ceph-csi-drivers</span>
+</code></pre></div>
+<p>For example settings, see the next section or <a href="https://github.com/ceph/ceph-csi-operator/tree/main/deploy/charts/ceph-csi-drivers/values.yaml">values.yaml</a></p>
+<h3 id="openshift-installation"><strong>OpenShift Installation</strong><a class="headerlink" href="#openshift-installation" title="Permanent link">&para;</a></h3>
+<p>For OpenShift clusters, you must enable OpenShift support and configure the SCC ClusterRole name to match the operator installation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver \</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="go">  --set openshift.enabled=true \</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="go">  --set openshift.sccClusterRoleName=ceph-csi-operator-scc-user \</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="go">  ceph-csi-operator/ceph-csi-drivers</span>
+</code></pre></div>
+<p><strong>Important:</strong>
+* The operator chart must be installed first with <code>openshift.enabled=true</code> to create the SCC and ClusterRole
+* The <code>sccClusterRoleName</code> must match the ClusterRole created by the operator chart (format: <code>&lt;operator-release-name&gt;-scc-user</code>)
+* If you used a custom release name for the operator (e.g., <code>my-operator</code>), set <code>sccClusterRoleName=my-operator-scc-user</code></p>
+<p>This will create ClusterRoleBindings in the driver namespace that bind the driver service accounts to the SCC ClusterRole created by the operator chart.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>The following table lists the configurable parameters of the ceph-csi-drivers chart and their default values.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cephConnections[0].crushLocationLabels</code></td>
+<td>Labels to be used for CRUSH location selection (default: []) Leave empty to disable read affinity. When set, it must be a non-empty list of node label keys, e.g. ["topology.kubernetes.io/zone"].</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>cephConnections[0].monitors</code></td>
+<td>Ceph monitors (key-value pairs, typically IP addresses of the Ceph monitors) (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>cephConnections[0].name</code></td>
+<td>Name for the Ceph connection (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>cephConnections[0].rbdMirrorDaemonCount</code></td>
+<td>Number of RBD mirror daemons (default: 1)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>clientProfileReplications[0].localClientProfile</code></td>
+<td>Name of the local ClientProfile CR (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfileReplications[0].name</code></td>
+<td>Name of the client profile replication (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfileReplications[0].rbd.poolMapping</code></td>
+<td>Pool mappings from local pool names to remote pool IDs (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>clientProfileReplications[0].remoteClientProfile</code></td>
+<td>Name of the remote cluster's client profile (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephConnection.name</code></td>
+<td>Reference to the Ceph connection for this profile (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.fuseMountOptions</code></td>
+<td>Mount options for CephFS with FUSE (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.kernelMountOptions</code></td>
+<td>Mount options for CephFS with the kernel (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.subVolumeGroup</code></td>
+<td>Sub-volume group for the CephFS client (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].name</code></td>
+<td>Name of the client profile (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].nvmeof.radosNamespace</code></td>
+<td>Namespace for RADOS block devices (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].rbd.radosNamespace</code></td>
+<td>Namespace for RADOS block devices (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.attachRequired</code></td>
+<td>Flag indicating whether attachment is required (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.cephFsClientType</code></td>
+<td>CephFS client type (options: autodetect, kernel) (default: "kernel")</td>
+<td><code>"kernel"</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.clusterName</code></td>
+<td>Cluster name identifier (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.containerExtraArgs</code></td>
+<td>Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.deploymentStrategy</code></td>
+<td>Deployment strategy for the controller plugin (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.hostNetwork</code></td>
+<td>Flag to use host network for the controller plugin (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.privileged</code></td>
+<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.replicas</code></td>
+<td>Number of replicas for the controller plugin (default: 1)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.resources</code></td>
+<td>Resource requirements for controller plugin containers (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.controllerPlugin.tolerations</code></td>
+<td>List of tolerations for the controller plugin (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.deployCsiAddons</code></td>
+<td>Flag to deploy CSI Addons (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.enableFencing</code></td>
+<td>Flag to enable fencing (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.enabled</code></td>
+<td>Enable the CephFS driver (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.encryption.configMapRef.name</code></td>
+<td>Name of the ConfigMap for encryption settings (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.fsGroupPolicy</code></td>
+<td>File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")</td>
+<td><code>"File"</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.fuseMountOptions</code></td>
+<td>FUSE mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.generateOMapInfo</code></td>
+<td>Flag to generate OMap info (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.grpcTimeout</code></td>
+<td>gRPC timeout in seconds (default: 30)</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.imageSet.name</code></td>
+<td>ConfigMap reference to the image set for the driver (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.kernelMountOptions</code></td>
+<td>Kernel mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.log.rotation.enabled</code></td>
+<td>Enable log rotation (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.log.rotation.logHostPath</code></td>
+<td>Default log directory path (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.log.rotation.maxFiles</code></td>
+<td>Maximum number of log files to keep (default: 7)</td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.log.rotation.maxLogSize</code></td>
+<td>Maximum size of each log file (default: "10G")</td>
+<td><code>"10G"</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.log.rotation.periodicity</code></td>
+<td>Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")</td>
+<td><code>"daily"</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.log.verbosity</code></td>
+<td>Log verbosity level (0-5) (default: 0)</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.name</code></td>
+<td>CSI driver name for CephFS (default: "cephfs.csi.ceph.com")</td>
+<td><code>"cephfs.csi.ceph.com"</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.affinity</code></td>
+<td>Affinity settings for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.annotations</code></td>
+<td>Custom annotations for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.containerExtraArgs</code></td>
+<td>Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.imagePullPolicy</code></td>
+<td>Image pull policy (default: "IfNotPresent")</td>
+<td><code>"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.labels</code></td>
+<td>Custom labels for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.priorityClassName</code></td>
+<td>Pod's priority class name (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.tolerations</code></td>
+<td>List of tolerations for the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.nodePlugin.volumes</code></td>
+<td>List of volumes attached to the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.snapshotPolicy</code></td>
+<td>Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot")</td>
+<td><code>"volumeSnapshot"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.attachRequired</code></td>
+<td>Flag indicating whether attachment is required (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.cephFsClientType</code></td>
+<td>CephFS client type (options: autodetect, kernel) (default: "kernel")</td>
+<td><code>"kernel"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.clusterName</code></td>
+<td>Cluster name identifier (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.containerExtraArgs</code></td>
+<td>Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.deploymentStrategy</code></td>
+<td>Deployment strategy for the controller plugin (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.hostNetwork</code></td>
+<td>Flag to use host network for the controller plugin (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.privileged</code></td>
+<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.replicas</code></td>
+<td>Number of replicas for the controller plugin (default: 1)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.resources</code></td>
+<td>Resource requirements for controller plugin containers (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.controllerPlugin.tolerations</code></td>
+<td>List of tolerations for the controller plugin (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.deployCsiAddons</code></td>
+<td>Flag to deploy CSI Addons (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.enableFencing</code></td>
+<td>Flag to enable fencing (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.enabled</code></td>
+<td>Enable the NFS driver (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.encryption.configMapRef.name</code></td>
+<td>Name of the ConfigMap for encryption settings (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.fsGroupPolicy</code></td>
+<td>File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")</td>
+<td><code>"File"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.fuseMountOptions</code></td>
+<td>FUSE mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.generateOMapInfo</code></td>
+<td>Flag to generate OMap info (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.grpcTimeout</code></td>
+<td>gRPC timeout in seconds (default: 30)</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.imageSet.name</code></td>
+<td>ConfigMap reference to the image set for the driver (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.kernelMountOptions</code></td>
+<td>Kernel mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.log.rotation.enabled</code></td>
+<td>Enable log rotation (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.log.rotation.logHostPath</code></td>
+<td>Default log directory path (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.log.rotation.maxFiles</code></td>
+<td>Maximum number of log files to keep (default: 7)</td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.log.rotation.maxLogSize</code></td>
+<td>Maximum size of each log file (default: "10G")</td>
+<td><code>"10G"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.log.rotation.periodicity</code></td>
+<td>Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")</td>
+<td><code>"daily"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.log.verbosity</code></td>
+<td>Log verbosity level (0-5) (default: 0)</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.name</code></td>
+<td>CSI driver name for NFS (default: "nfs.csi.ceph.com")</td>
+<td><code>"nfs.csi.ceph.com"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.affinity</code></td>
+<td>Affinity settings for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.annotations</code></td>
+<td>Custom annotations for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.containerExtraArgs</code></td>
+<td>Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.imagePullPolicy</code></td>
+<td>Image pull policy (default: "IfNotPresent")</td>
+<td><code>"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.labels</code></td>
+<td>Custom labels for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.priorityClassName</code></td>
+<td>Pod's priority class name (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.serviceAccountName</code></td>
+<td>Service account name for the pod (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.tolerations</code></td>
+<td>List of tolerations for the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.nodePlugin.volumes</code></td>
+<td>List of volumes attached to the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.snapshotPolicy</code></td>
+<td>Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot")</td>
+<td><code>"volumeSnapshot"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.attachRequired</code></td>
+<td>Flag indicating whether attachment is required (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.cephFsClientType</code></td>
+<td>CephFS client type (options: autodetect, kernel) (default: "kernel")</td>
+<td><code>"kernel"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.clusterName</code></td>
+<td>Cluster name identifier (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.containerExtraArgs</code></td>
+<td>Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.deploymentStrategy</code></td>
+<td>Deployment strategy for the controller plugin (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.hostNetwork</code></td>
+<td>Flag to use host network for the controller plugin (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.privileged</code></td>
+<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.replicas</code></td>
+<td>Number of replicas for the controller plugin (default: 1)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.resources</code></td>
+<td>Resource requirements for controller plugin containers (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.controllerPlugin.tolerations</code></td>
+<td>List of tolerations for the controller plugin (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.deployCsiAddons</code></td>
+<td>Flag to deploy CSI Addons (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.enableFencing</code></td>
+<td>Flag to enable fencing (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.enabled</code></td>
+<td>Enable the NVMe-oF driver (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.encryption.configMapRef.name</code></td>
+<td>Name of the ConfigMap for encryption settings (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.fsGroupPolicy</code></td>
+<td>File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")</td>
+<td><code>"File"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.fuseMountOptions</code></td>
+<td>FUSE mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.generateOMapInfo</code></td>
+<td>Flag to generate OMap info (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.grpcTimeout</code></td>
+<td>gRPC timeout in seconds (default: 30)</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.imageSet.name</code></td>
+<td>ConfigMap reference to the image set for the driver (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.kernelMountOptions</code></td>
+<td>Kernel mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.log.rotation.enabled</code></td>
+<td>Enable log rotation (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.log.rotation.logHostPath</code></td>
+<td>Default log directory path (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.log.rotation.maxFiles</code></td>
+<td>Maximum number of log files to keep (default: 7)</td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.log.rotation.maxLogSize</code></td>
+<td>Maximum size of each log file (default: "10G")</td>
+<td><code>"10G"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.log.rotation.periodicity</code></td>
+<td>Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")</td>
+<td><code>"daily"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.log.verbosity</code></td>
+<td>Log verbosity level (0-5) (default: 0)</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.name</code></td>
+<td>CSI driver name for NVMe-oF (default: "nvmeof.csi.ceph.com")</td>
+<td><code>"nvmeof.csi.ceph.com"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.affinity</code></td>
+<td>Affinity settings for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.annotations</code></td>
+<td>Custom annotations for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.containerExtraArgs</code></td>
+<td>Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.imagePullPolicy</code></td>
+<td>Image pull policy (default: "IfNotPresent")</td>
+<td><code>"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.labels</code></td>
+<td>Custom labels for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.priorityClassName</code></td>
+<td>Pod's priority class name (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.tolerations</code></td>
+<td>List of tolerations for the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.nodePlugin.volumes</code></td>
+<td>List of volumes attached to the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.snapshotPolicy</code></td>
+<td>Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")</td>
+<td><code>"none"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.attachRequired</code></td>
+<td>Flag indicating whether attachment is required (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.cephFsClientType</code></td>
+<td>CephFS client type (options: autodetect, kernel) (default: "kernel")</td>
+<td><code>"kernel"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.clusterName</code></td>
+<td>Cluster name identifier (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.containerExtraArgs</code></td>
+<td>Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.deploymentStrategy</code></td>
+<td>Deployment strategy for the controller plugin (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.hostNetwork</code></td>
+<td>Flag to use host network for the controller plugin (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.privileged</code></td>
+<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.replicas</code></td>
+<td>Number of replicas for the controller plugin (default: 1)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.resources</code></td>
+<td>Resource requirements for controller plugin containers (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.controllerPlugin.tolerations</code></td>
+<td>List of tolerations for the controller plugin (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.deployCsiAddons</code></td>
+<td>Flag to deploy CSI Addons (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.enableFencing</code></td>
+<td>Flag to enable fencing (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.enabled</code></td>
+<td>Enable the RBD driver (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.encryption.configMapRef.name</code></td>
+<td>Name of the ConfigMap for encryption settings (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.fsGroupPolicy</code></td>
+<td>File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")</td>
+<td><code>"File"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.fuseMountOptions</code></td>
+<td>FUSE mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.generateOMapInfo</code></td>
+<td>Flag to generate OMap info (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.grpcTimeout</code></td>
+<td>gRPC timeout in seconds (default: 30)</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.imageSet.name</code></td>
+<td>ConfigMap reference to the image set for the driver (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.kernelMountOptions</code></td>
+<td>Kernel mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.log.rotation.enabled</code></td>
+<td>Enable log rotation (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.log.rotation.logHostPath</code></td>
+<td>Default log directory path (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.log.rotation.maxFiles</code></td>
+<td>Maximum number of log files to keep (default: 7)</td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.log.rotation.maxLogSize</code></td>
+<td>Maximum size of each log file (default: "10G")</td>
+<td><code>"10G"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.log.rotation.periodicity</code></td>
+<td>Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")</td>
+<td><code>"daily"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.log.verbosity</code></td>
+<td>Log verbosity level (0-5) (default: 0)</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.name</code></td>
+<td>CSI driver name for RBD (default: "rbd.csi.ceph.com")</td>
+<td><code>"rbd.csi.ceph.com"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.affinity</code></td>
+<td>Affinity settings for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.annotations</code></td>
+<td>Custom annotations for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.containerExtraArgs</code></td>
+<td>Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.imagePullPolicy</code></td>
+<td>Image pull policy (default: "IfNotPresent")</td>
+<td><code>"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.labels</code></td>
+<td>Custom labels for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.priorityClassName</code></td>
+<td>Pod's priority class name (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.tolerations</code></td>
+<td>List of tolerations for the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.nodePlugin.volumes</code></td>
+<td>List of volumes attached to the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.snapshotPolicy</code></td>
+<td>Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")</td>
+<td><code>"none"</code></td>
+</tr>
+<tr>
+<td><code>imagePullSecrets</code></td>
+<td>List of pull secret names that will be added to all serviceaccounts (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>openshift.enabled</code></td>
+<td>Enable OpenShift-specific resources (ClusterRoleBindings for SCC) (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>openshift.sccClusterRoleName</code></td>
+<td>Name of the SCC ClusterRole created by the operator chart (default: "ceph-csi-operator-scc-user") This should match the ClusterRole name from the operator chart: {{ operator-release-name }}-scc-user</td>
+<td><code>"ceph-csi-operator-scc-user"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.create</code></td>
+<td>Flag to indicate if the config should be created (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.attachRequired</code></td>
+<td>Flag indicating whether attachment is required (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.cephFsClientType</code></td>
+<td>CephFS client type (options: autodetect, kernel) (default: "kernel")</td>
+<td><code>"kernel"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.clusterName</code></td>
+<td>Cluster name identifier (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.affinity</code></td>
+<td>Affinity settings for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.containerExtraArgs</code></td>
+<td>Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy</code></td>
+<td>Deployment strategy for the controller plugin (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork</code></td>
+<td>Flag to use host network for the controller plugin (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy</code></td>
+<td>Image pull policy (default: "IfNotPresent")</td>
+<td><code>"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.privileged</code></td>
+<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.replicas</code></td>
+<td>Number of replicas for the controller plugin (default: 1)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.resources</code></td>
+<td>Resource requirements for controller plugin containers (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.controllerPlugin.tolerations</code></td>
+<td>List of tolerations for the controller plugin (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.deployCsiAddons</code></td>
+<td>Flag to deploy CSI Addons (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.enableFencing</code></td>
+<td>Flag to enable fencing (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.encryption.configMapRef.name</code></td>
+<td>Name of the ConfigMap for encryption settings (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.fsGroupPolicy</code></td>
+<td>File system group policy (e.g., "None", "ReadWriteOnceWithFSType") (default: "File")</td>
+<td><code>"File"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.fuseMountOptions</code></td>
+<td>FUSE mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.generateOMapInfo</code></td>
+<td>Flag to generate OMap info (default: false)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.grpcTimeout</code></td>
+<td>gRPC timeout in seconds (default: 30)</td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.imageSet.name</code></td>
+<td>ConfigMap reference to the image set for the driver (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.kernelMountOptions</code></td>
+<td>Kernel mount options (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.log.rotation.enabled</code></td>
+<td>Enable log rotation (default: true)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.log.rotation.logHostPath</code></td>
+<td>Default log directory path (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.log.rotation.maxFiles</code></td>
+<td>Maximum number of log files to keep (default: 7)</td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.log.rotation.maxLogSize</code></td>
+<td>Maximum size of each log file (default: "10G")</td>
+<td><code>"10G"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.log.rotation.periodicity</code></td>
+<td>Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")</td>
+<td><code>"daily"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.log.verbosity</code></td>
+<td>Log verbosity level (0-5) (default: 0)</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.affinity</code></td>
+<td>Affinity settings for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.annotations</code></td>
+<td>Custom annotations for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.containerExtraArgs</code></td>
+<td>Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy</code></td>
+<td>Image pull policy (default: "IfNotPresent")</td>
+<td><code>"IfNotPresent"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath</code></td>
+<td>kubelet directory path (default: "/var/lib/kubelet")</td>
+<td><code>"/var/lib/kubelet"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.labels</code></td>
+<td>Custom labels for the pod (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName</code></td>
+<td>Pod's priority class name (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.tolerations</code></td>
+<td>List of tolerations for the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy</code></td>
+<td>Daemonset update strategy (default: {})</td>
+<td><code>{}</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.nodePlugin.volumes</code></td>
+<td>List of volumes attached to the pod (default: [])</td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.driverSpecDefaults.snapshotPolicy</code></td>
+<td>Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")</td>
+<td><code>"none"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.name</code></td>
+<td>Name of the operator config (default: "ceph-csi-operator-config")</td>
+<td><code>"ceph-csi-operator-config"</code></td>
+</tr>
+<tr>
+<td><code>operatorConfig.namespace</code></td>
+<td>Namespace for the operator configuration (default: "")</td>
+<td><code>""</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="development-build"><strong>Development Build</strong><a class="headerlink" href="#development-build" title="Permanent link">&para;</a></h3>
+<p>To deploy from a local build from your development environment:</p>
+<ol>
+<li>Install the helm chart:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">cd deploy/charts/ceph-csi-drivers</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="go">helm install ceph-csi-drivers --create-namespace --namespace ceph-csi-driver .</span>
+</code></pre></div>
+<h2 id="uninstalling-the-chart">Uninstalling the Chart<a class="headerlink" href="#uninstalling-the-chart" title="Permanent link">&para;</a></h2>
+<p>To see the currently installed ceph-csi-drivers chart:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">helm ls --namespace ceph-csi-driver</span>
+</code></pre></div>
+<p>To uninstall/delete the <code>ceph-csi-drivers</code> deployment:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">helm delete --namespace ceph-csi-driver ceph-csi-drivers</span>
+</code></pre></div>
+<p>The command removes all the Kubernetes components associated with the chart and deletes the release.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

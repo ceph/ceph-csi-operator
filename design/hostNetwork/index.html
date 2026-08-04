@@ -12,26 +12,28 @@
         <meta name="author" content="Ceph-CSI Operator Contributors">
       
       
-        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/">
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/design/hostNetwork/">
       
       
+        <link rel="prev" href="../operator/">
       
-        <link rel="next" href="quick-start/">
+      
+        <link rel="next" href="../logrotate/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Ceph-CSI Operator Documentation</title>
+        <title>Host Network - Ceph-CSI Operator Documentation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -50,7 +52,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -68,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ceph-csi-operator" class="md-skip">
+        <a href="#enabling-host-networking-for-controller-plugin-pods" class="md-skip">
           Skip to content
         </a>
       
@@ -82,7 +84,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+    <a href="../.." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -102,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Host Network
             
           </span>
         </div>
@@ -187,11 +189,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -212,7 +212,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="quick-start/" class="md-tabs__link">
+        <a href="../../quick-start/" class="md-tabs__link">
           
   
   
@@ -228,11 +228,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="design/operator/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../operator/" class="md-tabs__link">
           
   
   
@@ -252,7 +254,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="features/rbd-snapshot-metadata/" class="md-tabs__link">
+        <a href="../../features/rbd-snapshot-metadata/" class="md-tabs__link">
           
   
   
@@ -272,7 +274,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="helm-charts/helm-charts/" class="md-tabs__link">
+        <a href="../../helm-charts/helm-charts/" class="md-tabs__link">
           
   
   
@@ -292,7 +294,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="migration/" class="md-tabs__link">
+        <a href="../../migration/" class="md-tabs__link">
           
   
   
@@ -312,7 +314,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="development-guide/" class="md-tabs__link">
+        <a href="../../development-guide/" class="md-tabs__link">
           
   
   
@@ -346,7 +348,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+    <a href="../.." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -373,37 +375,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -419,120 +394,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Start
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Contributing">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#reporting-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reporting Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pull-requests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pull Requests
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#license" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        License
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contact" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contact
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -598,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="quick-start/" class="md-nav__link">
+      <a href="../../quick-start/" class="md-nav__link">
         
   
   
@@ -626,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -654,7 +515,7 @@
   
   
     <li class="md-nav__item">
-      <a href="kubernetes-installation/" class="md-nav__link">
+      <a href="../../kubernetes-installation/" class="md-nav__link">
         
   
   
@@ -686,28 +547,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -725,7 +589,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -743,7 +607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/operator/" class="md-nav__link">
+      <a href="../operator/" class="md-nav__link">
         
   
   
@@ -768,10 +632,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="design/hostNetwork/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Network
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -787,6 +678,48 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#operatorconfig-cr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OperatorConfig CR
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#driver-cr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver CR
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -799,7 +732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/logrotate/" class="md-nav__link">
+      <a href="../logrotate/" class="md-nav__link">
         
   
   
@@ -827,7 +760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/network-policy/" class="md-nav__link">
+      <a href="../network-policy/" class="md-nav__link">
         
   
   
@@ -855,7 +788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/replication/" class="md-nav__link">
+      <a href="../replication/" class="md-nav__link">
         
   
   
@@ -944,7 +877,7 @@
   
   
     <li class="md-nav__item">
-      <a href="features/rbd-snapshot-metadata/" class="md-nav__link">
+      <a href="../../features/rbd-snapshot-metadata/" class="md-nav__link">
         
   
   
@@ -1033,7 +966,7 @@
   
   
     <li class="md-nav__item">
-      <a href="helm-charts/helm-charts/" class="md-nav__link">
+      <a href="../../helm-charts/helm-charts/" class="md-nav__link">
         
   
   
@@ -1061,7 +994,7 @@
   
   
     <li class="md-nav__item">
-      <a href="helm-charts/operator-chart/" class="md-nav__link">
+      <a href="../../helm-charts/operator-chart/" class="md-nav__link">
         
   
   
@@ -1089,7 +1022,7 @@
   
   
     <li class="md-nav__item">
-      <a href="helm-charts/drivers-chart/" class="md-nav__link">
+      <a href="../../helm-charts/drivers-chart/" class="md-nav__link">
         
   
   
@@ -1178,7 +1111,7 @@
   
   
     <li class="md-nav__item">
-      <a href="migration/" class="md-nav__link">
+      <a href="../../migration/" class="md-nav__link">
         
   
   
@@ -1206,7 +1139,7 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-images/" class="md-nav__link">
+      <a href="../../custom-images/" class="md-nav__link">
         
   
   
@@ -1295,7 +1228,7 @@
   
   
     <li class="md-nav__item">
-      <a href="development-guide/" class="md-nav__link">
+      <a href="../../development-guide/" class="md-nav__link">
         
   
   
@@ -1323,7 +1256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="coding/" class="md-nav__link">
+      <a href="../../coding/" class="md-nav__link">
         
   
   
@@ -1351,7 +1284,7 @@
   
   
     <li class="md-nav__item">
-      <a href="releases/" class="md-nav__link">
+      <a href="../../releases/" class="md-nav__link">
         
   
   
@@ -1379,7 +1312,7 @@
   
   
     <li class="md-nav__item">
-      <a href="DCO" class="md-nav__link">
+      <a href="../../DCO" class="md-nav__link">
         
   
   
@@ -1434,10 +1367,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#operatorconfig-cr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        OperatorConfig CR
       
     </span>
   </a>
@@ -1445,82 +1378,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#driver-cr" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Start
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Contributing">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#reporting-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reporting Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pull-requests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pull Requests
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#license" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        License
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contact" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contact
+        Driver CR
       
     </span>
   </a>
@@ -1547,31 +1408,40 @@
   
 
 
-<h1 id="ceph-csi-operator">Ceph CSI Operator<a class="headerlink" href="#ceph-csi-operator" title="Permanent link">&para;</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Ceph CSI Operator provides native management interfaces for <a href="https://github.com/ceph/ceph-csi">Ceph-CSI drivers (CephFS, RBD, and NFS)</a> for Kubernetes and OpenShift environments. The operator automates the deployment, configuration, and management of these drivers using new Kubernetes APIs defined as a set of Custom Resource Definitions (CRDs).</p>
-<p><strong>Platform Support:</strong></p>
-<ul>
-<li>Kubernetes 1.32+</li>
-<li>OpenShift 4.19+</li>
-</ul>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>For those eager to get started quickly, follow the steps outlined in the <a href="quick-start/">Quick Start Guide</a>.</p>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<p>For detailed installation instructions, including methods using Helm and manual deployment, please visit the <a href="installation/">Installation Guide</a>.</p>
-<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
-<p>We welcome contributions to the Ceph CSI Operator! Please follow the <a href="development-guide/">Development Guide</a> and <a href="coding/">Coding Conventions</a> if you are interested to contribute to this repo.</p>
-<h3 id="reporting-issues">Reporting Issues<a class="headerlink" href="#reporting-issues" title="Permanent link">&para;</a></h3>
-<p>If you encounter a problem, please <a href="https://github.com/ceph/ceph-csi-operator/issues">open an issue</a> on GitHub. Be sure to fill the template when opening an issue.</p>
-<h3 id="pull-requests">Pull Requests<a class="headerlink" href="#pull-requests" title="Permanent link">&para;</a></h3>
-<p>We encourage you to submit pull requests for bug fixes, improvements, or new features. Please ensure that your code adheres to our coding standards and includes tests where applicable.</p>
-<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
-<p>The Ceph CSI Operator is licensed under the Apache License 2.0. See the <a href="https://github.com/ceph/ceph-csi-operator/blob/main/LICENSE">LICENSE</a> file for more details.</p>
-<h2 id="contact">Contact<a class="headerlink" href="#contact" title="Permanent link">&para;</a></h2>
-<p>Please use the following to reach members of the community:</p>
-<ul>
-<li><strong>Slack</strong>: Join the <a href="https://ceph-storage.slack.com/archives/C05522L7P60">#ceph-csi</a> channel on the <a href="https://ceph-storage.slack.com">Ceph Slack</a> to discuss anything related to this project. You can join the Slack by this <a href="https://bit.ly/ceph-slack-invite">invite link</a></li>
-</ul>
+<h1 id="enabling-host-networking-for-controller-plugin-pods">Enabling host networking for controller plugin pods<a class="headerlink" href="#enabling-host-networking-for-controller-plugin-pods" title="Permanent link">&para;</a></h1>
+<p>By default, the Ceph-CSI controller plugins operate on the pod network
+but under some circumstances, like setups with a dedicated storage network,
+where the pod network cannot connect to the ceph cluster,
+it is necessary to run the Ceph-CSI controller plugin pods on the host network.</p>
+<p>This document describes how the ceph-csi-operator can be configured to enforce the use of host network
+in the Ceph-CSI controller plugin pods</p>
+<p>The use of host networking can be enabled for a driver's controller plugin by setting <code>hostNetwork</code> to <code>true</code>in the <code>ControllerPlugin</code> section of the corresponding Driver CR.</p>
+<p>The <code>hostNetwork</code> setting is also available in the <code>driverSpecDefaults.controllerPlugin</code> section
+of the <code>OperatorConfig</code> CR. As this is a default for all Ceph-CSI controller plugins created by the operator, the setting
+in concrete Driver CRs will take precedence.</p>
+<p>There is currently no means of enforcing the use of host networking on all controller plugins against <code>Driver</code> CR settings.</p>
+<p>Example:</p>
+<h2 id="operatorconfig-cr">OperatorConfig CR<a class="headerlink" href="#operatorconfig-cr" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OperatorConfig</span><span class="w"> </span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi.ceph.io/v1</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi-operator-config</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;operator-namespace&gt;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">   </span><span class="nt">driverSpecDefaults</span><span class="p">:</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">     </span><span class="nt">controllerPlugin</span><span class="p">:</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">       </span><span class="nt">hostNetwork</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h2 id="driver-cr">Driver CR<a class="headerlink" href="#driver-cr" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi.ceph.io/v1</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Driver</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd.csi.ceph.com</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;operator-namespace&gt;</span><span class="w"> </span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">   </span><span class="nt">controllerPlugin</span><span class="p">:</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">     </span><span class="nt">hostNetwork</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</code></pre></div>
 
 
 
@@ -1627,10 +1497,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

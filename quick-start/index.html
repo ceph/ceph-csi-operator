@@ -1,0 +1,2027 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kubernetes Operator for managing Ceph-CSI drivers">
+      
+      
+        <meta name="author" content="Ceph-CSI Operator Contributors">
+      
+      
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/quick-start/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../installation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Quick Start - Ceph-CSI Operator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-start-guide-for-ceph-csi-operator" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Ceph-CSI Operator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quick Start
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../design/operator/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../features/rbd-snapshot-metadata/" class="md-tabs__link">
+          
+  
+  
+  Features
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../helm-charts/helm-charts/" class="md-tabs__link">
+          
+  
+  
+  Helm Charts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../migration/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../development-guide/" class="md-tabs__link">
+          
+  
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Ceph-CSI Operator Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-install-the-ceph-csi-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Install the Ceph-CSI Operator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Install the Ceph-CSI Operator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-standard-kubernetes-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Standard Kubernetes Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-openshift-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 OpenShift Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-deploy-ceph-csi-drivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Deploy Ceph-CSI Drivers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Deploy Ceph-CSI Drivers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-deploy-the-rbd-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Deploy the RBD Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-deploy-the-cephfs-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Deploy the CephFS Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-deploy-the-nvme-of-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Deploy the NVMe-oF Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-deploy-the-ceph-nfs-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Deploy the Ceph-NFS Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-create-cephconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Create CephConnection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-create-clientprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Create ClientProfile
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-create-ceph-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Create Ceph Secrets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-create-storageclasses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Create StorageClasses
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-create-volumesnapshotclasses-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Create VolumeSnapshotClasses (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-test-storage-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Test Storage Provisioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-clean-up-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Clean Up Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kubernetes-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/operator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/hostNetwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/logrotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Log Rotation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/network-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/replication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Replication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/rbd-snapshot-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RBD Snapshot Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Charts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Helm Charts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/helm-charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/operator-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/drivers-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drivers Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Images
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DCO" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DCO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-install-the-ceph-csi-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Install the Ceph-CSI Operator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Install the Ceph-CSI Operator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-standard-kubernetes-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Standard Kubernetes Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-openshift-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 OpenShift Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-deploy-ceph-csi-drivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Deploy Ceph-CSI Drivers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Deploy Ceph-CSI Drivers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-deploy-the-rbd-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Deploy the RBD Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-deploy-the-cephfs-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Deploy the CephFS Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-deploy-the-nvme-of-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Deploy the NVMe-oF Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-deploy-the-ceph-nfs-driver" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Deploy the Ceph-NFS Driver
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-create-cephconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Create CephConnection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-create-clientprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Create ClientProfile
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-create-ceph-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Create Ceph Secrets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-create-storageclasses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Create StorageClasses
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-create-volumesnapshotclasses-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Create VolumeSnapshotClasses (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-test-storage-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Test Storage Provisioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-clean-up-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Clean Up Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<ul>
+<li><a href="#quick-start-guide-for-ceph-csi-operator">Quick Start Guide for Ceph-CSI-Operator</a></li>
+<li><a href="#1-prerequisites">1. Prerequisites</a></li>
+<li><a href="#2-install-the-ceph-csi-operator">2. Install the Ceph-CSI Operator</a><ul>
+<li><a href="#21-standard-kubernetes-installation">2.1 Standard Kubernetes Installation</a></li>
+<li><a href="#22-openshift-installation">2.2 OpenShift Installation</a></li>
+<li><a href="#3-deploy-ceph-csi-drivers">3. Deploy Ceph-CSI Drivers</a></li>
+<li><a href="#31-deploy-the-rbd-driver">3.1 Deploy the RBD Driver</a></li>
+<li><a href="#32-deploy-the-cephfs-driver">3.2 Deploy the CephFS Driver</a></li>
+<li><a href="#33-deploy-the-nvme-of-driver">3.3 Deploy the NVMe-oF Driver</a></li>
+<li><a href="#34-deploy-the-ceph-nfs-driver">3.4 Deploy the Ceph-NFS Driver</a></li>
+</ul>
+</li>
+<li><a href="#4-verify-installation">4. Verify Installation</a></li>
+<li><a href="#5-create-cephconnection">5. Create CephConnection</a></li>
+<li><a href="#6-create-clientprofile">6. Create ClientProfile</a></li>
+<li><a href="#7-create-ceph-secrets">7. Create Ceph Secrets</a></li>
+<li><a href="#8-create-storageclasses">8. Create StorageClasses</a></li>
+<li><a href="#9-create-volumesnapshotclasses-optional">9. Create VolumeSnapshotClasses (Optional)</a></li>
+<li><a href="#10-test-storage-provisioning">10. Test Storage Provisioning</a></li>
+<li><a href="#11-clean-up-resources">11. Clean Up Resources</a></li>
+</ul>
+<h1 id="quick-start-guide-for-ceph-csi-operator">Quick Start Guide for Ceph-CSI-Operator<a class="headerlink" href="#quick-start-guide-for-ceph-csi-operator" title="Permanent link">&para;</a></h1>
+<h2 id="1-prerequisites">1. Prerequisites<a class="headerlink" href="#1-prerequisites" title="Permanent link">&para;</a></h2>
+<p>Before deploying the Ceph-CSI-Operator, ensure the following requirements are met:</p>
+<ul>
+<li>A Kubernetes cluster (<a href="https://kubernetes.io/releases/">supported version</a> recommended) or OpenShift 4.x cluster</li>
+<li>Ceph cluster (<a href="https://docs.ceph.com/en/latest/releases/">supported version</a> recommended)</li>
+<li><code>kubectl</code> CLI installed (or <code>oc</code> CLI for OpenShift)</li>
+</ul>
+<p><strong>Note:</strong> In this guide, we will use minimal configurations to deploy the Ceph-CSI-Operator and drivers. You can customize the configurations as per your requirements.</p>
+<h2 id="2-install-the-ceph-csi-operator">2. Install the Ceph-CSI Operator<a class="headerlink" href="#2-install-the-ceph-csi-operator" title="Permanent link">&para;</a></h2>
+<h3 id="21-standard-kubernetes-installation">2.1 Standard Kubernetes Installation<a class="headerlink" href="#21-standard-kubernetes-installation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">kubectl create -f deploy/all-in-one/install.yaml</span>
+</code></pre></div>
+<h3 id="22-openshift-installation">2.2 OpenShift Installation<a class="headerlink" href="#22-openshift-installation" title="Permanent link">&para;</a></h3>
+<p>For OpenShift clusters, use the OpenShift-specific installer that includes the required SecurityContextConstraints:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">kubectl create -f deploy/all-in-one/install-openshift.yaml</span>
+</code></pre></div>
+<p>verify the installation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>ceph-csi-operator-system
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>NAME<span class="w">                                                    </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>ceph-csi-operator-controller-manager-67d45fd9ff-zgst7<span class="w">   </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>40s
+</code></pre></div>
+<h3 id="3-deploy-ceph-csi-drivers">3. Deploy Ceph-CSI Drivers<a class="headerlink" href="#3-deploy-ceph-csi-drivers" title="Permanent link">&para;</a></h3>
+<p>Once the operator is installed, deploy the Ceph-CSI drivers:</p>
+<h4 id="31-deploy-the-rbd-driver">3.1 Deploy the RBD Driver<a class="headerlink" href="#31-deploy-the-rbd-driver" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">echo &#39;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="go">kind: Driver</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="go">metadata:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="go">  name: rbd.csi.ceph.com</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="go">&#39; | kubectl create -f -</span>
+</code></pre></div>
+<h4 id="32-deploy-the-cephfs-driver">3.2 Deploy the CephFS Driver<a class="headerlink" href="#32-deploy-the-cephfs-driver" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">echo &#39;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="go">kind: Driver</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="go">metadata:</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="go">  name: cephfs.csi.ceph.com</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="go">&#39; | kubectl create -f -</span>
+</code></pre></div>
+<h3 id="33-deploy-the-nvme-of-driver">3.3 Deploy the NVMe-oF Driver<a class="headerlink" href="#33-deploy-the-nvme-of-driver" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">echo &#39;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="go">kind: Driver</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="go">metadata:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="go">  name: nvmeof.csi.ceph.com</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="go">&#39; | kubectl create -f -</span>
+</code></pre></div>
+<h3 id="34-deploy-the-ceph-nfs-driver">3.4 Deploy the Ceph-NFS Driver<a class="headerlink" href="#34-deploy-the-ceph-nfs-driver" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="go">echo &#39;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="go">kind: Driver</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="go">metadata:</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="go">  name: nfs.csi.ceph.com</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="go">&#39; | kubectl create -f -</span>
+</code></pre></div>
+<h2 id="4-verify-installation">4. Verify Installation<a class="headerlink" href="#4-verify-installation" title="Permanent link">&para;</a></h2>
+<p>To verify the installation, check the status of the Ceph-CSI components:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>ceph-csi-operator-system
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>NAME<span class="w">                                                    </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ceph-csi-operator-controller-manager-744dc99cb5-scxxh<span class="w">   </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>45s
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>cephfs.csi.ceph.com-ctrlplugin-5847c998b5-xf85m<span class="w">         </span><span class="m">5</span>/5<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>27s
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>cephfs.csi.ceph.com-nodeplugin-r6pkt<span class="w">                    </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>27s
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>nvmeof.csi.ceph.com-ctrlplugin-6936b889a4-ya99h<span class="w">         </span><span class="m">5</span>/5<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>27s
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>nvmeof.csi.ceph.com-nodeplugin-ab67g<span class="w">                    </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>27s
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>nfs.csi.ceph.com-ctrlplugin-76fd4f5b4c-smk2g<span class="w">            </span><span class="m">5</span>/5<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>27s
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>nfs.csi.ceph.com-nodeplugin-kbzms<span class="w">                       </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>27s
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>rbd.csi.ceph.com-ctrlplugin-6965dcfdb8-w88kn<span class="w">            </span><span class="m">5</span>/5<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m35s
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>rbd.csi.ceph.com-nodeplugin-lnm4n<span class="w">                       </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m35s
+</code></pre></div>
+<h2 id="5-create-cephconnection">5. Create CephConnection<a class="headerlink" href="#5-create-cephconnection" title="Permanent link">&para;</a></h2>
+<p>Create a CephConnection CR to connect to the Ceph cluster:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">echo &#39;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="go">kind: CephConnection</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="go">metadata:</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="go">  name: ceph-connection</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="go">spec:</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="go">  monitors:</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="go">  - 10.98.44.171:6789</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="go">&#39; | kubectl create -f -</span>
+</code></pre></div>
+<h2 id="6-create-clientprofile">6. Create ClientProfile<a class="headerlink" href="#6-create-clientprofile" title="Permanent link">&para;</a></h2>
+<p>Create a ClientProfile CR to define the client configuration which points to
+the CephConnection CR and the CephFS and RBD configurations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">echo &#39;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="go">kind: ClientProfile</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="go">metadata:</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="go">  name: storage</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="go">spec:</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="go">  cephConnectionRef:</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="go">    name: ceph-connection</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="go">  cephFs:</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="go">    subVolumeGroup: csi</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="go">&#39; | kubectl create -f -</span>
+</code></pre></div>
+<blockquote>
+<p>[!IMPORTANT]
+The ClientProfile name (<code>storage</code> in this example) will be used as the <code>clusterID</code> parameter in your StorageClass and VolumeSnapshotClass resources.</p>
+</blockquote>
+<h2 id="7-create-ceph-secrets">7. Create Ceph Secrets<a class="headerlink" href="#7-create-ceph-secrets" title="Permanent link">&para;</a></h2>
+<p>Before creating storage classes, create Kubernetes Secrets with Ceph credentials for CSI operations.</p>
+<p>For detailed instructions on creating Ceph users and Kubernetes Secrets, refer to the upstream Ceph-CSI documentation:</p>
+<ul>
+<li><strong>Secret Examples</strong>:</li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/secret.yaml">RBD Secret Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/secret.yaml">CephFS Secret Example</a> (also used for NFS)</li>
+<li><strong>Ceph Capabilities</strong>: <a href="https://github.com/ceph/ceph-csi/blob/devel/docs/capabilities.md">Required Ceph Capabilities</a></li>
+</ul>
+<blockquote>
+<p>[!NOTE]
+- Create secrets in the namespace where your applications will create PVCs
+- NFS volumes use the same CephFS secret format since NFS is built on CephFS</p>
+</blockquote>
+<h2 id="8-create-storageclasses">8. Create StorageClasses<a class="headerlink" href="#8-create-storageclasses" title="Permanent link">&para;</a></h2>
+<p>Create StorageClasses using the upstream Ceph-CSI examples:</p>
+<ul>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml">RBD StorageClass Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml">CephFS StorageClass Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml">NFS StorageClass Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nvmeof/storageclass.yaml">NVMe-oF StorageClass Example</a></li>
+</ul>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>ClusterID and ClientProfile Mapping</strong></p>
+<p>The <code>clusterID</code> parameter <strong>must match</strong> your ClientProfile CR name:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># In your StorageClass</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">clusterID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span><span class="w">  </span><span class="c1"># Must match the ClientProfile name from step 6</span>
+</code></pre></div>
+</blockquote>
+<h2 id="9-create-volumesnapshotclasses-optional">9. Create VolumeSnapshotClasses (Optional)<a class="headerlink" href="#9-create-volumesnapshotclasses-optional" title="Permanent link">&para;</a></h2>
+<p>For snapshot support, use the upstream Ceph-CSI VolumeSnapshotClass examples:</p>
+<ul>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml">RBD VolumeSnapshotClass Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/snapshotclass.yaml">CephFS VolumeSnapshotClass Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/snapshotclass.yaml">NFS VolumeSnapshotClass Example</a></li>
+</ul>
+<p>Ensure the <code>clusterID</code> parameter matches your ClientProfile name:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">clusterID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span><span class="w">  </span><span class="c1"># Must match your ClientProfile name</span>
+</code></pre></div>
+<h2 id="10-test-storage-provisioning">10. Test Storage Provisioning<a class="headerlink" href="#10-test-storage-provisioning" title="Permanent link">&para;</a></h2>
+<p>Test your setup using the <a href="https://github.com/ceph/ceph-csi/tree/devel/examples">Ceph-CSI PVC examples</a>:</p>
+<ul>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/pvc.yaml">RBD PVC Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/pvc.yaml">CephFS PVC Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/pvc.yaml">NFS PVC Example</a></li>
+<li><a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nvmeof/pvc.yaml">NVMe-oF PVC Example</a></li>
+</ul>
+<p>The PVC should reach <code>Bound</code> status, indicating successful provisioning.</p>
+<h2 id="11-clean-up-resources">11. Clean Up Resources<a class="headerlink" href="#11-clean-up-resources" title="Permanent link">&para;</a></h2>
+<p>To clean up the resources, delete the cepconnection, clientprofile and drivers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="go">kubectl delete cephconnection ceph-connection -n ceph-csi-operator-system</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="go">kubectl delete clientprofile storage -n ceph-csi-operator-system</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="go">kubectl delete driver rbd.csi.ceph.com -n ceph-csi-operator-system</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="go">kubectl delete driver cephfs.csi.ceph.com -n ceph-csi-operator-system</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="go">kubectl delete driver nvmeof.csi.ceph.com -n ceph-csi-operator-system</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="go">kubectl delete driver nfs.csi.ceph.com -n ceph-csi-operator-system</span>
+</code></pre></div>
+<p>To uninstall the Ceph-CSI-Operator, delete the operator:</p>
+<p><strong>For standard Kubernetes:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="go">kubectl delete -f deploy/all-in-one/install.yaml</span>
+</code></pre></div></p>
+<p><strong>For OpenShift:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="go">kubectl delete -f deploy/all-in-one/install-openshift.yaml</span>
+</code></pre></div></p>
+<p>Verify the deletion:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>ceph-csi-operator-system
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>No<span class="w"> </span>resources<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span>ceph-csi-operator-system<span class="w"> </span>namespace.
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

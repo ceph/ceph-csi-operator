@@ -1,0 +1,2142 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kubernetes Operator for managing Ceph-CSI drivers">
+      
+      
+        <meta name="author" content="Ceph-CSI Operator Contributors">
+      
+      
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/migration/">
+      
+      
+        <link rel="prev" href="../helm-charts/drivers-chart/">
+      
+      
+        <link rel="next" href="../custom-images/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Migration - Ceph-CSI Operator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ceph-csi-to-ceph-csi-operator-migration-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Ceph-CSI Operator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Migration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../quick-start/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../design/operator/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../features/rbd-snapshot-metadata/" class="md-tabs__link">
+          
+  
+  
+  Features
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../helm-charts/helm-charts/" class="md-tabs__link">
+          
+  
+  
+  Helm Charts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../development-guide/" class="md-tabs__link">
+          
+  
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Ceph-CSI Operator Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kubernetes-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/operator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/hostNetwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/logrotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Log Rotation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/network-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/replication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Replication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/rbd-snapshot-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RBD Snapshot Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Charts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Helm Charts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/helm-charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/operator-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helm-charts/drivers-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drivers Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-migrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why migrate?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-preparation-steps-applies-to-both-yaml-helm-tracks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Preparation Steps (Applies to Both YAML &amp; Helm Tracks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Preparation Steps (Applies to Both YAML &amp; Helm Tracks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identify-your-existing-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identify Your Existing Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup-the-existing-ceph-csi-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup the existing Ceph-CSI configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-existing-ceph-csi-components-yaml-based-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Existing Ceph-CSI Components (YAML-based deployments)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-existing-ceph-csi-helm-release-helm-based-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Existing Ceph-CSI Helm Release (Helm-based deployments)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-ceph-csi-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install the Ceph-CSI-Operator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-cephconnection-and-clientprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create CephConnection and ClientProfile
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create CephConnection and ClientProfile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-extract-configuration-from-existing-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Extract Configuration from Existing Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-create-cephconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Create CephConnection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-clientprofile-with-matching-clusterid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Create ClientProfile with Matching ClusterID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-secret-namespace-requirements-during-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Secret Namespace Requirements During Migration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Secret Namespace Requirements During Migration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-secret-namespace-challenge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Secret Namespace Challenge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-strategy-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Strategy Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Strategy Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-keep-everything-in-the-old-namespace-simplest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Keep Everything in the Old Namespace (Simplest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-create-new-storageclasses-for-new-workloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Create New StorageClasses for New Workloads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cleanup-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cleanup Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-verify-the-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Verify the Migration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-clean-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Clean Up
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Images
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DCO" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DCO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-migrate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why migrate?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-preparation-steps-applies-to-both-yaml-helm-tracks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Preparation Steps (Applies to Both YAML &amp; Helm Tracks)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Preparation Steps (Applies to Both YAML &amp; Helm Tracks)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identify-your-existing-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identify Your Existing Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup-the-existing-ceph-csi-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup the existing Ceph-CSI configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-existing-ceph-csi-components-yaml-based-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Existing Ceph-CSI Components (YAML-based deployments)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove-existing-ceph-csi-helm-release-helm-based-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remove Existing Ceph-CSI Helm Release (Helm-based deployments)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-ceph-csi-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install the Ceph-CSI-Operator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-cephconnection-and-clientprofile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create CephConnection and ClientProfile
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create CephConnection and ClientProfile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-extract-configuration-from-existing-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Extract Configuration from Existing Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-create-cephconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Create CephConnection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-clientprofile-with-matching-clusterid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Create ClientProfile with Matching ClusterID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-secret-namespace-requirements-during-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Secret Namespace Requirements During Migration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Secret Namespace Requirements During Migration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-secret-namespace-challenge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Secret Namespace Challenge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-strategy-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Strategy Options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Strategy Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-keep-everything-in-the-old-namespace-simplest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Keep Everything in the Old Namespace (Simplest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-create-new-storageclasses-for-new-workloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Create New StorageClasses for New Workloads
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cleanup-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cleanup Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-verify-the-migration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Verify the Migration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-clean-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Clean Up
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ceph-csi-to-ceph-csi-operator-migration-guide">Ceph-CSI to Ceph-CSI-Operator Migration Guide<a class="headerlink" href="#ceph-csi-to-ceph-csi-operator-migration-guide" title="Permanent link">&para;</a></h1>
+<p>This guide provides two migration paths:</p>
+<ol>
+<li>
+<p>Migration from YAML-based Ceph-CSI deployment</p>
+</li>
+<li>
+<p>Migration from Helm-based Ceph-CSI deployment</p>
+</li>
+</ol>
+<p>Ceph-CSI v3.16+ officially recommends using Ceph-CSI-Operator as the supported deployment mechanism.</p>
+<h2 id="why-migrate">Why migrate?<a class="headerlink" href="#why-migrate" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Operator provides declarative CRD-based management</li>
+<li>Automated reconciliation &amp; healing</li>
+<li>Cleaner upgrades &amp; version lifecycle</li>
+<li>Matches Kubernetes best practices</li>
+</ul>
+<blockquote>
+<p>[!WARNING]
+<strong>Critical Migration Constraints</strong></p>
+<p><strong>1. Existing PersistentVolumes and Secret Namespace:</strong></p>
+<p>Existing PersistentVolumes contain <strong>immutable</strong> references to secrets in the old namespace (e.g., <code>ceph-csi</code>). These secret references <strong>cannot</strong> be changed after a PV is created.</p>
+<p>This means:
+- You <strong>MUST keep</strong> the old CSI secrets in the original namespace (e.g., <code>ceph-csi</code>)
+- You <strong>CANNOT</strong> delete the old namespace where secrets are referenced
+- Existing volumes will <strong>FAIL to mount</strong> if the old secrets are deleted</p>
+<p><strong>2. Migration Downtime:</strong></p>
+<p>After removing existing Ceph-CSI components:
+- New Pods cannot mount PVCs until migration is completed
+- New PVCs or VolumeSnapshots cannot be created until drivers are running
+- Existing Pods using RBD/CephFS kernel mounter will continue to work (as long as they are not restarted)
+- Any Pod that restarts or gets rescheduled before the new CSI driver is running will fail to mount volumes</p>
+<p><strong>Plan maintenance windows accordingly.</strong></p>
+</blockquote>
+<h2 id="common-preparation-steps-applies-to-both-yaml-helm-tracks">Common Preparation Steps (Applies to Both YAML &amp; Helm Tracks)<a class="headerlink" href="#common-preparation-steps-applies-to-both-yaml-helm-tracks" title="Permanent link">&para;</a></h2>
+<h3 id="identify-your-existing-configuration">Identify Your Existing Configuration<a class="headerlink" href="#identify-your-existing-configuration" title="Permanent link">&para;</a></h3>
+<p>Before migrating, identify the <code>clusterID</code> used in your existing StorageClasses:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># View your existing StorageClass to find the clusterID</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>storageclass<span class="w"> </span>&lt;your-storageclass-name&gt;<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>clusterID
+</code></pre></div>
+<p>Note the <code>clusterID</code> value - you'll use this exact name for your ClientProfile.</p>
+<h3 id="backup-the-existing-ceph-csi-configuration">Backup the existing Ceph-CSI configuration<a class="headerlink" href="#backup-the-existing-ceph-csi-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>backup/ceph-csi
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>-n<span class="w"> </span>ceph-csi<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span>&gt;<span class="w"> </span>backup/ceph-csi/configmap.yaml
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>deployment,daemonset<span class="w"> </span>-n<span class="w"> </span>ceph-csi<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span>&gt;<span class="w"> </span>backup/ceph-csi/workloads.yaml
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>kubectl<span class="w"> </span>get<span class="w"> </span>serviceaccount,role,rolebinding<span class="w"> </span>-n<span class="w"> </span>ceph-csi<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span>&gt;<span class="w"> </span>backup/ceph-csi/rbac.yaml
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>csidriver<span class="w"> </span>-oyaml<span class="w"> </span>&gt;<span class="w"> </span>backup/ceph-csi/csidriver.yaml
+</code></pre></div>
+<p><strong>Note:</strong> Replace the namespace where ceph-CSI resources are created.</p>
+<h3 id="remove-existing-ceph-csi-components-yaml-based-deployments">Remove Existing Ceph-CSI Components (YAML-based deployments)<a class="headerlink" href="#remove-existing-ceph-csi-components-yaml-based-deployments" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>backup/ceph-csi/workloads.yaml
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>backup/ceph-csi/csidriver.yaml
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>backup/ceph-csi/rbac.yaml
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>backup/ceph-csi/configmaps.yaml
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-nodeplugin
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrole.rbac.authorization.k8s.io/rbd-csi-nodeplugin
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrolebinding.rbac.authorization.k8s.io/rbd-csi-provisioner-role
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrole.rbac.authorization.k8s.io/rbd-external-provisioner-runner
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrolebinding.rbac.authorization.k8s.io/nfs-csi-provisioner-role
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrole.rbac.authorization.k8s.io/nfs-external-provisioner-runner
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrolebinding.rbac.authorization.k8s.io/cephfs-csi-nodeplugin
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrole.rbac.authorization.k8s.io/cephfs-csi-nodeplugin
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrole.rbac.authorization.k8s.io/cephfs-external-provisioner-runner
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>clusterrolebinding.rbac.authorization.k8s.io/cephfs-csi-provisioner-role
+</code></pre></div>
+<p>Make sure the above yamls contains only the ceph-CSI resources before issuing delete.</p>
+<h3 id="remove-existing-ceph-csi-helm-release-helm-based-deployments">Remove Existing Ceph-CSI Helm Release (Helm-based deployments)<a class="headerlink" href="#remove-existing-ceph-csi-helm-release-helm-based-deployments" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>helm<span class="w"> </span>uninstall<span class="w"> </span>ceph-csi<span class="w"> </span>-n<span class="w"> </span>ceph-csi
+</code></pre></div>
+<h3 id="install-the-ceph-csi-operator">Install the Ceph-CSI-Operator<a class="headerlink" href="#install-the-ceph-csi-operator" title="Permanent link">&para;</a></h3>
+<p>Install the operator using the <a href="../installation/">Installation Guide</a> (stop before the "Create Ceph Secrets" section).</p>
+<p>You will need to:
+1. Install the operator
+2. Deploy the CSI drivers (RBD, CephFS, NFS as needed)
+3. Create CephConnection and ClientProfile CRs (see below)</p>
+<blockquote>
+<p>[!WARNING]
+ Important Migration Note for <code>ClusterID</code> Handling</p>
+</blockquote>
+<p>In legacy deployments, <code>clusterID</code> is defined in:</p>
+<ul>
+<li>ConfigMap</li>
+<li>StorageClass</li>
+<li>VolumeSnapshotClass</li>
+</ul>
+<p>In the operator-based deployments, these must be represented through a ClientProfile CR.</p>
+<h2 id="create-cephconnection-and-clientprofile">Create CephConnection and ClientProfile<a class="headerlink" href="#create-cephconnection-and-clientprofile" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-extract-configuration-from-existing-setup">Step 1: Extract Configuration from Existing Setup<a class="headerlink" href="#step-1-extract-configuration-from-existing-setup" title="Permanent link">&para;</a></h3>
+<p>First, extract the Ceph monitor addresses from your existing ConfigMap:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># View your existing ceph-csi ConfigMap</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>configmap<span class="w"> </span>ceph-csi-config<span class="w"> </span>-n<span class="w"> </span>ceph-csi<span class="w"> </span>-o<span class="w"> </span>yaml
+</code></pre></div>
+<p>The ConfigMap contains monitor addresses under the <code>config.json</code> key.</p>
+<h3 id="step-2-create-cephconnection">Step 2: Create CephConnection<a class="headerlink" href="#step-2-create-cephconnection" title="Permanent link">&para;</a></h3>
+<p>Create a CephConnection using the monitor addresses from your existing ConfigMap:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi.ceph.io/v1</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CephConnection</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-connection</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi-operator-system</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">monitors</span><span class="p">:</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;monitor-1&gt;:6789</span><span class="w">  </span><span class="c1"># From your existing ceph-csi ConfigMap</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;monitor-2&gt;:6789</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;monitor-3&gt;:6789</span>
+</code></pre></div>
+<h3 id="step-3-create-clientprofile-with-matching-clusterid">Step 3: Create ClientProfile with Matching ClusterID<a class="headerlink" href="#step-3-create-clientprofile-with-matching-clusterid" title="Permanent link">&para;</a></h3>
+<p>Create a ClientProfile with a name that <strong>exactly matches</strong> the <code>clusterID</code> from your existing StorageClass:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi.ceph.io/v1</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClientProfile</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-ceph-cluster</span><span class="w">  </span><span class="c1"># Must match the clusterID from your existing StorageClass</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi-operator-system</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">cephConnectionRef</span><span class="p">:</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-connection</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">  </span><span class="nt">cephFs</span><span class="p">:</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span><span class="nt">subVolumeGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi</span><span class="w">  </span><span class="c1"># Match your existing CephFS configuration</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">  </span><span class="nt">rbd</span><span class="p">:</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="nt">radosNamespace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">  </span><span class="c1"># Match your existing RBD configuration</span>
+</code></pre></div>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>ClusterID Matching is Critical</strong></p>
+<p>The ClientProfile name <strong>must exactly match</strong> the <code>clusterID</code> value in your existing StorageClasses. This allows your existing StorageClasses to work seamlessly with the operator without modification.</p>
+</blockquote>
+<h2 id="understanding-secret-namespace-requirements-during-migration">Understanding Secret Namespace Requirements During Migration<a class="headerlink" href="#understanding-secret-namespace-requirements-during-migration" title="Permanent link">&para;</a></h2>
+<h3 id="the-secret-namespace-challenge">The Secret Namespace Challenge<a class="headerlink" href="#the-secret-namespace-challenge" title="Permanent link">&para;</a></h3>
+<p>When you create a PersistentVolume using CSI, Kubernetes stores secret references directly in the PV object's spec. These fields are <strong>immutable</strong> and include:</p>
+<ul>
+<li><code>spec.csi.nodeStageSecretRef</code> - Used when mounting the volume on a node</li>
+<li><code>spec.csi.controllerExpandSecretRef</code> - Used when expanding the volume</li>
+</ul>
+<p>Example from an existing PV:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolume</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-12345678-abcd-1234-5678-123456789012</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nt">csi</span><span class="p">:</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd.csi.ceph.com</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">nodeStageSecretRef</span><span class="p">:</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi-rbd-secret</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi</span><span class="w">  </span><span class="c1"># This cannot be changed!</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="nt">controllerExpandSecretRef</span><span class="p">:</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi-rbd-secret</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi</span><span class="w">  </span><span class="c1"># This cannot be changed!</span>
+</code></pre></div></p>
+<h3 id="required-actions">Required Actions<a class="headerlink" href="#required-actions" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>You MUST Keep Old Secrets in Their Original Namespace</strong></p>
+<p><strong>For Existing PersistentVolumes:</strong>
+- Existing PVs reference secrets in the old namespace (e.g., <code>ceph-csi</code>)
+- These references <strong>cannot be modified</strong> after the PV is created
+- You <strong>MUST keep</strong> these secrets in the original namespace
+- <strong>DO NOT</strong> delete the old namespace or these secrets
+- If you delete these secrets, existing volumes will fail to mount with errors like:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>failed to find the secret csi-rbd-secret in the namespace ceph-csi
+</code></pre></div></p>
+<p><strong>For New PersistentVolumes:</strong>
+- New PVCs can use secrets in any namespace
+- The namespace is specified in your StorageClass parameters</p>
+</blockquote>
+<h3 id="migration-strategy-options">Migration Strategy Options<a class="headerlink" href="#migration-strategy-options" title="Permanent link">&para;</a></h3>
+<h4 id="option-1-keep-everything-in-the-old-namespace-simplest">Option 1: Keep Everything in the Old Namespace (Simplest)<a class="headerlink" href="#option-1-keep-everything-in-the-old-namespace-simplest" title="Permanent link">&para;</a></h4>
+<p>Continue using your existing StorageClasses and secrets:
+- Keep secrets in the old namespace (e.g., <code>ceph-csi</code>)
+- Keep using existing StorageClasses
+- Both old and new PVs will use secrets from the old namespace</p>
+<h4 id="option-2-create-new-storageclasses-for-new-workloads">Option 2: Create New StorageClasses for New Workloads<a class="headerlink" href="#option-2-create-new-storageclasses-for-new-workloads" title="Permanent link">&para;</a></h4>
+<p>For new applications, create new StorageClasses that reference secrets in a different namespace:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage.k8s.io/v1</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">StorageClass</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-rbd-operator</span><span class="w">  </span><span class="c1"># New StorageClass name</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nt">provisioner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd.csi.ceph.com</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nt">clusterID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-ceph-cluster</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="nt">pool</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replicapool</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nt">imageFeatures</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">layering</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span><span class="c1"># New secrets in a different namespace</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="nt">csi.storage.k8s.io/provisioner-secret-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi-rbd-secret</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">  </span><span class="nt">csi.storage.k8s.io/provisioner-secret-namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi-operator-system</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">  </span><span class="nt">csi.storage.k8s.io/node-stage-secret-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi-rbd-secret</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">  </span><span class="nt">csi.storage.k8s.io/node-stage-secret-namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi-operator-system</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">  </span><span class="c1"># ... other secret parameters</span>
+</code></pre></div>
+<p>With this approach:
+- Old PVCs/PVs continue using secrets from the old namespace
+- New PVCs can use the new StorageClass with secrets in the new namespace
+- You still cannot delete the old namespace until all old PVs are deleted</p>
+<h3 id="cleanup-limitations">Cleanup Limitations<a class="headerlink" href="#cleanup-limitations" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>[!WARNING]
+<strong>You Cannot Fully Clean Up the Old Namespace</strong></p>
+<p>As long as you have existing PersistentVolumes created by the old ceph-csi deployment:
+- You <strong>cannot</strong> delete the old namespace (e.g., <code>ceph-csi</code>)
+- You <strong>cannot</strong> delete the CSI secrets in that namespace
+- These resources must remain until:
+  1. All pods using old PVs are deleted
+  2. All old PVCs are deleted
+  3. All old PVs are deleted</p>
+<p>This is a limitation of Kubernetes CSI, not the ceph-csi-operator.</p>
+</blockquote>
+<h2 id="7-verify-the-migration">7. Verify the Migration<a class="headerlink" href="#7-verify-the-migration" title="Permanent link">&para;</a></h2>
+<p>Once all the operator pods are up and running, verify the migration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Check operator and driver pods</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>ceph-csi-operator-system
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Verify existing PVCs remain bound</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pvc<span class="w"> </span>--all-namespaces
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Test new provisioning with existing StorageClass</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>kubectl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>&lt;test-pvc.yaml&gt;
+</code></pre></div>
+<p>The migration is complete when:
+- All CSI driver pods are running
+- Existing PVCs remain in <code>Bound</code> status
+- New PVCs can be provisioned successfully</p>
+<h2 id="8-clean-up">8. Clean Up<a class="headerlink" href="#8-clean-up" title="Permanent link">&para;</a></h2>
+<p>Once all the pods are up and running and you've verified that storage provisioning works correctly, the migration is complete. You can now delete the backup files:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>rm<span class="w"> </span>-rf<span class="w"> </span>backup/
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -12,26 +12,28 @@
         <meta name="author" content="Ceph-CSI Operator Contributors">
       
       
-        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/">
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/development-guide/">
       
       
+        <link rel="prev" href="../custom-images/">
       
-        <link rel="next" href="quick-start/">
+      
+        <link rel="next" href="../coding/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Ceph-CSI Operator Documentation</title>
+        <title>Development Guide - Ceph-CSI Operator Documentation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -50,7 +52,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -68,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ceph-csi-operator" class="md-skip">
+        <a href="#development-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -82,7 +84,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+    <a href=".." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -102,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Development Guide
             
           </span>
         </div>
@@ -187,11 +189,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -212,7 +212,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="quick-start/" class="md-tabs__link">
+        <a href="../quick-start/" class="md-tabs__link">
           
   
   
@@ -232,7 +232,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="design/operator/" class="md-tabs__link">
+        <a href="../design/operator/" class="md-tabs__link">
           
   
   
@@ -252,7 +252,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="features/rbd-snapshot-metadata/" class="md-tabs__link">
+        <a href="../features/rbd-snapshot-metadata/" class="md-tabs__link">
           
   
   
@@ -272,7 +272,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="helm-charts/helm-charts/" class="md-tabs__link">
+        <a href="../helm-charts/helm-charts/" class="md-tabs__link">
           
   
   
@@ -292,7 +292,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="migration/" class="md-tabs__link">
+        <a href="../migration/" class="md-tabs__link">
           
   
   
@@ -308,11 +308,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="development-guide/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -346,7 +348,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+    <a href=".." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -373,37 +375,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -419,120 +394,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Start
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Contributing">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#reporting-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reporting Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pull-requests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pull Requests
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#license" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        License
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contact" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contact
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -598,7 +459,7 @@
   
   
     <li class="md-nav__item">
-      <a href="quick-start/" class="md-nav__link">
+      <a href="../quick-start/" class="md-nav__link">
         
   
   
@@ -626,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -654,7 +515,7 @@
   
   
     <li class="md-nav__item">
-      <a href="kubernetes-installation/" class="md-nav__link">
+      <a href="../kubernetes-installation/" class="md-nav__link">
         
   
   
@@ -743,7 +604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/operator/" class="md-nav__link">
+      <a href="../design/operator/" class="md-nav__link">
         
   
   
@@ -771,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/hostNetwork/" class="md-nav__link">
+      <a href="../design/hostNetwork/" class="md-nav__link">
         
   
   
@@ -799,7 +660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/logrotate/" class="md-nav__link">
+      <a href="../design/logrotate/" class="md-nav__link">
         
   
   
@@ -827,7 +688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/network-policy/" class="md-nav__link">
+      <a href="../design/network-policy/" class="md-nav__link">
         
   
   
@@ -855,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="design/replication/" class="md-nav__link">
+      <a href="../design/replication/" class="md-nav__link">
         
   
   
@@ -944,7 +805,7 @@
   
   
     <li class="md-nav__item">
-      <a href="features/rbd-snapshot-metadata/" class="md-nav__link">
+      <a href="../features/rbd-snapshot-metadata/" class="md-nav__link">
         
   
   
@@ -1033,7 +894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="helm-charts/helm-charts/" class="md-nav__link">
+      <a href="../helm-charts/helm-charts/" class="md-nav__link">
         
   
   
@@ -1061,7 +922,7 @@
   
   
     <li class="md-nav__item">
-      <a href="helm-charts/operator-chart/" class="md-nav__link">
+      <a href="../helm-charts/operator-chart/" class="md-nav__link">
         
   
   
@@ -1089,7 +950,7 @@
   
   
     <li class="md-nav__item">
-      <a href="helm-charts/drivers-chart/" class="md-nav__link">
+      <a href="../helm-charts/drivers-chart/" class="md-nav__link">
         
   
   
@@ -1178,7 +1039,7 @@
   
   
     <li class="md-nav__item">
-      <a href="migration/" class="md-nav__link">
+      <a href="../migration/" class="md-nav__link">
         
   
   
@@ -1206,7 +1067,7 @@
   
   
     <li class="md-nav__item">
-      <a href="custom-images/" class="md-nav__link">
+      <a href="../custom-images/" class="md-nav__link">
         
   
   
@@ -1238,28 +1099,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1277,7 +1141,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1292,10 +1156,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="development-guide/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Guide
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1311,6 +1202,137 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#new-to-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New to Go
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workspace-and-repository-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workspace and repository setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-ceph-csi-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building ceph-csi-operator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-ceph-csi-operator-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running ceph-csi-operator tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-contribution-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code contribution workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Code contribution workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#certificate-of-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certificate of Origin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commit-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commit Messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backport-a-fix-to-a-release-branch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backport a Fix to a Release Branch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1323,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="coding/" class="md-nav__link">
+      <a href="../coding/" class="md-nav__link">
         
   
   
@@ -1351,7 +1373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="releases/" class="md-nav__link">
+      <a href="../releases/" class="md-nav__link">
         
   
   
@@ -1379,7 +1401,7 @@
   
   
     <li class="md-nav__item">
-      <a href="DCO" class="md-nav__link">
+      <a href="../DCO" class="md-nav__link">
         
   
   
@@ -1434,10 +1456,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#new-to-go" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        New to Go
       
     </span>
   </a>
@@ -1445,44 +1467,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#development-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Start
+        Development Workflow
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Contributing">
+    <nav class="md-nav" aria-label="Development Workflow">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#reporting-issues" class="md-nav__link">
+  <a href="#workspace-and-repository-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reporting Issues
+        Workspace and repository setup
       
     </span>
   </a>
@@ -1490,10 +1490,55 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#pull-requests" class="md-nav__link">
+  <a href="#building-ceph-csi-operator" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pull Requests
+        Building ceph-csi-operator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-ceph-csi-operator-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running ceph-csi-operator tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-contribution-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code contribution workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Code contribution workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#certificate-of-origin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certificate of Origin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commit-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commit Messages
       
     </span>
   </a>
@@ -1504,26 +1549,20 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#license" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#backport-a-fix-to-a-release-branch" class="md-nav__link">
     <span class="md-ellipsis">
       
-        License
+        Backport a Fix to a Release Branch
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#contact" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contact
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1547,31 +1586,125 @@
   
 
 
-<h1 id="ceph-csi-operator">Ceph CSI Operator<a class="headerlink" href="#ceph-csi-operator" title="Permanent link">&para;</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Ceph CSI Operator provides native management interfaces for <a href="https://github.com/ceph/ceph-csi">Ceph-CSI drivers (CephFS, RBD, and NFS)</a> for Kubernetes and OpenShift environments. The operator automates the deployment, configuration, and management of these drivers using new Kubernetes APIs defined as a set of Custom Resource Definitions (CRDs).</p>
-<p><strong>Platform Support:</strong></p>
+<h1 id="development-guide">Development Guide<a class="headerlink" href="#development-guide" title="Permanent link">&para;</a></h1>
+<h2 id="new-to-go">New to Go<a class="headerlink" href="#new-to-go" title="Permanent link">&para;</a></h2>
+<p>Ceph-csi-operator is written in Go and if you are new to the language,
+it is <strong>highly</strong> encouraged to:</p>
 <ul>
-<li>Kubernetes 1.32+</li>
-<li>OpenShift 4.19+</li>
+<li>Take the <a href="http://tour.golang.org/welcome/1">A Tour of Go</a> course.</li>
+<li><a href="https://golang.org/doc/code.html">Set up</a> Go development environment on your machine.</li>
+<li>Read <a href="https://golang.org/doc/effective_go.html">Effective Go</a> for best practices.</li>
 </ul>
-<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>For those eager to get started quickly, follow the steps outlined in the <a href="quick-start/">Quick Start Guide</a>.</p>
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<p>For detailed installation instructions, including methods using Helm and manual deployment, please visit the <a href="installation/">Installation Guide</a>.</p>
-<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
-<p>We welcome contributions to the Ceph CSI Operator! Please follow the <a href="development-guide/">Development Guide</a> and <a href="coding/">Coding Conventions</a> if you are interested to contribute to this repo.</p>
-<h3 id="reporting-issues">Reporting Issues<a class="headerlink" href="#reporting-issues" title="Permanent link">&para;</a></h3>
-<p>If you encounter a problem, please <a href="https://github.com/ceph/ceph-csi-operator/issues">open an issue</a> on GitHub. Be sure to fill the template when opening an issue.</p>
-<h3 id="pull-requests">Pull Requests<a class="headerlink" href="#pull-requests" title="Permanent link">&para;</a></h3>
-<p>We encourage you to submit pull requests for bug fixes, improvements, or new features. Please ensure that your code adheres to our coding standards and includes tests where applicable.</p>
-<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
-<p>The Ceph CSI Operator is licensed under the Apache License 2.0. See the <a href="https://github.com/ceph/ceph-csi-operator/blob/main/LICENSE">LICENSE</a> file for more details.</p>
-<h2 id="contact">Contact<a class="headerlink" href="#contact" title="Permanent link">&para;</a></h2>
-<p>Please use the following to reach members of the community:</p>
+<h2 id="development-workflow">Development Workflow<a class="headerlink" href="#development-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="workspace-and-repository-setup">Workspace and repository setup<a class="headerlink" href="#workspace-and-repository-setup" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Slack</strong>: Join the <a href="https://ceph-storage.slack.com/archives/C05522L7P60">#ceph-csi</a> channel on the <a href="https://ceph-storage.slack.com">Ceph Slack</a> to discuss anything related to this project. You can join the Slack by this <a href="https://bit.ly/ceph-slack-invite">invite link</a></li>
+<li><a href="https://golang.org/dl/">Download</a> Go and
+   <a href="https://golang.org/doc/install">install</a> it on your system.</li>
+<li>Clone the ceph-csi-operator
+  repo](<a href="https://github.com/ceph/ceph-csi-operator">https://github.com/ceph/ceph-csi-operator</a>)</li>
+<li>Fork the <a href="https://github.com/ceph/ceph-csi-operator">ceph-csi-operator repo</a> on Github.</li>
+<li>
+<p>Add your fork as a git remote:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">git remote add fork https://github.com/&lt;your-github-username&gt;/ceph-csi-operator</span>
+</code></pre></div>
+</li>
 </ul>
+<blockquote>
+<p>Editors: Our favorite editor is vim with the <a href="https://github.com/fatih/vim-go">vim-go</a>
+plugin, but there are many others like <a href="https://github.com/Microsoft/vscode-go">vscode</a></p>
+</blockquote>
+<h3 id="building-ceph-csi-operator">Building ceph-csi-operator<a class="headerlink" href="#building-ceph-csi-operator" title="Permanent link">&para;</a></h3>
+<p>To build ceph-csi-operator locally run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">make</span>
+</code></pre></div>
+<p>To build ceph-csi-operator in a container:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">make docker-build</span>
+</code></pre></div>
+<p>The built binary will be present under <code>bin/</code> directory.</p>
+<h3 id="running-ceph-csi-operator-tests">Running ceph-csi-operator tests<a class="headerlink" href="#running-ceph-csi-operator-tests" title="Permanent link">&para;</a></h3>
+<p>Once the changes to the sources compile, it is good practice to run the tests that validate the style and other basics of the source code. Execute the unit tests (in the <code>*_test.go</code> files) and check the formatting of YAML files, MarkDown documents and shell scripts:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">make test</span>
+</code></pre></div>
+<p>In addition to running tests locally, each Pull Request that is created will
+trigger Continuous Integration tests.</p>
+<h3 id="code-contribution-workflow">Code contribution workflow<a class="headerlink" href="#code-contribution-workflow" title="Permanent link">&para;</a></h3>
+<p>ceph-csi-operator repository currently follows GitHub's
+[Fork &amp; Pull] (<a href="https://help.github.com/articles/about-pull-requests/">https://help.github.com/articles/about-pull-requests/</a>) workflow
+for code contributions.</p>
+<p>Please read the <a href="../coding/">coding guidelines</a> document before submitting a PR.</p>
+<h4 id="certificate-of-origin">Certificate of Origin<a class="headerlink" href="#certificate-of-origin" title="Permanent link">&para;</a></h4>
+<p>By contributing to this project you agree to the Developer Certificate of Origin (DCO). This document was created by the Linux Kernel community and is a simple statement that you, as a contributor, have the legal right to make the contribution. See the <a href="../DCO">DCO</a> file for details.</p>
+<p>Contributors sign-off that they adhere to these requirements by adding a Signed-off-by line to commit messages. For example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>This is my commit message
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>More details on what this commit does
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Signed-off-by: Random J Developer &lt;random@developer.example.org&gt;
+</code></pre></div>
+<p>If you have already made a commit and forgot to include the sign-off, you can amend your last commit to add the sign-off with the following command, which can then be force pushed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">git commit --amend -s</span>
+</code></pre></div>
+<p>We use a <a href="https://github.com/apps/dco">DCO bot</a> to enforce the DCO on each pull request and branch commits.</p>
+<h4 id="commit-messages">Commit Messages<a class="headerlink" href="#commit-messages" title="Permanent link">&para;</a></h4>
+<p>We follow a rough convention for commit messages that is designed to answer two questions: what changed and why? The subject line should feature the what and the body of the commit should describe the why.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>fix bug in configmap
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>fix clusterID bug in the configmap where the clusterID is
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>not set to the expected value.
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>Signed-off-by: Random J Developer &lt;random@developer.example.org&gt;
+</code></pre></div>
+<p>The format can be described more formally as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>&lt;subject of the change&gt;
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>&lt;BLANK LINE&gt;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>&lt;paragraph(s) with reason/description&gt;
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>&lt;BLANK LINE&gt;
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>&lt;signed-off-by&gt;
+</code></pre></div>
+<p>The first line is the subject and should be no longer than 70 characters, the second line is always blank, and other lines should be wrapped at 80 characters. This allows the message to be easier to read on GitHub as well as in various git tools.</p>
+<p>Here is a short guide on how to work on a new patch. In this example, we will work on a patch called <em>hellopatch</em>:</p>
+<ol>
+<li>
+<p>Make sure you Fork's main branch is up to date</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">git fetch upstream main:main</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="go">git checkout main</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="go">git push</span>
+</code></pre></div>
+</li>
+<li>
+<p>Create a new branch for your patch:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">git checkout -b hellopatch</span>
+</code></pre></div>
+</li>
+</ol>
+<p>Do your work here and commit.</p>
+<p>Run the test suite, which includes linting checks, static code check, and unit tests:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="go">make test</span>
+</code></pre></div>
+<p>Once you are ready to push, you will type the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="go">git push hellopatch</span>
+</code></pre></div>
+<p><strong>Creating A Pull Request:</strong>
+When you are satisfied with your changes, you will then need to go to your repo in GitHub.com and create a pull request for your branch. Automated tests will be run against the pull request. Your pull request will be reviewed and merged.</p>
+<p>If you are planning on making a large set of changes or a major architectural change it is often desirable to first build a consensus in an issue discussion and/or create an initial design doc PR. Once the design has been agreed upon one or more PRs implementing the plan can be made.</p>
+<p>A few labels interact with automation around the pull requests:</p>
+<ul>
+<li>ready-to-merge: This PR is ready to be merged and it doesn't need second review</li>
+<li>do-not-merge: DO NOT MERGE (Mergify will not merge this PR)</li>
+<li>ok-to-test: PR is ready for e2e testing.</li>
+</ul>
+<p><strong>Review Process:</strong>
+Once your PR has been submitted for review the following criteria will need to be met before it will be merged:</p>
+<p>When the criteria are met, a project maintainer can merge your changes into the project's main branch.</p>
+<h3 id="backport-a-fix-to-a-release-branch">Backport a Fix to a Release Branch<a class="headerlink" href="#backport-a-fix-to-a-release-branch" title="Permanent link">&para;</a></h3>
+<p>The flow for getting a fix into a release branch is:</p>
+<ol>
+<li>Open a PR to merge the changes to main following the process outlined above.</li>
+<li>Add the backport label to that PR such as <code>backport-to-release-vX.Y.Z</code></li>
+<li>After your PR is merged to main, the mergify bot will automatically open a PR with your commits backported to the release branch</li>
+<li>If there are any conflicts you will need to resolve them by pulling the branch, resolving the conflicts and force push back the branch</li>
+<li>After the CI is green, the bot will automatically merge the backport PR.</li>
+</ol>
 
 
 
@@ -1627,10 +1760,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

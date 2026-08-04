@@ -1,0 +1,2262 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kubernetes Operator for managing Ceph-CSI drivers">
+      
+      
+        <meta name="author" content="Ceph-CSI Operator Contributors">
+      
+      
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/design/replication/">
+      
+      
+        <link rel="prev" href="../network-policy/">
+      
+      
+        <link rel="next" href="../../features/rbd-snapshot-metadata/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Replication - Ceph-CSI Operator Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#clientprofilereplication" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Ceph-CSI Operator Documentation" class="md-header__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Ceph-CSI Operator Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Replication
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../quick-start/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../operator/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../features/rbd-snapshot-metadata/" class="md-tabs__link">
+          
+  
+  
+  Features
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../helm-charts/helm-charts/" class="md-tabs__link">
+          
+  
+  
+  Helm Charts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../migration/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development-guide/" class="md-tabs__link">
+          
+  
+  
+  Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Ceph-CSI Operator Documentation" class="md-nav__button md-logo" aria-label="Ceph-CSI Operator Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Ceph-CSI Operator Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ceph/ceph-csi-operator" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ceph/ceph-csi-operator
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../kubernetes-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hostNetwork/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logrotate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Log Rotation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network-policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Replication
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Replication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Rationale
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraints-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraints and Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Definition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#controller-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controller Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Controller Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#field-index-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Field Index Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clientprofilereplication-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientProfileReplication Controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clientprofile-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientProfile Controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-from-clientprofilemapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration from ClientProfileMapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration from ClientProfileMapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-path-for-existing-clusters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrade Path for Existing Clusters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#co-existence-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Co-existence Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drbackup-consumption-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DR/Backup Consumption Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DR/Backup Consumption Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-dr-orchestrators-use-clientprofilereplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How DR Orchestrators Use ClientProfileReplication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#volume-group-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Volume Group Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configmap-translation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ConfigMap Translation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-bidirectional-replication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Bidirectional Replication
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/rbd-snapshot-metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RBD Snapshot Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helm Charts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Helm Charts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helm-charts/helm-charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helm-charts/operator-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operator Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../helm-charts/drivers-chart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drivers Chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../custom-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Images
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Conventions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DCO" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DCO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Rationale
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraints-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constraints and Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Definition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#controller-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controller Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Controller Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#field-index-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Field Index Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clientprofilereplication-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientProfileReplication Controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clientprofile-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientProfile Controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-from-clientprofilemapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration from ClientProfileMapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration from ClientProfileMapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-path-for-existing-clusters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrade Path for Existing Clusters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#co-existence-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Co-existence Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#drbackup-consumption-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DR/Backup Consumption Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DR/Backup Consumption Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-dr-orchestrators-use-clientprofilereplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How DR Orchestrators Use ClientProfileReplication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#volume-group-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Volume Group Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configmap-translation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ConfigMap Translation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-bidirectional-replication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Bidirectional Replication
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="clientprofilereplication">ClientProfileReplication<a class="headerlink" href="#clientprofilereplication" title="Permanent link">&para;</a></h1>
+<p>The ClientProfileReplication CR defines the replication destination mapping
+for backup and disaster recovery scenarios. It enables the CSI driver to determine the
+destination volume identifiers when client profile is different across cluster and pools
+have different IDs across mirrored Ceph clusters.</p>
+<h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Provides destination client profile and pool mapping for the <code>GetReplicationDestinationInfo</code> RPC</li>
+<li>Enables DR/Backup orchestrators to discover correct destination volume IDs during failover</li>
+<li>ClientProfileReplication replaces the replication destination discovery function of ClientProfileMapping. However, ClientProfileMapping must be retained as long as PersistentVolumes with stale cluster IDs exist in the cluster. Removing ClientProfileMapping prematurely will break all CSI operations on those volumes. Over time, as old PVs are deleted and replaced with PVs created through GetReplicationDestinationInfo (which have correct volume handles), ClientProfileMapping becomes unnecessary and can be safely removed.</li>
+</ul>
+<h2 id="design-rationale">Design Rationale<a class="headerlink" href="#design-rationale" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Pool name mapping</strong>: Pool names are consistent across mirrored Ceph clusters,
+   while pool IDs can differ. Mapping by name is more intuitive and maintainable.
+   <strong>Important</strong>: Pool names must remain constant across clusters. If pools are
+   renamed on either cluster, the corresponding ClientProfileReplication CR must
+   be updated to reflect the new pool names.</p>
+</li>
+<li>
+<p><strong>Single destination</strong>: The <code>GetReplicationDestinationInfo</code> RPC cannot receive
+   selection parameters, therefore only one destination per local client profile
+   is supported.</p>
+</li>
+<li>
+<p><strong>Operator translation</strong>: The operator translates this CR into the
+   <code>replicationDestination</code> field in the ceph-csi-config ConfigMap, which the CSI
+   driver reads at runtime.</p>
+</li>
+</ol>
+<h2 id="constraints-and-validation">Constraints and Validation<a class="headerlink" href="#constraints-and-validation" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Unique active client profiles</strong>: Only one ClientProfileReplication CR may be in
+   <code>Ready</code> state for a given <code>localClientProfile</code>. If multiple CRs reference the same
+   <code>localClientProfile</code>:</li>
+<li>The oldest CR (by creation timestamp) is accepted and marked <code>Ready</code></li>
+<li>
+<p>All other CRs are rejected and marked <code>Rejected</code> with a descriptive message</p>
+</li>
+<li>
+<p><strong>Client profile dependency</strong>: A ClientProfileReplication CR requires a
+   corresponding ClientProfile CR with a matching name.</p>
+</li>
+<li>
+<p><strong>Missing ClientProfile</strong>: If a ClientProfileReplication references a
+     <code>localClientProfile</code> that doesn't exist, the CR is marked <code>Rejected</code> with message:
+     <code>"rejected: ClientProfile '&lt;name&gt;' not found"</code></p>
+</li>
+<li>
+<p><strong>Deletion protection</strong>: The ClientProfile controller adds a finalizer to
+     ClientProfile CR. If deletion is attempted, the finalizer blocks it until all referencing
+     ClientProfileReplication CRs are deleted first. This prevents breaking
+     replication configurations.</p>
+</li>
+</ol>
+<h2 id="api-definition">API Definition<a class="headerlink" href="#api-definition" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// ClientProfileReplicationSpec defines the desired replication destination mapping</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">type</span><span class="w"> </span><span class="nx">ClientProfileReplicationSpec</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="c1">// LocalClientProfile is the name of the local ClientProfile CR</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="c1">// +kubebuilder:validation:Required</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nx">LocalClientProfile</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;localClientProfile&quot;`</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="c1">// RemoteClientProfile is the name of the remote cluster&#39;s client profile</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="c1">// +kubebuilder:validation:Required</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nx">RemoteClientProfile</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;remoteClientProfile&quot;`</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="c1">// RBD contains RBD-specific replication configuration</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="c1">// +optional</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="nx">RBD</span><span class="w"> </span><span class="o">*</span><span class="nx">RBDReplicationSpec</span><span class="w"> </span><span class="s">`json:&quot;rbd,omitempty&quot;`</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1">// RBDReplicationSpec defines RBD-specific replication configuration</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="kd">type</span><span class="w"> </span><span class="nx">RBDReplicationSpec</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="c1">// PoolMapping maps local pool names to remote pool IDs</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="c1">// +optional</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="nx">PoolMapping</span><span class="w"> </span><span class="p">[]</span><span class="nx">PoolMappingSpec</span><span class="w"> </span><span class="s">`json:&quot;poolMapping,omitempty&quot;`</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="p">}</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1">// PoolMappingSpec defines the mapping for a single pool</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="kd">type</span><span class="w"> </span><span class="nx">PoolMappingSpec</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="c1">// Name is the pool name (must be consistent across clusters)</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="c1">// +kubebuilder:validation:Required</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;name&quot;`</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span><span class="c1">// RemoteID is the pool ID on the remote cluster</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="c1">// +kubebuilder:validation:Required</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="nx">RemoteID</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;remoteID&quot;`</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">}</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="c1">// ClientProfileReplicationStatus defines the observed state</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="kd">type</span><span class="w"> </span><span class="nx">ClientProfileReplicationStatus</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span><span class="c1">// Phase indicates the current state of this CR</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">    </span><span class="c1">// +optional</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">    </span><span class="nx">Phase</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;phase,omitempty&quot;`</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">    </span><span class="c1">// Message provides human-readable details about the current phase</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">    </span><span class="c1">// +optional</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="nx">Message</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;message,omitempty&quot;`</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="p">}</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="c1">// Phase constants</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">    </span><span class="c1">// ClientProfileReplicationPhaseReady indicates the CR is accepted and active</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="w">    </span><span class="nx">ClientProfileReplicationPhaseReady</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Ready&quot;</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="w">    </span><span class="c1">// ClientProfileReplicationPhaseRejected indicates the CR is rejected (conflict)</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="w">    </span><span class="nx">ClientProfileReplicationPhaseRejected</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Rejected&quot;</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="w">    </span><span class="c1">// ClientProfileReplicationPhasePending indicates validation is in progress</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="w">    </span><span class="nx">ClientProfileReplicationPhasePending</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Pending&quot;</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="p">)</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a><span class="c1">// ClientProfileStatus defines the observed state</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a><span class="kd">type</span><span class="w"> </span><span class="nx">ClientProfileStatus</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a><span class="w">    </span><span class="c1">// Phase indicates the current state of this CR</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a><span class="w">    </span><span class="c1">// +optional</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a><span class="w">    </span><span class="nx">Phase</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;phase,omitempty&quot;`</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a><span class="w">    </span><span class="c1">// Message provides human-readable details about the current phase</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a><span class="w">    </span><span class="c1">// +optional</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a><span class="w">    </span><span class="nx">Message</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:&quot;message,omitempty&quot;`</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a><span class="p">}</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a><span class="c1">// Phase constants for ClientProfile</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a><span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a><span class="w">    </span><span class="c1">// ClientProfilePhaseReady indicates the CR is reconciled successfully</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a><span class="w">    </span><span class="nx">ClientProfilePhaseReady</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Ready&quot;</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a>
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a><span class="w">    </span><span class="c1">// ClientProfilePhaseFailed indicates reconciliation failed</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a><span class="w">    </span><span class="nx">ClientProfilePhaseFailed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Failed&quot;</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a><span class="w">    </span><span class="c1">// ClientProfilePhasePending indicates reconciliation is in progress</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a><span class="w">    </span><span class="nx">ClientProfilePhasePending</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;Pending&quot;</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a><span class="p">)</span>
+</code></pre></div>
+<h2 id="controller-design">Controller Design<a class="headerlink" href="#controller-design" title="Permanent link">&para;</a></h2>
+<p>The design uses two controllers working together:</p>
+<ol>
+<li><strong>ClientProfileReplication Controller</strong> - Validates and accepts/rejects CRs</li>
+<li><strong>ClientProfile Controller</strong> - Consumes ready CRs to build ConfigMap</li>
+</ol>
+<h3 id="field-index-setup">Field Index Setup<a class="headerlink" href="#field-index-setup" title="Permanent link">&para;</a></h3>
+<p>To efficiently look up ClientProfileReplication CRs by the referenced ClientProfile,
+create a field index during controller initialization:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Index ClientProfileReplication by localClientProfile field</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nx">indexFunc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">obj</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">cpr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">obj</span><span class="p">.(</span><span class="o">*</span><span class="nx">ClientProfileReplication</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">cpr</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">LocalClientProfile</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">cpr</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">LocalClientProfile</span><span class="p">}</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nx">mgr</span><span class="p">.</span><span class="nx">GetFieldIndexer</span><span class="p">().</span><span class="nx">IndexField</span><span class="p">(</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="o">&amp;</span><span class="nx">ClientProfileReplication</span><span class="p">{},</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="s">&quot;spec.localClientProfile&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nx">indexFunc</span><span class="p">,</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">)</span>
+</code></pre></div>
+<h3 id="clientprofilereplication-controller">ClientProfileReplication Controller<a class="headerlink" href="#clientprofilereplication-controller" title="Permanent link">&para;</a></h3>
+<p>This controller validates ClientProfileReplication CRs and ensures only one CR per
+<code>localClientProfile</code> is in Ready state.</p>
+<p><strong>Reconciliation flow</strong>:
+1. Fetch the ClientProfileReplication CR being reconciled
+2. <strong>Validate ClientProfile exists</strong>:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">var</span><span class="w"> </span><span class="nx">clientProfile</span><span class="w"> </span><span class="nx">ClientProfile</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">cr</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">LocalClientProfile</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">Namespace</span><span class="p">:</span><span class="w"> </span><span class="nx">cr</span><span class="p">.</span><span class="nx">Namespace</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">},</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">clientProfile</span><span class="p">)</span>
+</code></pre></div>
+   - If not found, mark CR as <code>Rejected</code> with message:
+     <code>"rejected: ClientProfile '&lt;name&gt;' not found"</code>
+   - Update status and stop reconciliation (return)
+3. Look up all CRs referencing the same <code>localClientProfile</code> using the field index:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">var</span><span class="w"> </span><span class="nx">allForProfile</span><span class="w"> </span><span class="nx">ClientProfileReplicationList</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">List</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">allForProfile</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nx">client</span><span class="p">.</span><span class="nx">InNamespace</span><span class="p">(</span><span class="nx">cr</span><span class="p">.</span><span class="nx">Namespace</span><span class="p">),</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nx">client</span><span class="p">.</span><span class="nx">MatchingFields</span><span class="p">{</span><span class="s">&quot;spec.localClientProfile&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">cr</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">LocalClientProfile</span><span class="p">})</span>
+</code></pre></div>
+4. <strong>Conflict detection</strong>:
+   - Sort the list by creation timestamp (oldest first)
+   - The oldest CR wins and gets marked <code>Ready</code>
+   - All other CRs are marked <code>Rejected</code> with message:
+     <code>"rejected: another ClientProfileReplication '&lt;winner-name&gt;' is already active for localClientProfile '&lt;profile-name&gt;'"</code>
+5. <strong>Winner validation</strong> (for the CR being accepted):
+   - Mark status as <code>Ready</code> with message: <code>"accepted"</code>
+6. Update the CR's status with the determined phase and message
+7. Trigger reconciliation of all other CRs with the same <code>localClientProfile</code> to update their status</p>
+<p><strong>Status updates</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// For the accepted/winner CR</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nx">status</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ClientProfileReplicationStatus</span><span class="p">{</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nx">Phase</span><span class="p">:</span><span class="w"> </span><span class="nx">ClientProfileReplicationPhaseReady</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nx">Message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;accepted&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// For rejected CRs</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="nx">status</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ClientProfileReplicationStatus</span><span class="p">{</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nx">Phase</span><span class="p">:</span><span class="w"> </span><span class="nx">ClientProfileReplicationPhaseRejected</span><span class="p">,</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nx">Message</span><span class="p">:</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;rejected: another ClientProfileReplication &#39;%s&#39; is already active for localClientProfile &#39;%s&#39;&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">        </span><span class="nx">winnerName</span><span class="p">,</span><span class="w"> </span><span class="nx">localClientProfile</span><span class="p">),</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Watches</strong>:
+- ClientProfileReplication CRs (primary resource)
+- ClientProfile CRs (triggers reconciliation of all ClientProfileReplication CRs that reference it)
+  - When a ClientProfile is created, rejected CRs may become ready
+  - When a ClientProfile is deleted, ready CRs must be rejected
+- Triggers reconciliation of all CRs with the same <code>localClientProfile</code> when any one changes</p>
+<h3 id="clientprofile-controller">ClientProfile Controller<a class="headerlink" href="#clientprofile-controller" title="Permanent link">&para;</a></h3>
+<p>The ClientProfile controller reads ready ClientProfileReplication CRs and builds the ConfigMap.</p>
+<p><strong>Reconciliation flow</strong>:
+1. Read the ClientProfile CR to get cluster configuration
+2. Look up ClientProfileReplication CRs using the field index:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">var</span><span class="w"> </span><span class="nx">replicationList</span><span class="w"> </span><span class="nx">ClientProfileReplicationList</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">List</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">replicationList</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nx">client</span><span class="p">.</span><span class="nx">InNamespace</span><span class="p">(</span><span class="nx">clientProfile</span><span class="p">.</span><span class="nx">Namespace</span><span class="p">),</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nx">client</span><span class="p">.</span><span class="nx">MatchingFields</span><span class="p">{</span><span class="s">&quot;spec.localClientProfile&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">clientProfile</span><span class="p">.</span><span class="nx">Name</span><span class="p">})</span>
+</code></pre></div>
+3. <strong>Filter for ready state</strong>:
+   - Filter the list to find CRs with <code>status.phase == ClientProfileReplicationPhaseReady</code>
+   - Should only be 0 or 1 ready CRs (enforced by ClientProfileReplication controller)
+   - If somehow multiple Ready CRs exist, log a warning and use the first one
+4. Build ConfigMap entry:
+   - Add cluster configuration from ClientProfile
+   - If a Ready ClientProfileReplication found, add <code>replicationDestination</code> field
+   - If no Ready CR found, omit <code>replicationDestination</code> (valid state)
+5. Update the <code>config.json</code> key of the ceph-csi-config ConfigMap
+6. Update ClientProfile status to reflect success</p>
+<p><strong>Deletion handling</strong>:
+- Enhanced finalizer processing uses the index to check for referencing
+  ClientProfileReplication CRs (any phase)
+- If any exist, block deletion and update status with error:
+  <code>"cannot delete: ClientProfileReplication CRs still reference this profile: [cr1, cr2]"</code>
+- If none, proceed with normal cleanup</p>
+<p><strong>Watches</strong>:
+- ClientProfile CRs (primary resource)
+- ClientProfileReplication CRs (triggers reconciliation of referenced ClientProfile)</p>
+<p>This design ensures:
+- Clear separation of concerns: validation vs consumption
+- Only one CR per <code>localClientProfile</code> can be Ready at a time
+- Deterministic winner selection (oldest CR wins)
+- ClientProfile controller only uses Ready CRs
+- Single serialization point for ConfigMap updates (ClientProfile controller only)
+- Deletion protection prevents breaking replication configurations</p>
+<h2 id="migration-from-clientprofilemapping">Migration from ClientProfileMapping<a class="headerlink" href="#migration-from-clientprofilemapping" title="Permanent link">&para;</a></h2>
+<h3 id="upgrade-path-for-existing-clusters">Upgrade Path for Existing Clusters<a class="headerlink" href="#upgrade-path-for-existing-clusters" title="Permanent link">&para;</a></h3>
+<p>When upgrading from ClientProfileMapping to ClientProfileReplication on an existing
+cluster with replicated volumes:</p>
+<p><strong>Problem</strong>: Existing PersistentVolumes contain volume handles with stale/destroyed
+cluster IDs that were mapped via ClientProfileMapping. These PVs will continue to
+work only as long as ClientProfileMapping exists.</p>
+<p><strong>Migration Strategy</strong>:</p>
+<ol>
+<li><strong>Initial State</strong> (before upgrade):</li>
+<li>Cluster uses ClientProfileMapping for both cluster ID mapping and replication
+     destination discovery</li>
+<li>PVs contain volume handles with old cluster IDs (e.g., <code>cluster-a</code>)</li>
+<li>
+<p>ClientProfileMapping maps <code>cluster-a</code> → <code>cluster-d</code></p>
+</li>
+<li>
+<p><strong>Post-Upgrade State</strong> (immediately after upgrade):</p>
+</li>
+<li>Deploy ClientProfileReplication CRs alongside existing ClientProfileMapping</li>
+<li><strong>Keep both CRs active</strong> - they serve different purposes now:<ul>
+<li>ClientProfileMapping: Required for CSI operations on old PVs with stale cluster IDs</li>
+<li>ClientProfileReplication: Used by DR orchestrators for new failover operations</li>
+</ul>
+</li>
+<li>
+<p>Ceph CSI ConfigMap contains both <code>clientProfileMapping</code> and <code>replicationDestination</code> fields</p>
+</li>
+<li>
+<p><strong>Transition Period</strong>:</p>
+</li>
+<li>New failovers use <code>GetReplicationDestinationInfo</code> RPC</li>
+<li>New PVs created during failover have correct volume handles with current cluster IDs</li>
+<li>Old PVs continue working via ClientProfileMapping</li>
+<li>
+<p>Gradual replacement: as applications failover/failback, old PVs are deleted and
+     replaced with new PVs containing correct volume handles</p>
+</li>
+<li>
+<p><strong>End State</strong> (later, when all old PVs are gone):</p>
+</li>
+<li>All PVs now have correct volume handles</li>
+<li>ClientProfileMapping can be safely deleted</li>
+<li>Only ClientProfileReplication remains</li>
+</ol>
+<p><strong>Timeline</strong>: The migration is complete when administrators verify that no PVs remain
+with old cluster IDs in their volume handles. This can take weeks to months depending
+on application lifecycle and DR testing frequency.</p>
+<h3 id="co-existence-behavior">Co-existence Behavior<a class="headerlink" href="#co-existence-behavior" title="Permanent link">&para;</a></h3>
+<p>When both ClientProfileMapping and ClientProfileReplication exist for the same cluster:</p>
+<p><strong>Operational Behavior</strong>:
+- <strong>CSI volume operations</strong> (create, delete, attach, mount) on old PVs use
+  <code>clientProfileMapping</code> to resolve stale cluster IDs
+- <strong>GetReplicationDestinationInfo RPC</strong> uses <code>replicationDestination</code> to map
+  source → destination for new failover operations
+- Both fields are independent and non-conflicting
+- Deleting ClientProfileMapping while old PVs exist will break those PVs permanently</p>
+<p><strong>Controller Coordination</strong>:
+- ClientProfile controller reads both ClientProfileMapping and ClientProfileReplication CRs
+- Builds ConfigMap with both <code>clientProfileMapping</code> and <code>replicationDestination</code> fields
+- No conflict as they serve different purposes</p>
+<h2 id="drbackup-consumption-model">DR/Backup Consumption Model<a class="headerlink" href="#drbackup-consumption-model" title="Permanent link">&para;</a></h2>
+<h3 id="how-dr-orchestrators-use-clientprofilereplication">How DR Orchestrators Use ClientProfileReplication<a class="headerlink" href="#how-dr-orchestrators-use-clientprofilereplication" title="Permanent link">&para;</a></h3>
+<p>DR/Backup orchestrators (e.g. Ramen) use the
+<code>GetReplicationDestinationInfo</code> RPC to discover correct destination volume handles
+during failover operations.</p>
+<p><strong>Workflow</strong>:</p>
+<ol>
+<li><strong>Pre-Failover</strong> (Primary cluster active):</li>
+<li>Application runs on primary cluster with PVs</li>
+<li>RBD mirroring replicates volumes to secondary cluster</li>
+<li>
+<p>Volume handles on primary: <code>0001-000f-primary-cluster-0000000000000001-&lt;uuid&gt;</code></p>
+</li>
+<li>
+<p><strong>Disaster Event</strong>:</p>
+</li>
+<li>Primary cluster goes down</li>
+<li>
+<p>DR orchestrator initiates failover to secondary cluster</p>
+</li>
+<li>
+<p><strong>Destination Discovery</strong> (on secondary cluster):</p>
+</li>
+<li>DR orchestrator reads backed-up PV manifests (from Velero/OADP)</li>
+<li>Extracts source volume handles from PV specs</li>
+<li>Calls <code>GetReplicationDestinationInfo</code> RPC with source volume handle:
+     <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">req</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">GetReplicationDestinationInfoRequest</span><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="nx">ReplicationSource</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ReplicationSource</span><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">        </span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ReplicationSource_Volume</span><span class="p">{</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">            </span><span class="nx">Volume</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">VolumeSource</span><span class="p">{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">                </span><span class="nx">VolumeId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0001-000f-primary-cluster-0000000000000001-&lt;uuid&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="nx">Secrets</span><span class="p">:</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="o">...</span><span class="p">},</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="p">}</span>
+</code></pre></div></li>
+<li>CSI driver reads <code>replicationDestination</code> from ConfigMap</li>
+<li>
+<p>Maps source volume ID to destination:</p>
+<ul>
+<li>Input: <code>0001-000f-primary-cluster-0000000000000001-&lt;uuid&gt;</code></li>
+<li>Output: <code>0001-0011-secondary-cluster-0000000000000005-&lt;uuid&gt;</code></li>
+<li>(pool ID changed 1→5 based on ClientProfileReplication mapping)</li>
+</ul>
+</li>
+<li>
+<p><strong>PV Recreation</strong> (on secondary cluster):</p>
+</li>
+<li>DR orchestrator creates new PV manifest with destination volume handle</li>
+<li>PVC binds to new PV</li>
+<li>Application starts using the mirrored volume on secondary cluster</li>
+<li>
+<p><strong>Volume handle now has correct cluster ID</strong> (<code>secondary-cluster</code>)</p>
+</li>
+<li>
+<p><strong>Post-Failover State</strong>:</p>
+</li>
+<li>New PVs have correct volume handles for secondary cluster</li>
+<li>No ClientProfileMapping needed for these PVs</li>
+<li>Future operations (attach, mount, delete) work directly without mapping</li>
+</ol>
+<h3 id="volume-group-support">Volume Group Support<a class="headerlink" href="#volume-group-support" title="Permanent link">&para;</a></h3>
+<p>For applications using VolumeGroups (consistency groups), the RPC handles entire groups:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nx">req</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">GetReplicationDestinationInfoRequest</span><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nx">ReplicationSource</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ReplicationSource</span><span class="p">{</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">        </span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ReplicationSource_Volumegroup</span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">            </span><span class="nx">Volumegroup</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">VolumeGroupSource</span><span class="p">{</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">                </span><span class="nx">VolumeGroupId</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0001-000f-primary-cluster-0000000000000001-&lt;group-uuid&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>Response includes:
+- Destination volume group ID
+- Map of all source volume IDs → destination volume IDs</p>
+<p>This enables DR orchestrators to maintain consistency group relationships during failover.</p>
+<h2 id="configmap-translation">ConfigMap Translation<a class="headerlink" href="#configmap-translation" title="Permanent link">&para;</a></h2>
+<p>The operator translates the CR into the <code>config.json</code> key of the ceph-csi-config ConfigMap:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">[{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;clusterID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;primary-cluster&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;monitors&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;10.0.0.1:6789&quot;</span><span class="p">],</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">&quot;replicationDestination&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">&quot;remoteClusterID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;secondary-cluster&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">&quot;rbd&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">      </span><span class="nt">&quot;remotePoolMapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">        </span><span class="nt">&quot;rbd&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">          </span><span class="nt">&quot;poolID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5&quot;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">        </span><span class="nt">&quot;replicapool&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">          </span><span class="nt">&quot;poolID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6&quot;</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="p">}]</span>
+</code></pre></div>
+<h2 id="example-bidirectional-replication">Example: Bidirectional Replication<a class="headerlink" href="#example-bidirectional-replication" title="Permanent link">&para;</a></h2>
+<p>For disaster recovery with failback capability, create mappings in both directions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nn">---</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># Primary → Secondary (for initial failover)</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClientProfileReplication</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi.ceph.io/v1</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary-to-secondary</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;operator-namespace&gt;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nt">localClientProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary-cluster</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span><span class="nt">remoteClientProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secondary-cluster</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">  </span><span class="nt">rbd</span><span class="p">:</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="nt">poolMapping</span><span class="p">:</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">      </span><span class="c1"># Pool &quot;rbd&quot; has ID 1 on primary, ID 5 on secondary</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="nt">remoteID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">      </span><span class="c1"># Pool &quot;replicapool&quot; has ID 2 on primary, ID 6 on secondary</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replicapool</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">        </span><span class="nt">remoteID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;6&quot;</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="nn">---</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="c1"># Secondary → Primary (for failback)</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClientProfileReplication</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csi.ceph.io/v1</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secondary-to-primary</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;operator-namespace&gt;</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="w">  </span><span class="nt">localClientProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secondary-cluster</span>
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="w">  </span><span class="nt">remoteClientProfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">primary-cluster</span>
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="w">  </span><span class="nt">rbd</span><span class="p">:</span>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="w">    </span><span class="nt">poolMapping</span><span class="p">:</span>
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a><span class="w">      </span><span class="c1"># Pool &quot;rbd&quot; has ID 5 on secondary, ID 1 on primary</span>
+<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd</span>
+<a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a><span class="w">        </span><span class="nt">remoteID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<a id="__codelineno-9-34" name="__codelineno-9-34" href="#__codelineno-9-34"></a><span class="w">      </span><span class="c1"># Pool &quot;replicapool&quot; has ID 6 on secondary, ID 2 on primary</span>
+<a id="__codelineno-9-35" name="__codelineno-9-35" href="#__codelineno-9-35"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replicapool</span>
+<a id="__codelineno-9-36" name="__codelineno-9-36" href="#__codelineno-9-36"></a><span class="w">        </span><span class="nt">remoteID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
