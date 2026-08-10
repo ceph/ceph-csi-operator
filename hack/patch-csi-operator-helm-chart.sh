@@ -43,6 +43,21 @@ echo "Patched $SA_FILE successfully"
 
 # Replace hardcoded namespace with Helm template variable in all template files
 if [[ "$CHART_DIR" == *"ceph-csi-operator"* ]]; then
+  echo "Restoring namespace in $SA_FILE"
+
+  awk '
+    /^metadata:/ { in_metadata = 1 }
+
+    { print }
+
+    in_metadata && /^  name: / {
+      print "  namespace: ceph-csi-operator-system"
+      in_metadata = 0
+    }
+  ' "$SA_FILE" >"${SA_FILE}.tmp"
+
+  mv "${SA_FILE}.tmp" "$SA_FILE"
+
   echo "Replacing hardcoded namespace with Helm template variable in $CHART_DIR"
 
   # Process each YAML file in the templates directory
