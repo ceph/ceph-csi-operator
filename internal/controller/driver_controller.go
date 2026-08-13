@@ -840,7 +840,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 							})
 						}
 						// Addons Sidecar Container
-						if !r.isNfsDriver() && ptr.Deref(r.driver.Spec.DeployCsiAddons, false) {
+						if r.withCsiAddons() {
 							port := r.controllerPluginCsiAddonsContainerPort()
 							containers = append(containers, corev1.Container{
 								Name:            "csi-addons",
@@ -1139,7 +1139,6 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 
 	log := r.log.WithValues("csiAddonsDaemonSetName", daemonSet.Name)
 
-	withCsiAddonsDaemonSet := ptr.Deref(r.driver.Spec.DeployCsiAddons, false)
 	withCsiAddonsVolumeCondition := false
 
 	// check if the driver wants CSI-Addons features
@@ -1160,11 +1159,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 		withCsiAddonsVolumeCondition = enabled
 	}
 
-	if r.isNfsDriver() {
-		withCsiAddonsDaemonSet = false
-	}
-
-	if !withCsiAddonsDaemonSet {
+	if !r.withCsiAddons() {
 		if err := r.Delete(r.ctx, daemonSet); client.IgnoreNotFound(err) != nil {
 			log.Error(err, "failed to delete csi addons daemonset")
 			return err
@@ -1786,6 +1781,15 @@ func (r *driverReconcile) isNvmeofDriver() bool {
 
 func (r *driverReconcile) isRbdOrNvemofDriver() bool {
 	return r.isRbdDriver() || r.isNvmeofDriver()
+}
+
+func (r *driverReconcile) withCsiAddons() bool {
+	// NFS and NVMe-oF do not support CSI-Addons
+	if r.isNfsDriver() || r.isNvmeofDriver() {
+		return false
+	}
+
+	return ptr.Deref(r.driver.Spec.DeployCsiAddons, false)
 }
 
 func (r *driverReconcile) generateName(suffix string) string {
