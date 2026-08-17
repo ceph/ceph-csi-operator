@@ -1,0 +1,31 @@
+cephConnections:
+  - name: cephcluster
+    monitors: {}
+clientProfiles:
+  - name: rook-ceph
+    cephConnection:
+      name: cephcluster
+    cephFs:
+      subVolumeGroup: csi
+drivers:
+  nfs:
+    storageClasses:
+      - name: k8s-storage-e2e-nfs
+        reclaimPolicy: Delete
+        allowVolumeExpansion: true
+        provisionerSecretName: rook-csi-cephfs-provisioner
+        provisionerSecretNamespace: rook-ceph
+        nodeSecretName: rook-csi-cephfs-node
+        nodeSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
+          fsName: myfs
+          nfsCluster: my-nfs
+          server: rook-ceph-nfs-my-nfs-a.rook-ceph.svc.cluster.local
+    volumeSnapshotClasses:
+      - name: k8s-storage-e2e-nfs
+        deletionPolicy: Delete
+        snapshotterSecretName: rook-csi-cephfs-provisioner
+        snapshotterSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
