@@ -1,0 +1,32 @@
+{{- if .Capabilities.APIVersions.Has "storage.k8s.io/v1/VolumeAttributesClass" }}
+{{- $root := . -}}
+{{- range $driverName, $driver := .Values.drivers -}}
+{{- if $driver.enabled }}
+{{- range $class := $driver.volumeAttributesClasses }}
+{{- if $class.name }}
+---
+apiVersion: storage.k8s.io/v1
+kind: VolumeAttributesClass
+metadata:
+  name: {{ $class.name }}
+  labels:
+    {{- include "ceph-csi-drivers.labels" $root | nindent 4 }}
+    {{- with $class.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $class.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+driverName: {{ $driver.name }}
+{{- with $class.parameters }}
+parameters:
+  {{- range $key, $value := . }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

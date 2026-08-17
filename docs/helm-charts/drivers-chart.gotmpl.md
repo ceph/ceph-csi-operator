@@ -6,10 +6,15 @@ title: Ceph-CSI Driver Helm Chart
 Creates ceph-csi-operator resources to configure a [ceph-csi](https://github.com/ceph/ceph-csi) drivers using the [Helm](https://helm.sh) package manager.
 This chart is a simple packaging of templates that will optionally create ceph-csi-operator resources such as:
 
-* Driver CRs (RBD,cephFS,NFS)
+* Driver CRs (RBD, CephFS, NFS, NVMe-oF)
 * CephConnection that contains the ceph details
 * ClientProfile for the RBD/CephFS/NFS clusterID and corresponding configurations
 * ClientProfileMapping for disaster recovery
+* StorageClass for dynamic volume provisioning
+* VolumeSnapshotClass for volume snapshots
+* VolumeGroupSnapshotClass for volume group snapshots
+* VolumeAttributesClass for volume attributes (QoS, MDS pinning, etc.)
+* Secret for Ceph authentication credentials
 
 
 ## Prerequisites

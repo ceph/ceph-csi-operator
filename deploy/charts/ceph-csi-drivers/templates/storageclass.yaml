@@ -1,0 +1,76 @@
+{{- $root := . -}}
+{{- range $driverName, $driver := .Values.drivers -}}
+{{- if $driver.enabled }}
+{{- range $class := $driver.storageClasses }}
+{{- if $class.name }}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $class.name }}
+  labels:
+    {{- include "ceph-csi-drivers.labels" $root | nindent 4 }}
+    {{- with $class.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or $class.isDefault $class.annotations }}
+  annotations:
+    {{- if $class.isDefault }}
+    storageclass.kubernetes.io/is-default-class: "true"
+    {{- end }}
+    {{- with $class.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+provisioner: {{ $driver.name }}
+{{- with $class.reclaimPolicy }}
+reclaimPolicy: {{ . }}
+{{- end }}
+{{- if hasKey $class "allowVolumeExpansion" }}
+allowVolumeExpansion: {{ $class.allowVolumeExpansion }}
+{{- end }}
+{{- with $class.volumeBindingMode }}
+volumeBindingMode: {{ . }}
+{{- end }}
+{{- with $class.mountOptions }}
+mountOptions:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- if or $class.provisionerSecretName $class.nodeSecretName $class.parameters }}
+parameters:
+  {{- if $class.provisionerSecretName }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/provisioner-secret-name") }}
+  csi.storage.k8s.io/provisioner-secret-name: {{ $class.provisionerSecretName }}
+  csi.storage.k8s.io/provisioner-secret-namespace: {{ $class.provisionerSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/controller-expand-secret-name") }}
+  csi.storage.k8s.io/controller-expand-secret-name: {{ $class.provisionerSecretName }}
+  csi.storage.k8s.io/controller-expand-secret-namespace: {{ $class.provisionerSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/controller-publish-secret-name") }}
+  csi.storage.k8s.io/controller-publish-secret-name: {{ $class.provisionerSecretName }}
+  csi.storage.k8s.io/controller-publish-secret-namespace: {{ $class.provisionerSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/controller-modify-secret-name") }}
+  csi.storage.k8s.io/controller-modify-secret-name: {{ $class.provisionerSecretName }}
+  csi.storage.k8s.io/controller-modify-secret-namespace: {{ $class.provisionerSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- end }}
+  {{- if $class.nodeSecretName }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/node-stage-secret-name") }}
+  csi.storage.k8s.io/node-stage-secret-name: {{ $class.nodeSecretName }}
+  csi.storage.k8s.io/node-stage-secret-namespace: {{ $class.nodeSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/node-publish-secret-name") }}
+  csi.storage.k8s.io/node-publish-secret-name: {{ $class.nodeSecretName }}
+  csi.storage.k8s.io/node-publish-secret-namespace: {{ $class.nodeSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- end }}
+  {{- range $key, $value := $class.parameters }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

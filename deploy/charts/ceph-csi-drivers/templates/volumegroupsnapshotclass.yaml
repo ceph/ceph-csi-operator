@@ -1,0 +1,39 @@
+{{- if .Capabilities.APIVersions.Has "groupsnapshot.storage.k8s.io/v1" }}
+{{- $root := . -}}
+{{- range $driverName, $driver := .Values.drivers -}}
+{{- if $driver.enabled }}
+{{- range $class := $driver.volumeGroupSnapshotClasses }}
+{{- if $class.name }}
+---
+apiVersion: groupsnapshot.storage.k8s.io/v1
+kind: VolumeGroupSnapshotClass
+metadata:
+  name: {{ $class.name }}
+  labels:
+    {{- include "ceph-csi-drivers.labels" $root | nindent 4 }}
+    {{- with $class.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $class.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+driver: {{ $driver.name }}
+deletionPolicy: {{ required "volumeGroupSnapshotClasses[].deletionPolicy is required" $class.deletionPolicy }}
+{{- if or $class.groupSnapshotterSecretName $class.parameters }}
+parameters:
+  {{- if $class.groupSnapshotterSecretName }}
+  {{- if not (hasKey ($class.parameters | default dict) "csi.storage.k8s.io/group-snapshotter-secret-name") }}
+  csi.storage.k8s.io/group-snapshotter-secret-name: {{ $class.groupSnapshotterSecretName }}
+  csi.storage.k8s.io/group-snapshotter-secret-namespace: {{ $class.groupSnapshotterSecretNamespace | default $root.Release.Namespace }}
+  {{- end }}
+  {{- end }}
+  {{- range $key, $value := $class.parameters }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
