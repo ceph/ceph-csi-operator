@@ -25,17 +25,68 @@ spec:
       {{ end }}
     {{- end }}
     subVolumeGroup: {{ $clientProfile.cephFs.subVolumeGroup }}
+    {{- if and $clientProfile.cephFs.cephCsiSecrets (or (and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.name)) }}
+    cephCsiSecrets:
+      {{- if and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name }}
+      controllerPublishSecret:
+        name: {{ $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name }}
+        {{- if $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.namespace }}
+        namespace: {{ $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.namespace }}
+        {{- end }}
+      {{- end }}
+      {{- if and $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.name }}
+      nodePublishSecret:
+        name: {{ $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.name }}
+        {{- if $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.namespace }}
+        namespace: {{ $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.namespace }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
   {{- end }}
   {{- if $clientProfile.rbd }}
   rbd:
     {{- if $clientProfile.rbd.radosNamespace }}
-    radosNamespace: {{  $clientProfile.rbd.radosNamespace  }}
+    radosNamespace: {{ $clientProfile.rbd.radosNamespace }}
+    {{- end }}
+    {{- if and $clientProfile.rbd.cephCsiSecrets (or (and $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.rbd.cephCsiSecrets.nodePublishSecret $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.name)) }}
+    cephCsiSecrets:
+      {{- if and $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.name }}
+      controllerPublishSecret:
+        name: {{ $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.name }}
+        {{- if $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.namespace }}
+        namespace: {{ $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.namespace }}
+        {{- end }}
+      {{- end }}
+      {{- if and $clientProfile.rbd.cephCsiSecrets.nodePublishSecret $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.name }}
+      nodePublishSecret:
+        name: {{ $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.name }}
+        {{- if $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.namespace }}
+        namespace: {{ $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.namespace }}
+        {{- end }}
+      {{- end }}
     {{- end }}
   {{- end }}
   {{- if $clientProfile.nvmeof }}
   nvmeof:
     {{- if $clientProfile.nvmeof.radosNamespace }}
-    radosNamespace: {{  $clientProfile.nvmeof.radosNamespace  }}
+    radosNamespace: {{ $clientProfile.nvmeof.radosNamespace }}
+    {{- end }}
+    {{- if and $clientProfile.nvmeof.cephCsiSecrets (or (and $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.name)) }}
+    cephCsiSecrets:
+      {{- if and $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.name }}
+      controllerPublishSecret:
+        name: {{ $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.name }}
+        {{- if $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.namespace }}
+        namespace: {{ $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.namespace }}
+        {{- end }}
+      {{- end }}
+      {{- if and $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.name }}
+      nodePublishSecret:
+        name: {{ $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.name }}
+        {{- if $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.namespace }}
+        namespace: {{ $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.namespace }}
+        {{- end }}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

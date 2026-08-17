@@ -23,12 +23,48 @@ clientProfiles:
       kernelMountOptions: {}
       # -- Sub-volume group for the CephFS client (default: "")
       subVolumeGroup: ""
+      # -- Ceph CSI secret references for CephFS (default: {})
+      cephCsiSecrets:
+        controllerPublishSecret:
+          # -- Name of the controller publish secret (default: "")
+          name: ""
+          # -- Namespace of the controller publish secret (default: "")
+          namespace: ""
+        nodePublishSecret:
+          # -- Name of the node publish secret (default: "")
+          name: ""
+          # -- Namespace of the node publish secret (default: "")
+          namespace: ""
     rbd:
       # -- Namespace for RADOS block devices (default: "")
       radosNamespace: ""
+      # -- Ceph CSI secret references for RBD (default: {})
+      cephCsiSecrets:
+        controllerPublishSecret:
+          # -- Name of the controller publish secret (default: "")
+          name: ""
+          # -- Namespace of the controller publish secret (default: "")
+          namespace: ""
+        nodePublishSecret:
+          # -- Name of the node publish secret (default: "")
+          name: ""
+          # -- Namespace of the node publish secret (default: "")
+          namespace: ""
     nvmeof:
       # -- Namespace for RADOS block devices (default: "")
       radosNamespace: ""
+      # -- Ceph CSI secret references for NVMe-oF (default: {})
+      cephCsiSecrets:
+        controllerPublishSecret:
+          # -- Name of the controller publish secret (default: "")
+          name: ""
+          # -- Namespace of the controller publish secret (default: "")
+          namespace: ""
+        nodePublishSecret:
+          # -- Name of the node publish secret (default: "")
+          name: ""
+          # -- Namespace of the node publish secret (default: "")
+          namespace: ""
 # Configuration for Client Profile Replications
 clientProfileReplications:
   - # -- Name of the client profile replication (default: "")

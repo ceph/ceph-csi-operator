@@ -74,11 +74,26 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `clientProfileReplications[0].rbd.poolMapping` | Pool mappings from local pool names to remote pool IDs (default: []) | `[]` |
 | `clientProfileReplications[0].remoteClientProfile` | Name of the remote cluster's client profile (default: "") | `""` |
 | `clientProfiles[0].cephConnection.name` | Reference to the Ceph connection for this profile (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets` | Ceph CSI secret references for CephFS (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.controllerPublishSecret.name` | Name of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.controllerPublishSecret.namespace` | Namespace of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.name` | Name of the node publish secret (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].cephFs.fuseMountOptions` | Mount options for CephFS with FUSE (default: {}) | `{}` |
 | `clientProfiles[0].cephFs.kernelMountOptions` | Mount options for CephFS with the kernel (default: {}) | `{}` |
 | `clientProfiles[0].cephFs.subVolumeGroup` | Sub-volume group for the CephFS client (default: "") | `""` |
 | `clientProfiles[0].name` | Name of the client profile (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets` | Ceph CSI secret references for NVMe-oF (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.controllerPublishSecret.name` | Name of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.controllerPublishSecret.namespace` | Namespace of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.nodePublishSecret.name` | Name of the node publish secret (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].nvmeof.radosNamespace` | Namespace for RADOS block devices (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets` | Ceph CSI secret references for RBD (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |
+| `clientProfiles[0].rbd.cephCsiSecrets.controllerPublishSecret.name` | Name of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets.controllerPublishSecret.namespace` | Namespace of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets.nodePublishSecret.name` | Name of the node publish secret (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].rbd.radosNamespace` | Namespace for RADOS block devices (default: "") | `""` |
 | `drivers.cephfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.cephfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
