@@ -1,0 +1,56 @@
+name: Deploy CSI Driver via kubectl
+description: Deploy CSI driver and storage resources via kubectl. Expects operator to be already running.
+
+inputs:
+  driverType:
+    description: "The CSI driver to deploy (cephfs, rbd, nfs)"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install snapshot controller
+      shell: bash
+      run: test/scripts/install-snapshot.sh install
+
+    - name: Deploy driver resources via helm template + kubectl
+      shell: bash
+      run: |
+          kubectl create namespace csi-driver --dry-run=client -o yaml | kubectl apply -f -
+
+          DRIVER_NAME="${{ inputs.driverType }}.csi.ceph.com" yq eval --inplace '
+          .drivers |=
+          with_entries(
+            .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
+            .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
+            .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com"))
+          )
+          ' ./deploy/charts/ceph-csi-drivers/values.yaml
+
+          helm template csi-driver ./deploy/charts/ceph-csi-drivers \
+            --namespace csi-driver \
+            | kubectl apply --server-side --force-conflicts -f -
+
+          git checkout ./deploy/charts/ceph-csi-drivers/values.yaml || true
+
+    - name: Check operator and driver health
+      shell: bash
+      run: |
+          source test/scripts/utils.sh
+          check_operator_health
+          check_driver_health "${{ inputs.driverType }}"
+
+    - name: Create CephConnection, ClientProfile, StorageClass, and VolumeSnapshotClass
+      shell: bash
+      run: |
+          MONITOR=$(kubectl -n rook-ceph get svc -l app=rook-ceph-mon \
+          -o=jsonpath='{.items[0].spec.clusterIP}:{.items[0].spec.ports[0].port}')
+
+          yq eval '.spec.monitors = ["'"$MONITOR"'"]' -i ./test/scripts/k8s-storage/kubectl/ceph-connection.yaml
+
+          kubectl apply -f ./test/scripts/k8s-storage/kubectl/ceph-connection.yaml
+          kubectl apply -f ./test/scripts/k8s-storage/kubectl/client-profile.yaml
+          kubectl apply -f ./test/scripts/k8s-storage/kubectl/sc-${{ inputs.driverType }}.yaml || echo "No StorageClass file for ${{ inputs.driverType }}"
+          kubectl apply -f ./test/scripts/k8s-storage/kubectl/vsclass-${{ inputs.driverType }}.yaml || echo "No VolumeSnapshotClass file for ${{ inputs.driverType }}"
+
+          git checkout ./test/scripts/k8s-storage/kubectl/ceph-connection.yaml || true
