@@ -261,6 +261,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml> | `[]` |
 | `drivers.rbd.volumeGroupSnapshotClasses` | List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml> | `[]` |
 | `drivers.rbd.volumeSnapshotClasses` | List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml> | `[]` |
+| `extraDeploy` | List of extra Kubernetes resources to deploy alongside the chart. Supports Helm templating via tpl (default: []) | `[]` |
 | `imagePullSecrets` | List of pull secret names that will be added to all serviceaccounts (default: []) | `[]` |
 | `openshift.enabled` | Enable OpenShift-specific resources (ClusterRoleBindings for SCC) (default: false) | `false` |
 | `openshift.sccClusterRoleName` | Name of the SCC ClusterRole created by the operator chart (default: "ceph-csi-operator-scc-user") This should match the ClusterRole name from the operator chart: {{ operator-release-name }}-scc-user | `"ceph-csi-operator-scc-user"` |

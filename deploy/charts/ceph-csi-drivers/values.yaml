@@ -744,6 +744,8 @@ secrets: []
 #   stringData:
 #     userID: admin
 #     userKey: AQBxxxxxxxxxxxxxx==
+# -- List of extra Kubernetes resources to deploy alongside the chart. Supports Helm templating via tpl (default: [])
+extraDeploy: []
 # -- List of pull secret names that will be added to all serviceaccounts (default: [])
 imagePullSecrets: []
 # OpenShift configuration
