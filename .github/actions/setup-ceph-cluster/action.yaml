@@ -17,6 +17,12 @@ runs:
       shell: bash
       run: kubectl get nodes
 
+    - name: Install NVMe/TCP Kernel Modules
+      shell: bash
+      run: |
+          sudo apt-get update -y 
+          sudo apt-get install -y --no-install-recommends linux-modules-extra-$(uname -r)
+
     - name: Use local disk
       shell: bash
       run: test/scripts/github-action-helper.sh use_local_disk
