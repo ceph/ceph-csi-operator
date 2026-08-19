@@ -1,0 +1,26 @@
+cephConnections:
+  - name: cephcluster
+    monitors: {}
+clientProfiles:
+  - name: rook-ceph
+    cephConnection:
+      name: cephcluster
+    cephFs:
+      subVolumeGroup: csi
+drivers:
+  nvmeof:
+    storageClasses:
+      - name: k8s-storage-e2e-nvmeof
+        reclaimPolicy: Delete
+        allowVolumeExpansion: false
+        mountOptions:
+          - discard
+        provisionerSecretName: rook-csi-nvmeof-provisioner
+        provisionerSecretNamespace: rook-ceph
+        nodeSecretName: rook-csi-nvmeof-node
+        nodeSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
+          pool: replicapool
+          imageFeatures: layering
+          csi.storage.k8s.io/fstype: ext4
