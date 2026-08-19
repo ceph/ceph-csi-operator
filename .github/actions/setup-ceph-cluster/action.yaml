@@ -1,0 +1,26 @@
+name: Setup Ceph Cluster
+description: Setup Minikube, local disk, and deploy a Rook Ceph cluster
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: go.mod
+
+    - name: Setup Minikube
+      shell: bash
+      run: test/scripts/github-action-helper.sh install_minikube_with_none_driver
+
+    - name: Print k8s cluster status
+      shell: bash
+      run: kubectl get nodes
+
+    - name: Use local disk
+      shell: bash
+      run: test/scripts/github-action-helper.sh use_local_disk
+
+    - name: Create Ceph cluster
+      shell: bash
+      run: test/scripts/github-action-helper.sh deploy_rook
