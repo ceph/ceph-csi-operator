@@ -1,6 +1,12 @@
 name: Setup Ceph Cluster
 description: Setup Minikube, local disk, and deploy a Rook Ceph cluster
 
+inputs:
+  driverType:
+    description: "CSI driver being tested. When 'nvmeof', also deploys the Rook NVMe-oF gateway."
+    required: false
+    default: ""
+
 runs:
   using: "composite"
   steps:
@@ -30,3 +36,8 @@ runs:
     - name: Create Ceph cluster
       shell: bash
       run: test/scripts/github-action-helper.sh deploy_rook
+
+    - name: Deploy NVMe-oF gateway
+      if: inputs.driverType == 'nvmeof'
+      shell: bash
+      run: test/scripts/github-action-helper.sh deploy_nvmeof

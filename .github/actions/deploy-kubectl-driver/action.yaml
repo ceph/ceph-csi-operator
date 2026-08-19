@@ -40,6 +40,11 @@ runs:
           check_operator_health
           check_driver_health "${{ inputs.driverType }}"
 
+    - name: Patch NVMe-oF StorageClass with gateway address
+      if: inputs.driverType == 'nvmeof'
+      shell: bash
+      run: test/scripts/k8s-storage/patch-nvmeof-storageclass.sh kubectl
+
     - name: Create CephConnection, ClientProfile, StorageClass, and VolumeSnapshotClass
       shell: bash
       run: |

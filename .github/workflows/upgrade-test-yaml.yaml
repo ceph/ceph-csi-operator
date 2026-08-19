@@ -41,6 +41,8 @@ jobs:
 
       - name: Setup Ceph cluster
         uses: ./.github/actions/setup-ceph-cluster
+        with:
+          driverType: ${{ matrix.driver }}
 
       - name: Get latest release version
         id: get_release

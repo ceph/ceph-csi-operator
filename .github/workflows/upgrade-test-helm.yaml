@@ -67,6 +67,11 @@ jobs:
 
       - name: Deploy storage resources on upgraded release
         run: |
+            if [ "${{ matrix.driver }}" = "nvmeof" ]; then
+              test/scripts/k8s-storage/patch-nvmeof-storageclass.sh helm \
+                ./test/scripts/k8s-storage/helm/values-${{ matrix.driver }}.yaml
+            fi
+
             MONITOR=$(kubectl -n rook-ceph get svc -l app=rook-ceph-mon \
             -o=jsonpath='{.items[0].spec.clusterIP}:{.items[0].spec.ports[0].port}')
 
