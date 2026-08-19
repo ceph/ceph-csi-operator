@@ -2762,31 +2762,31 @@
 <h2 id="4-deploy-ceph-csi-drivers">4. Deploy Ceph-CSI Drivers<a class="headerlink" href="#4-deploy-ceph-csi-drivers" title="Permanent link">&para;</a></h2>
 <p>Once the operator is installed (on either Kubernetes or OpenShift), deploy the required CSI drivers.</p>
 <h3 id="41-deploy-the-rbd-driver">4.1 Deploy the RBD Driver<a class="headerlink" href="#41-deploy-the-rbd-driver" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="go">echo &#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="go">echo '</span>
 <a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
 <a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="go">kind: Driver</span>
 <a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="go">metadata:</span>
 <a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="go">  name: rbd.csi.ceph.com</span>
 <a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="go">&#39; | kubectl create -f -</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="go">' | kubectl create -f -</span>
 </code></pre></div>
 <h3 id="42-deploy-the-cephfs-driver">4.2 Deploy the CephFS Driver<a class="headerlink" href="#42-deploy-the-cephfs-driver" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="go">echo &#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="go">echo '</span>
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="go">kind: Driver</span>
 <a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="go">metadata:</span>
 <a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="go">  name: cephfs.csi.ceph.com</span>
 <a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="go">&#39; | kubectl create -f -</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="go">' | kubectl create -f -</span>
 </code></pre></div>
 <h3 id="43-deploy-the-ceph-nfs-driver">4.3 Deploy the Ceph-NFS Driver<a class="headerlink" href="#43-deploy-the-ceph-nfs-driver" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="go">echo &#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="go">echo '</span>
 <a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
 <a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="go">kind: Driver</span>
 <a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="go">metadata:</span>
 <a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="go">  name: nfs.csi.ceph.com</span>
 <a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="go">  namespace: ceph-csi-operator-system</span>
-<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="go">&#39; | kubectl create -f -</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="go">' | kubectl create -f -</span>
 </code></pre></div>
 <hr />
 <h2 id="5-verify-installation">5. Verify Installation<a class="headerlink" href="#5-verify-installation" title="Permanent link">&para;</a></h2>
@@ -2806,7 +2806,7 @@
 <hr />
 <h2 id="6-create-cephconnection">6. Create CephConnection<a class="headerlink" href="#6-create-cephconnection" title="Permanent link">&para;</a></h2>
 <p>Create a CephConnection CR to connect to the Ceph cluster:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="go">echo &#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="go">echo '</span>
 <a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
 <a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="go">kind: CephConnection</span>
 <a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="go">metadata:</span>
@@ -2815,13 +2815,13 @@
 <a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="go">spec:</span>
 <a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="go">  monitors:</span>
 <a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="go">  - 10.98.44.171:6789</span>
-<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="go">&#39; | kubectl create -f -</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="go">' | kubectl create -f -</span>
 </code></pre></div>
 <p>Replace the monitor IP address with your Ceph cluster's monitor addresses.</p>
 <hr />
 <h2 id="7-create-clientprofile">7. Create ClientProfile<a class="headerlink" href="#7-create-clientprofile" title="Permanent link">&para;</a></h2>
 <p>Create a ClientProfile CR to define the client configuration:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="go">echo &#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="go">echo '</span>
 <a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="go">apiVersion: csi.ceph.io/v1</span>
 <a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="go">kind: ClientProfile</span>
 <a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="go">metadata:</span>
@@ -2832,7 +2832,7 @@
 <a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="go">    name: ceph-connection</span>
 <a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="go">  cephFs:</span>
 <a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="go">    subVolumeGroup: csi</span>
-<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="go">&#39; | kubectl create -f -</span>
+<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a><span class="go">' | kubectl create -f -</span>
 </code></pre></div>
 <blockquote>
 <p>[!IMPORTANT]

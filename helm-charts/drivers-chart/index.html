@@ -1546,10 +1546,15 @@ Edit the corresponding *.gotmpl.md file instead
 <p>Creates ceph-csi-operator resources to configure a <a href="https://github.com/ceph/ceph-csi">ceph-csi</a> drivers using the <a href="https://helm.sh">Helm</a> package manager.
 This chart is a simple packaging of templates that will optionally create ceph-csi-operator resources such as:</p>
 <ul>
-<li>Driver CRs (RBD,cephFS,NFS)</li>
+<li>Driver CRs (RBD, CephFS, NFS, NVMe-oF)</li>
 <li>CephConnection that contains the ceph details</li>
 <li>ClientProfile for the RBD/CephFS/NFS clusterID and corresponding configurations</li>
 <li>ClientProfileMapping for disaster recovery</li>
+<li>StorageClass for dynamic volume provisioning</li>
+<li>VolumeSnapshotClass for volume snapshots</li>
+<li>VolumeGroupSnapshotClass for volume group snapshots</li>
+<li>VolumeAttributesClass for volume attributes (QoS, MDS pinning, etc.)</li>
+<li>Secret for Ceph authentication credentials</li>
 </ul>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1639,6 +1644,31 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>""</code></td>
 </tr>
 <tr>
+<td><code>clientProfiles[0].cephFs.cephCsiSecrets</code></td>
+<td>Ceph CSI secret references for CephFS (default: {})</td>
+<td><code>{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.cephCsiSecrets.controllerPublishSecret.name</code></td>
+<td>Name of the controller publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.cephCsiSecrets.controllerPublishSecret.namespace</code></td>
+<td>Namespace of the controller publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.name</code></td>
+<td>Name of the node publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.namespace</code></td>
+<td>Namespace of the node publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
 <td><code>clientProfiles[0].cephFs.fuseMountOptions</code></td>
 <td>Mount options for CephFS with FUSE (default: {})</td>
 <td><code>{}</code></td>
@@ -1659,8 +1689,58 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>""</code></td>
 </tr>
 <tr>
+<td><code>clientProfiles[0].nvmeof.cephCsiSecrets</code></td>
+<td>Ceph CSI secret references for NVMe-oF (default: {})</td>
+<td><code>{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].nvmeof.cephCsiSecrets.controllerPublishSecret.name</code></td>
+<td>Name of the controller publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].nvmeof.cephCsiSecrets.controllerPublishSecret.namespace</code></td>
+<td>Namespace of the controller publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].nvmeof.cephCsiSecrets.nodePublishSecret.name</code></td>
+<td>Name of the node publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].nvmeof.cephCsiSecrets.nodePublishSecret.namespace</code></td>
+<td>Namespace of the node publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
 <td><code>clientProfiles[0].nvmeof.radosNamespace</code></td>
 <td>Namespace for RADOS block devices (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].rbd.cephCsiSecrets</code></td>
+<td>Ceph CSI secret references for RBD (default: {})</td>
+<td><code>{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].rbd.cephCsiSecrets.controllerPublishSecret.name</code></td>
+<td>Name of the controller publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].rbd.cephCsiSecrets.controllerPublishSecret.namespace</code></td>
+<td>Namespace of the controller publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].rbd.cephCsiSecrets.nodePublishSecret.name</code></td>
+<td>Name of the node publish secret (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
+<td><code>clientProfiles[0].rbd.cephCsiSecrets.nodePublishSecret.namespace</code></td>
+<td>Namespace of the node publish secret (default: "")</td>
 <td><code>""</code></td>
 </tr>
 <tr>
@@ -1849,6 +1929,26 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>"volumeSnapshot"</code></td>
 </tr>
 <tr>
+<td><code>drivers.cephfs.storageClasses</code></td>
+<td>List of StorageClass resources to create for this driver (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.volumeAttributesClasses</code></td>
+<td>List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/volumeattributesclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/volumeattributesclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.volumeGroupSnapshotClasses</code></td>
+<td>List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/groupsnapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/groupsnapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.cephfs.volumeSnapshotClasses</code></td>
+<td>List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/snapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/snapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
 <td><code>drivers.nfs.attachRequired</code></td>
 <td>Flag indicating whether attachment is required (default: true)</td>
 <td><code>true</code></td>
@@ -2034,6 +2134,26 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>"volumeSnapshot"</code></td>
 </tr>
 <tr>
+<td><code>drivers.nfs.storageClasses</code></td>
+<td>List of StorageClass resources to create for this driver (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.volumeAttributesClasses</code></td>
+<td>List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/volumeattributesclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/volumeattributesclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.volumeGroupSnapshotClasses</code></td>
+<td>List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/groupsnapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/groupsnapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nfs.volumeSnapshotClasses</code></td>
+<td>List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/snapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/snapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
 <td><code>drivers.nvmeof.attachRequired</code></td>
 <td>Flag indicating whether attachment is required (default: true)</td>
 <td><code>true</code></td>
@@ -2214,6 +2334,26 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>"none"</code></td>
 </tr>
 <tr>
+<td><code>drivers.nvmeof.storageClasses</code></td>
+<td>List of StorageClass resources to create for this driver (default: []) NVMe-oF is backed by RBD; for all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.volumeAttributesClasses</code></td>
+<td>List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.volumeGroupSnapshotClasses</code></td>
+<td>List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.nvmeof.volumeSnapshotClasses</code></td>
+<td>List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
 <td><code>drivers.rbd.attachRequired</code></td>
 <td>Flag indicating whether attachment is required (default: true)</td>
 <td><code>true</code></td>
@@ -2392,6 +2532,31 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>drivers.rbd.snapshotPolicy</code></td>
 <td>Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none")</td>
 <td><code>"none"</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.storageClasses</code></td>
+<td>List of StorageClass resources to create for this driver (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.volumeAttributesClasses</code></td>
+<td>List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.volumeGroupSnapshotClasses</code></td>
+<td>List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>drivers.rbd.volumeSnapshotClasses</code></td>
+<td>List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <a href="https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml">https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml</a></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td><code>extraDeploy</code></td>
+<td>List of extra Kubernetes resources to deploy alongside the chart. Supports Helm templating via tpl (default: [])</td>
+<td><code>[]</code></td>
 </tr>
 <tr>
 <td><code>imagePullSecrets</code></td>
@@ -2612,6 +2777,11 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>operatorConfig.namespace</code></td>
 <td>Namespace for the operator configuration (default: "")</td>
 <td><code>""</code></td>
+</tr>
+<tr>
+<td><code>secrets</code></td>
+<td>List of Secret resources to create for CSI driver authentication (default: [])</td>
+<td><code>[]</code></td>
 </tr>
 </tbody>
 </table>

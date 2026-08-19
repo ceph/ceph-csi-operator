@@ -1401,10 +1401,15 @@
 <p>Creates ceph-csi-operator resources to configure a <a href="https://github.com/ceph/ceph-csi">ceph-csi</a> drivers using the <a href="https://helm.sh">Helm</a> package manager.
 This chart is a simple packaging of templates that will optionally create ceph-csi-operator resources such as:</p>
 <ul>
-<li>Driver CRs (RBD,cephFS,NFS)</li>
+<li>Driver CRs (RBD, CephFS, NFS, NVMe-oF)</li>
 <li>CephConnection that contains the ceph details</li>
 <li>ClientProfile for the RBD/CephFS/NFS clusterID and corresponding configurations</li>
 <li>ClientProfileMapping for disaster recovery</li>
+<li>StorageClass for dynamic volume provisioning</li>
+<li>VolumeSnapshotClass for volume snapshots</li>
+<li>VolumeGroupSnapshotClass for volume group snapshots</li>
+<li>VolumeAttributesClass for volume attributes (QoS, MDS pinning, etc.)</li>
+<li>Secret for Ceph authentication credentials</li>
 </ul>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
 <ul>
