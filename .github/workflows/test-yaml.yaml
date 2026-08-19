@@ -39,23 +39,8 @@ jobs:
         with:
             fetch-depth: 0
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-
-      - name: Setup Minikube
-        run: |
-            test/scripts/github-action-helper.sh install_minikube_with_none_driver
-
-      - name: print k8s cluster status
-        run: |
-            kubectl get nodes
-
-      - name: use local disk
-        run: test/scripts/github-action-helper.sh use_local_disk
-
-      - name: create ceph cluster
-        run: test/scripts/github-action-helper.sh deploy_rook
+      - name: Setup Ceph cluster
+        uses: ./.github/actions/setup-ceph-cluster
 
       - name: Build and install operator
         run: |
