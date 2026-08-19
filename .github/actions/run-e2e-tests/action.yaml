@@ -3,7 +3,7 @@ description: Download kubernetes e2e binary, run external storage tests, and col
 
 inputs:
   driverType:
-    description: "The CSI driver to test (cephfs, rbd, nfs)"
+    description: "The CSI driver to test (cephfs, rbd, nfs, nvmeof)"
     required: true
   logPrefix:
     description: "Prefix for log artifact names (e.g., helm, yaml, yaml-upgrade)"

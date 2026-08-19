@@ -3,7 +3,7 @@ description: Deploy CSI driver and storage resources via kubectl. Expects operat
 
 inputs:
   driverType:
-    description: "The CSI driver to deploy (cephfs, rbd, nfs)"
+    description: "The CSI driver to deploy (cephfs, rbd, nfs, nvmeof)"
     required: true
 
 runs:
