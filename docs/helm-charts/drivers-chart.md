@@ -9,10 +9,15 @@ Edit the corresponding *.gotmpl.md file instead
 Creates ceph-csi-operator resources to configure a [ceph-csi](https://github.com/ceph/ceph-csi) drivers using the [Helm](https://helm.sh) package manager.
 This chart is a simple packaging of templates that will optionally create ceph-csi-operator resources such as:
 
-* Driver CRs (RBD,cephFS,NFS)
+* Driver CRs (RBD, CephFS, NFS, NVMe-oF)
 * CephConnection that contains the ceph details
 * ClientProfile for the RBD/CephFS/NFS clusterID and corresponding configurations
 * ClientProfileMapping for disaster recovery
+* StorageClass for dynamic volume provisioning
+* VolumeSnapshotClass for volume snapshots
+* VolumeGroupSnapshotClass for volume group snapshots
+* VolumeAttributesClass for volume attributes (QoS, MDS pinning, etc.)
+* Secret for Ceph authentication credentials
 
 ## Prerequisites
 
@@ -74,11 +79,26 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `clientProfileReplications[0].rbd.poolMapping` | Pool mappings from local pool names to remote pool IDs (default: []) | `[]` |
 | `clientProfileReplications[0].remoteClientProfile` | Name of the remote cluster's client profile (default: "") | `""` |
 | `clientProfiles[0].cephConnection.name` | Reference to the Ceph connection for this profile (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets` | Ceph CSI secret references for CephFS (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.controllerPublishSecret.name` | Name of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.controllerPublishSecret.namespace` | Namespace of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.name` | Name of the node publish secret (default: "") | `""` |
+| `clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].cephFs.fuseMountOptions` | Mount options for CephFS with FUSE (default: {}) | `{}` |
 | `clientProfiles[0].cephFs.kernelMountOptions` | Mount options for CephFS with the kernel (default: {}) | `{}` |
 | `clientProfiles[0].cephFs.subVolumeGroup` | Sub-volume group for the CephFS client (default: "") | `""` |
 | `clientProfiles[0].name` | Name of the client profile (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets` | Ceph CSI secret references for NVMe-oF (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.controllerPublishSecret.name` | Name of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.controllerPublishSecret.namespace` | Namespace of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.nodePublishSecret.name` | Name of the node publish secret (default: "") | `""` |
+| `clientProfiles[0].nvmeof.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].nvmeof.radosNamespace` | Namespace for RADOS block devices (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets` | Ceph CSI secret references for RBD (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |
+| `clientProfiles[0].rbd.cephCsiSecrets.controllerPublishSecret.name` | Name of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets.controllerPublishSecret.namespace` | Namespace of the controller publish secret (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets.nodePublishSecret.name` | Name of the node publish secret (default: "") | `""` |
+| `clientProfiles[0].rbd.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].rbd.radosNamespace` | Namespace for RADOS block devices (default: "") | `""` |
 | `drivers.cephfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.cephfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
@@ -116,6 +136,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.cephfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
 | `drivers.cephfs.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot") | `"volumeSnapshot"` |
+| `drivers.cephfs.storageClasses` | List of StorageClass resources to create for this driver (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml> | `[]` |
+| `drivers.cephfs.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/volumeattributesclass.yaml> | `[]` |
+| `drivers.cephfs.volumeGroupSnapshotClasses` | List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/groupsnapshotclass.yaml> | `[]` |
+| `drivers.cephfs.volumeSnapshotClasses` | List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/snapshotclass.yaml> | `[]` |
 | `drivers.nfs.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.nfs.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.nfs.clusterName` | Cluster name identifier (default: "") | `""` |
@@ -153,6 +177,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.nfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
 | `drivers.nfs.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot") | `"volumeSnapshot"` |
+| `drivers.nfs.storageClasses` | List of StorageClass resources to create for this driver (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml> | `[]` |
+| `drivers.nfs.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/volumeattributesclass.yaml> | `[]` |
+| `drivers.nfs.volumeGroupSnapshotClasses` | List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/groupsnapshotclass.yaml> | `[]` |
+| `drivers.nfs.volumeSnapshotClasses` | List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/snapshotclass.yaml> | `[]` |
 | `drivers.nvmeof.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.nvmeof.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.nvmeof.clusterName` | Cluster name identifier (default: "") | `""` |
@@ -189,6 +217,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.nvmeof.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
 | `drivers.nvmeof.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
+| `drivers.nvmeof.storageClasses` | List of StorageClass resources to create for this driver (default: []) NVMe-oF is backed by RBD; for all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml> | `[]` |
+| `drivers.nvmeof.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml> | `[]` |
+| `drivers.nvmeof.volumeGroupSnapshotClasses` | List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml> | `[]` |
+| `drivers.nvmeof.volumeSnapshotClasses` | List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml> | `[]` |
 | `drivers.rbd.attachRequired` | Flag indicating whether attachment is required (default: true) | `true` |
 | `drivers.rbd.cephFsClientType` | CephFS client type (options: autodetect, kernel) (default: "kernel") | `"kernel"` |
 | `drivers.rbd.clusterName` | Cluster name identifier (default: "") | `""` |
@@ -225,6 +257,11 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.rbd.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
 | `drivers.rbd.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
+| `drivers.rbd.storageClasses` | List of StorageClass resources to create for this driver (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml> | `[]` |
+| `drivers.rbd.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml> | `[]` |
+| `drivers.rbd.volumeGroupSnapshotClasses` | List of VolumeGroupSnapshotClass resources to create (requires groupsnapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/groupsnapshotclass.yaml> | `[]` |
+| `drivers.rbd.volumeSnapshotClasses` | List of VolumeSnapshotClass resources to create (requires snapshot.storage.k8s.io/v1 CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/snapshotclass.yaml> | `[]` |
+| `extraDeploy` | List of extra Kubernetes resources to deploy alongside the chart. Supports Helm templating via tpl (default: []) | `[]` |
 | `imagePullSecrets` | List of pull secret names that will be added to all serviceaccounts (default: []) | `[]` |
 | `openshift.enabled` | Enable OpenShift-specific resources (ClusterRoleBindings for SCC) (default: false) | `false` |
 | `openshift.sccClusterRoleName` | Name of the SCC ClusterRole created by the operator chart (default: "ceph-csi-operator-scc-user") This should match the ClusterRole name from the operator chart: {{ operator-release-name }}-scc-user | `"ceph-csi-operator-scc-user"` |
@@ -269,6 +306,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
 | `operatorConfig.name` | Name of the operator config (default: "ceph-csi-operator-config") | `"ceph-csi-operator-config"` |
 | `operatorConfig.namespace` | Namespace for the operator configuration (default: "") | `""` |
+| `secrets` | List of Secret resources to create for CSI driver authentication (default: []) | `[]` |
 
 ### **Development Build**
 

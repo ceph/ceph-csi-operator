@@ -53,6 +53,12 @@ function install_release_version() {
 }
 
 function cleanup() {
+    if [ "${SKIP_CLEANUP:-false}" = "true" ]; then
+        echo "Skipping cleanup (SKIP_CLEANUP=true)"
+        rm -f /tmp/install-release.yaml
+        return
+    fi
+
     echo "Cleaning up..."
 
     # Try to delete the current version first (from upgrade)
@@ -67,43 +73,19 @@ function cleanup() {
     fi
 }
 
-function check_operator_health() {
+function verify_operator_image() {
     local expected_version=$1
-    echo "Checking operator health (expected version: ${expected_version})"
+    echo "Verifying operator image contains: ${expected_version}"
 
-    for ((retry = 0; retry <= OPERATOR_DEPLOY_TIMEOUT; retry = retry + 5)); do
-        echo "Waiting for ceph-csi-operator pod... ${retry}s" && sleep 5
+    local operator_image
+    operator_image=$(kubectl -n "${OPERATOR_NAMESPACE}" get deployment "${OPERATOR_NAME}" -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || echo "")
+    echo "Operator image: ${operator_image}"
 
-        OPERATOR_POD_NAME=$(kubectl_retry -n "${OPERATOR_NAMESPACE}" get pods -l "${OPERATOR_POD_LABEL}" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-
-        if [ -z "$OPERATOR_POD_NAME" ]; then
-            echo "No operator pod found yet, continuing to wait..."
-            continue
-        fi
-
-        OPERATOR_POD_STATUS=$(kubectl_retry -n "${OPERATOR_NAMESPACE}" get pod "$OPERATOR_POD_NAME" -ojsonpath='{.status.phase}')
-        [[ "$OPERATOR_POD_STATUS" = "Running" ]] && break
-    done
-
-    if [ "$retry" -gt "$OPERATOR_DEPLOY_TIMEOUT" ]; then
-        echo "[Timeout] ceph-csi-operator pod is not running (timeout)"
-        return 1
-    fi
-
-    echo "Operator pod is running: ${OPERATOR_POD_NAME}"
-
-    # Verify the operator image version
-    OPERATOR_IMAGE=$(kubectl_retry -n "${OPERATOR_NAMESPACE}" get deployment "${OPERATOR_NAME}" -o jsonpath='{.spec.template.spec.containers[0].image}')
-    echo "Operator image: ${OPERATOR_IMAGE}"
-
-    if [[ "${OPERATOR_IMAGE}" == *"${expected_version}"* ]]; then
-        echo "Operator version verification successful: ${expected_version}"
+    if [[ "${operator_image}" == *"${expected_version}"* ]]; then
+        echo "Operator version verification successful"
     else
         echo "Warning: Operator image does not contain expected version tag '${expected_version}'"
-        echo "This may be expected if the image naming convention differs"
     fi
-
-    echo ""
 }
 
 function upgrade_to_pr_version() {
@@ -116,15 +98,17 @@ function upgrade_to_pr_version() {
     echo "Applying PR version manifests"
     kubectl_retry apply --server-side --force-conflicts -f deploy/all-in-one/install.yaml
 
-    # Wait a bit for the upgrade to start
-    sleep 5
+    # Create driver namespace and set WATCH_NAMESPACE
+    kubectl create namespace csi-driver --dry-run=client -o yaml | kubectl apply -f -
+    kubectl set env deployment/ceph-csi-operator-controller-manager -n "${OPERATOR_NAMESPACE}" WATCH_NAMESPACE=csi-driver
+    kubectl rollout status deployment/ceph-csi-operator-controller-manager -n "${OPERATOR_NAMESPACE}" --timeout=300s
 }
 
 function verify_upgrade() {
     echo "Verifying upgrade was successful"
 
-    # Check that the operator is running the new version
-    check_operator_health "test"
+    check_operator_health
+    verify_operator_image "test"
 
     # Additional verification: check that the deployment has been updated
     DEPLOYMENT_GENERATION=$(kubectl_retry -n "${OPERATOR_NAMESPACE}" get deployment "${OPERATOR_NAME}" -o jsonpath='{.metadata.generation}')
@@ -149,7 +133,8 @@ echo "=== Starting YAML-based upgrade test ==="
 # Step 1: Install the release version
 echo "Step 1: Installing release version ${RELEASE_VERSION}"
 install_release_version
-check_operator_health "${RELEASE_VERSION}"
+check_operator_health
+verify_operator_image "${RELEASE_VERSION}"
 
 # Step 2: Build the PR version
 echo "Step 2: Building PR version"

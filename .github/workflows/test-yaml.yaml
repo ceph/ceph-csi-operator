@@ -1,4 +1,4 @@
-name: test-ceph-csi-operator
+name: test-yaml
 on:
   pull_request:
     branches:
@@ -24,7 +24,14 @@ permissions:
 
 jobs:
   test:
+    name: ${{ matrix.driver }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        driver:
+          - cephfs
+          - rbd
+          - nfs
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -49,5 +56,24 @@ jobs:
       - name: create ceph cluster
         run: test/scripts/github-action-helper.sh deploy_rook
 
-      - name: test ceph-csi-operator
-        run: test/scripts/test-ceph-csi-operator.sh
+      - name: Build and install operator
+        run: |
+            IMAGE_TAG=test make docker-build
+            make build-installer
+            kubectl create namespace csi-driver --dry-run=client -o yaml | kubectl apply -f -
+            kubectl apply --server-side --force-conflicts -f deploy/all-in-one/install.yaml
+            kubectl set env deployment/ceph-csi-operator-controller-manager -n ceph-csi-operator-system WATCH_NAMESPACE=csi-driver
+            kubectl rollout status deployment/ceph-csi-operator-controller-manager -n ceph-csi-operator-system --timeout=300s
+            source test/scripts/utils.sh
+            check_operator_health
+
+      - name: Deploy CSI driver via kubectl
+        uses: ./.github/actions/deploy-kubectl-driver
+        with:
+          driverType: ${{ matrix.driver }}
+
+      - name: Run E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          driverType: ${{ matrix.driver }}
+          logPrefix: yaml
