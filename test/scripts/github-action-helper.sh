@@ -176,11 +176,25 @@ EOF
 }
 
 timeout_command_exit_code() {
-  # timeout command return exit status 124 if command times out
-  if [ $? -eq 124 ]; then
-    echo "Timeout reached"
-    exit 1
+  # Capture the exit status of the preceding (timed) command before anything
+  # else runs. timeout returns 124 when the command times out.
+  local ret=$?
+  if [ "${ret}" -ne 124 ]; then
+    return 0
   fi
+
+  # On timeout, dump the Ceph cluster state so the failure cause is visible in
+  # the CI logs. Every command is best-effort; missing resources must not mask
+  # the original timeout.
+  echo "Timeout reached; dumping rook-ceph state for debugging" >&2
+  kubectl -n rook-ceph get pods -o wide || true
+  kubectl -n rook-ceph get deploy,daemonset -o wide || true
+  kubectl -n rook-ceph get cephcluster,cephblockpool,cephfilesystem -o wide || true
+  kubectl -n rook-ceph get cephnvmeofgateway -o wide || true
+  kubectl -n rook-ceph get events --sort-by=.lastTimestamp | tail -50 || true
+  kubectl -n rook-ceph describe pods || true
+  kubectl -n rook-ceph logs -l app=rook-ceph-operator --tail=100 || true
+  exit 1
 }
 
 install_minikube_with_none_driver() {
