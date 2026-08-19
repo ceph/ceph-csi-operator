@@ -32,6 +32,8 @@ runs:
     - name: Setup Ceph cluster
       if: inputs.skipSetup == 'false'
       uses: ./.github/actions/setup-ceph-cluster
+      with:
+        driverType: ${{ inputs.driverType }}
 
     - name: Install snapshot controller
       if: inputs.skipSetup == 'false'
@@ -101,6 +103,11 @@ runs:
       if: inputs.source == 'local'
       shell: bash
       run: helm lint ./deploy/charts/ceph-csi-drivers
+
+    - name: Patch NVMe-oF StorageClass with gateway address
+      if: inputs.driverType == 'nvmeof' && inputs.valuesFile != ''
+      shell: bash
+      run: test/scripts/k8s-storage/patch-nvmeof-storageclass.sh helm "${{ inputs.valuesFile }}"
 
     - name: Install csi driver helm chart
       shell: bash
