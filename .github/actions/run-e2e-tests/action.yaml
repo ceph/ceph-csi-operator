@@ -65,6 +65,32 @@ runs:
           -- \
           -storage.testdriver="$(pwd)/test/scripts/k8s-storage/driver-${{ inputs.driverType }}.yaml"
 
+    # Dump Ceph cluster status/health first so a cluster-health problem is
+    # obvious at the top of the failed step, without digging through the
+    # collected pod logs below.
+    - name: Log Ceph cluster health
+      if: failure()
+      shell: bash
+      run: |
+          echo "=== rook-ceph pods ==="
+          kubectl -n rook-ceph get pods -o wide || true
+          echo "=== CephCluster ==="
+          kubectl -n rook-ceph get cephcluster -o wide || true
+          kubectl -n rook-ceph get cephcluster -o yaml || true
+
+          toolbox=$(kubectl -n rook-ceph get pod -l app=rook-ceph-tools \
+            -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+          if [ -z "${toolbox}" ]; then
+            echo "rook-ceph toolbox not found; skipping ceph CLI health dump"
+            exit 0
+          fi
+          for cmd in "ceph status" "ceph health detail" "ceph osd tree" \
+                     "ceph osd df" "ceph df" "ceph mon stat"; do
+            echo "=== ${cmd} ==="
+            # shellcheck disable=SC2086 # intentional word splitting of the command
+            kubectl -n rook-ceph exec "${toolbox}" -- ${cmd} || true
+          done
+
     - name: Collect logs on failure
       if: failure()
       shell: bash
