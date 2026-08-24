@@ -94,7 +94,6 @@ deploy_rook() {
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/cluster-test.yaml -o cluster-test.yaml
   sed -i "s|#deviceFilter:|deviceFilter: ${BLOCK/\/dev\//}|g" cluster-test.yaml
   cat cluster-test.yaml
-  kubectl create -f cluster-test.yaml
   kubectl_retry create -f cluster-test.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/pool-test.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/filesystem-test.yaml
@@ -187,13 +186,14 @@ timeout_command_exit_code() {
   # the CI logs. Every command is best-effort; missing resources must not mask
   # the original timeout.
   echo "Timeout reached; dumping rook-ceph state for debugging" >&2
+  kubectl -n rook-ceph logs -l app=rook-ceph-operator --tail=200 || true
   kubectl -n rook-ceph get pods -o wide || true
   kubectl -n rook-ceph get deploy,daemonset -o wide || true
   kubectl -n rook-ceph get cephcluster,cephblockpool,cephfilesystem -o wide || true
+  kubectl -n rook-ceph get cephcluster,cephblockpool,cephfilesystem -o yaml || true
   kubectl -n rook-ceph get cephnvmeofgateway -o wide || true
-  kubectl -n rook-ceph get events --sort-by=.lastTimestamp | tail -50 || true
+  kubectl -n rook-ceph get events --sort-by=.lastTimestamp || true
   kubectl -n rook-ceph describe pods || true
-  kubectl -n rook-ceph logs -l app=rook-ceph-operator --tail=100 || true
   exit 1
 }
 
