@@ -76,6 +76,8 @@ deploy_rook() {
   wait_for_operator_pod_to_be_ready_state
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/cluster-test.yaml -o cluster-test.yaml
   sed -i "s|#deviceFilter:|deviceFilter: ${BLOCK/\/dev\//}|g" cluster-test.yaml
+  # pin the Ceph image to a specific patch release for reproducible CI runs
+  sed -i "s|image: quay.io/ceph/ceph:v19|image: quay.io/ceph/ceph:v19.2.5|g" cluster-test.yaml
   cat cluster-test.yaml
   kubectl create -f cluster-test.yaml
   kubectl_retry create -f cluster-test.yaml
@@ -83,7 +85,7 @@ deploy_rook() {
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/filesystem-test.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/nfs-test.yaml
   wait_for_mon
-  wait_for_pod_to_be_ready_state
+  wait_for_osd_pod_to_be_ready_state
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
 }
 
