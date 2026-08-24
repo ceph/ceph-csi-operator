@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Rook release used to deploy the Ceph cluster and the NVMe-oF gateway.
 # NVMe-oF requires Ceph v20 (Tentacle), which is the default image shipped
 # with this Rook release's cluster-test.yaml.
-ROOK_VERSION="v1.20.4"
+ROOK_VERSION="v1.20.5"
 
 # Namespace where Rook and the Ceph cluster (including the NVMe-oF gateway)
 # are deployed.
