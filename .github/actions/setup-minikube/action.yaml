@@ -1,11 +1,5 @@
-name: Setup Ceph Cluster
-description: Setup Minikube, local disk, and deploy a Rook Ceph cluster
-
-inputs:
-  driverType:
-    description: "CSI driver being tested. When 'nvmeof', also deploys the Rook NVMe-oF gateway."
-    required: false
-    default: ""
+name: Setup Minikube
+description: Setup Go, a Minikube cluster, NVMe/TCP kernel modules, and a local disk for Rook
 
 runs:
   using: "composite"
@@ -26,18 +20,9 @@ runs:
     - name: Install NVMe/TCP Kernel Modules
       shell: bash
       run: |
-          sudo apt-get update -y 
+          sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends linux-modules-extra-$(uname -r)
 
     - name: Use local disk
       shell: bash
       run: test/scripts/github-action-helper.sh use_local_disk
-
-    - name: Create Ceph cluster
-      shell: bash
-      run: test/scripts/github-action-helper.sh deploy_rook
-
-    - name: Deploy NVMe-oF gateway
-      if: inputs.driverType == 'nvmeof'
-      shell: bash
-      run: test/scripts/github-action-helper.sh deploy_nvmeof

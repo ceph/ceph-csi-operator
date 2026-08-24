@@ -39,11 +39,12 @@ jobs:
         with:
             fetch-depth: 0
 
-      - name: Setup Ceph cluster
-        uses: ./.github/actions/setup-ceph-cluster
-        with:
-          driverType: ${{ matrix.driver }}
+      - name: Setup Minikube
+        uses: ./.github/actions/setup-minikube
 
+      # Install the ceph-csi-operator (CRDs + controller) before Rook: Rook
+      # v1.20+ creates a CephConnection CR while bringing up the cluster, so
+      # the csi.ceph.io CRDs must already exist.
       - name: Build and install operator
         run: |
             IMAGE_TAG=test make docker-build
@@ -54,6 +55,11 @@ jobs:
             kubectl rollout status deployment/ceph-csi-operator-controller-manager -n ceph-csi-operator-system --timeout=300s
             source test/scripts/utils.sh
             check_operator_health
+
+      - name: Deploy Rook Ceph cluster
+        uses: ./.github/actions/deploy-rook
+        with:
+          driverType: ${{ matrix.driver }}
 
       - name: Deploy CSI driver via kubectl
         uses: ./.github/actions/deploy-kubectl-driver

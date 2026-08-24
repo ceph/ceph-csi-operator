@@ -39,10 +39,8 @@ jobs:
         with:
             fetch-depth: 0
 
-      - name: Setup Ceph cluster
-        uses: ./.github/actions/setup-ceph-cluster
-        with:
-          driverType: ${{ matrix.driver }}
+      - name: Setup Minikube
+        uses: ./.github/actions/setup-minikube
 
       - name: Get latest release version
         id: get_release
@@ -53,11 +51,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      # Installs the release operator (CRDs + controller) and upgrades it to the
+      # PR version. Rook is deployed afterwards so the csi.ceph.io CRDs exist
+      # before Rook creates its CephConnection CR.
       - name: run yaml upgrade test
         env:
           RELEASE_VERSION: ${{ steps.get_release.outputs.release_version }}
           SKIP_CLEANUP: "true"
         run: test/scripts/test-upgrade-yaml.sh
+
+      - name: Deploy Rook Ceph cluster
+        uses: ./.github/actions/deploy-rook
+        with:
+          driverType: ${{ matrix.driver }}
 
       - name: Deploy CSI driver via kubectl
         uses: ./.github/actions/deploy-kubectl-driver

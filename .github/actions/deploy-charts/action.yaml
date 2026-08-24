@@ -29,11 +29,9 @@ runs:
       if: inputs.skipSetup == 'false'
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - name: Setup Ceph cluster
+    - name: Setup Minikube
       if: inputs.skipSetup == 'false'
-      uses: ./.github/actions/setup-ceph-cluster
-      with:
-        driverType: ${{ inputs.driverType }}
+      uses: ./.github/actions/setup-minikube
 
     - name: Install snapshot controller
       if: inputs.skipSetup == 'false'
@@ -98,6 +96,14 @@ runs:
       run: |
         source test/scripts/utils.sh
         check_operator_health
+
+    # Deploy Rook only after the ceph-csi-operator (and its CRDs) is installed:
+    # Rook v1.20+ creates a CephConnection CR while bringing up the cluster.
+    - name: Deploy Rook Ceph cluster
+      if: inputs.skipSetup == 'false'
+      uses: ./.github/actions/deploy-rook
+      with:
+        driverType: ${{ inputs.driverType }}
 
     - name: Lint csi driver helm chart
       if: inputs.source == 'local'
