@@ -59,6 +59,7 @@ runs:
 
           ./kubernetes/test/bin/ginkgo \
           --vv \
+          -p \
           -focus="External.Storage.*${{ inputs.driverType }}.csi.ceph.com" \
           -skip='\[Feature:|\[Disruptive\]|Generic Ephemeral-volume' \
           ./kubernetes/test/bin/e2e.test \
