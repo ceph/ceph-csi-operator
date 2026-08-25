@@ -21,7 +21,7 @@ ROOK_VERSION="v1.20.5"
 ROOK_NAMESPACE="rook-ceph"
 
 # Ceph pool holding the RBD images that back NVMe-oF volumes.
-NVMEOF_POOL="nvmeofpool"
+NVMEOF_POOL="nvmeof"
 
 function create_extra_disk() {
   sudo apt install -y targetcli-fb open-iscsi

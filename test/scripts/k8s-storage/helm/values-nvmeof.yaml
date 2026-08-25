@@ -22,8 +22,8 @@ drivers:
         nodeSecretNamespace: rook-ceph
         parameters:
           clusterID: rook-ceph
-          pool: nvmeofpool
-          imageFeatures: layering
+          pool: nvmeof
+          imageFeatures: layering,deep-flatten,exclusive-lock,object-map,fast-diff
           csi.storage.k8s.io/fstype: ext4
           # NVMe-oF subsystem all volumes of this StorageClass belong to.
           subsystemNQN: nqn.2016-06.io.spdk:cnode1.rook-ceph
