@@ -8,6 +8,9 @@ SnapshotClass:
   # Must be set to enable snapshotting tests
   FromExistingClassName: k8s-storage-e2e-nvmeof
 
+Timeouts:
+  ClaimProvision: 10m
+
 DriverInfo:
   # Internal name of the driver, display name in the test case and test objects
   Name: nvmeof.csi.ceph.com
