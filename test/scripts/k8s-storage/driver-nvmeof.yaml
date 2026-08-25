@@ -10,6 +10,8 @@ SnapshotClass:
 
 Timeouts:
   ClaimProvision: 10m
+  DataSourceProvision: 10m
+  PodStart: 10m
 
 DriverInfo:
   # Internal name of the driver, display name in the test case and test objects
