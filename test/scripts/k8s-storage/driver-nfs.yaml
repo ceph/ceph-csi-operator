@@ -2,6 +2,8 @@
 ShortName: cephcsi-nfs-test
 Timeouts:
   ClaimProvision: 10m
+  DataSourceProvision: 10m
+  PodStart: 10m
 
 StorageClass:
   FromExistingClassName: k8s-storage-e2e-nfs
