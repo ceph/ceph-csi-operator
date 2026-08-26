@@ -1,5 +1,6 @@
 # Ceph CSI Operator
 
+[![Ceph-CSI Operator Documentation](https://badgen.net/static/docs/ceph-csi-operator)](https://ceph.github.io/ceph-csi-operator)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ceph/ceph-csi-operator)](https://goreportcard.com/report/github.com/ceph/ceph-csi-operator)
 ![License](https://img.shields.io/github/license/ceph/ceph-csi-operator)
 [![Mergify Status](https://img.shields.io/endpoint.svg?url=https://api.mergify.com/v1/badges/ceph/ceph-csi-operator&style=flat)](https://mergify.com)
@@ -28,17 +29,17 @@ The Ceph CSI Operator provides native management interfaces for [Ceph-CSI driver
 
 ## Quick Start
 
-For those eager to get started quickly, follow the steps outlined in the [Quick Start Guide](docs/quick-start.md).
+For those eager to get started quickly, follow the steps outlined in the [Quick Start Guide](https://ceph.github.io/ceph-csi-operator/quick-start).
 
 ## Installation
 
-For detailed installation instructions, including methods using Helm and manual deployment, please visit the [Installation Guide](docs/installation.md).
+For detailed installation instructions, including methods using Helm and manual deployment, please visit the [Installation Guide](https://ceph.github.io/ceph-csi-operator/installation).
 
 
 ## Contributing
 
-We welcome contributions to the Ceph CSI Operator! Please follow [development-guide](docs/development-guide.md)
-and [coding style guidelines](docs/coding.md) if you are interested to contribute to this repo.
+We welcome contributions to the Ceph CSI Operator! Please follow [development-guide](https://ceph.github.io/ceph-csi-operator/development-guide)
+and [coding style guidelines](https://ceph.github.io/ceph-csi-operator/coding) if you are interested to contribute to this repo.
 
 ### Reporting Issues
 
