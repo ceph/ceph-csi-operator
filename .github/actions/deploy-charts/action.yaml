@@ -105,6 +105,10 @@ runs:
       with:
         driverType: ${{ inputs.driverType }}
 
+    - name: Deploy CSI-Addons controller
+      if: inputs.skipSetup == 'false'
+      uses: ./.github/actions/deploy-csi-addons
+
     - name: Lint csi driver helm chart
       if: inputs.source == 'local'
       shell: bash

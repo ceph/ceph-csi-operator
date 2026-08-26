@@ -1,0 +1,13 @@
+name: Deploy CSI-Addons Controller
+description: >-
+  Install the CSI-Addons controller, its RBAC and CRDs. The ceph-csi driver
+  pods run a csi-addons sidecar and reference the csiaddonsnodes RBAC, so the
+  CSIAddons controller and CRDs must exist in the cluster for addons operations
+  (reclaim space, network fence, etc.).
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install CSI-Addons controller, RBAC and CRDs
+      shell: bash
+      run: test/scripts/install-csi-addons.sh install
