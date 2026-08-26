@@ -48,7 +48,7 @@ jobs:
       - name: Build and install operator
         run: |
             IMAGE_TAG=test make docker-build
-            make build-installer
+            IMAGE_TAG=test make build-installer
             kubectl create namespace csi-driver --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply --server-side --force-conflicts -f deploy/all-in-one/install.yaml
             kubectl set env deployment/ceph-csi-operator-controller-manager -n ceph-csi-operator-system WATCH_NAMESPACE=csi-driver
