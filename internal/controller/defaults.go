@@ -34,7 +34,7 @@ var imageDefaults = map[string]string{
 	"snapshotter":       "registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0",
 	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.17.0",
 	"snapshot-metadata": "registry.k8s.io/sig-storage/csi-snapshot-metadata:v1.0.0",
-	"plugin":            "quay.io/madhupr001/cephcsi:fix-nvmeof",
+	"plugin":            "quay.io/gdidi/cephcsi:nvmeof_bug",
 	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.14.0",
 }
 
