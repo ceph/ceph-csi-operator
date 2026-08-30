@@ -19,6 +19,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 * VolumeAttributesClass for volume attributes (QoS, MDS pinning, etc.)
 * Secret for Ceph authentication credentials
 
+
 ## Prerequisites
 
 * Kubernetes 1.32+
@@ -37,6 +38,7 @@ The `helm install` command deploys ceph-csi-drivers on the Kubernetes cluster in
 ceph-csi-drivers currently publishes artifacts of the ceph-csi drivers to tagged versions.
 
 ### **Released version**
+
 
 ```console
 helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/
@@ -120,6 +122,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.cephfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.cephfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.cephfs.liveness.metricsPort` | Port served by the liveness sidecar, exposing the CSI metrics that Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0) | `0` |
 | `drivers.cephfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.cephfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.cephfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -135,6 +138,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.cephfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.cephfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.cephfs.podMonitor.annotations` | Additional annotations to set on the PodMonitor resource (default: {}) | `{}` |
+| `drivers.cephfs.podMonitor.enabled` | Create a PodMonitor resource for this driver, so that the Prometheus Operator scrapes the CSI metrics. Requires the Prometheus Operator to be installed and requires liveness.metricsPort to be set. (default: false) | `false` |
+| `drivers.cephfs.podMonitor.interval` | Prometheus scrape interval for the metrics endpoint, e.g. "30s". If empty, the Prometheus global scrape interval is used. (default: "") | `""` |
+| `drivers.cephfs.podMonitor.labels` | Additional labels to set on the PodMonitor resource (default: {}) | `{}` |
 | `drivers.cephfs.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot") | `"volumeSnapshot"` |
 | `drivers.cephfs.storageClasses` | List of StorageClass resources to create for this driver (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml> | `[]` |
 | `drivers.cephfs.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/volumeattributesclass.yaml> | `[]` |
@@ -160,6 +167,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nfs.liveness.metricsPort` | Port served by the liveness sidecar, exposing the CSI metrics that Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0) | `0` |
 | `drivers.nfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -176,6 +184,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.nodePlugin.serviceAccountName` | Service account name for the pod (default: "") | `""` |
 | `drivers.nfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.nfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.nfs.podMonitor.annotations` | Additional annotations to set on the PodMonitor resource (default: {}) | `{}` |
+| `drivers.nfs.podMonitor.enabled` | Create a PodMonitor resource for this driver, so that the Prometheus Operator scrapes the CSI metrics. Requires the Prometheus Operator to be installed and requires liveness.metricsPort to be set. (default: false) | `false` |
+| `drivers.nfs.podMonitor.interval` | Prometheus scrape interval for the metrics endpoint, e.g. "30s". If empty, the Prometheus global scrape interval is used. (default: "") | `""` |
+| `drivers.nfs.podMonitor.labels` | Additional labels to set on the PodMonitor resource (default: {}) | `{}` |
 | `drivers.nfs.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "volumeSnapshot") | `"volumeSnapshot"` |
 | `drivers.nfs.storageClasses` | List of StorageClass resources to create for this driver (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml> | `[]` |
 | `drivers.nfs.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/volumeattributesclass.yaml> | `[]` |
@@ -201,6 +213,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nvmeof.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nvmeof.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.nvmeof.liveness.metricsPort` | Port served by the liveness sidecar, exposing the CSI metrics that Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0) | `0` |
 | `drivers.nvmeof.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.nvmeof.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.nvmeof.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -216,6 +229,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.nvmeof.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.nvmeof.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.nvmeof.podMonitor.annotations` | Additional annotations to set on the PodMonitor resource (default: {}) | `{}` |
+| `drivers.nvmeof.podMonitor.enabled` | Create a PodMonitor resource for this driver, so that the Prometheus Operator scrapes the CSI metrics. Requires the Prometheus Operator to be installed and requires liveness.metricsPort to be set. (default: false) | `false` |
+| `drivers.nvmeof.podMonitor.interval` | Prometheus scrape interval for the metrics endpoint, e.g. "30s". If empty, the Prometheus global scrape interval is used. (default: "") | `""` |
+| `drivers.nvmeof.podMonitor.labels` | Additional labels to set on the PodMonitor resource (default: {}) | `{}` |
 | `drivers.nvmeof.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
 | `drivers.nvmeof.storageClasses` | List of StorageClass resources to create for this driver (default: []) NVMe-oF is backed by RBD; for all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml> | `[]` |
 | `drivers.nvmeof.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml> | `[]` |
@@ -241,6 +258,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.rbd.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.rbd.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `drivers.rbd.liveness.metricsPort` | Port served by the liveness sidecar, exposing the CSI metrics that Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0) | `0` |
 | `drivers.rbd.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `drivers.rbd.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `drivers.rbd.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -256,6 +274,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.rbd.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.rbd.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `drivers.rbd.podMonitor.annotations` | Additional annotations to set on the PodMonitor resource (default: {}) | `{}` |
+| `drivers.rbd.podMonitor.enabled` | Create a PodMonitor resource for this driver, so that the Prometheus Operator scrapes the CSI metrics. Requires the Prometheus Operator to be installed and requires liveness.metricsPort to be set. (default: false) | `false` |
+| `drivers.rbd.podMonitor.interval` | Prometheus scrape interval for the metrics endpoint, e.g. "30s". If empty, the Prometheus global scrape interval is used. (default: "") | `""` |
+| `drivers.rbd.podMonitor.labels` | Additional labels to set on the PodMonitor resource (default: {}) | `{}` |
 | `drivers.rbd.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
 | `drivers.rbd.storageClasses` | List of StorageClass resources to create for this driver (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml> | `[]` |
 | `drivers.rbd.volumeAttributesClasses` | List of VolumeAttributesClass resources to create (requires storage.k8s.io/v1 VolumeAttributesClass CRD) (default: []) For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/volumeattributesclass.yaml> | `[]` |
@@ -287,6 +309,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `operatorConfig.driverSpecDefaults.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.liveness.metricsPort` | Port served by the liveness sidecar, exposing the CSI metrics that Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0) | `0` |
 | `operatorConfig.driverSpecDefaults.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
 | `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
@@ -303,6 +326,10 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy` | Daemonset update strategy (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
+| `operatorConfig.driverSpecDefaults.podMonitor.annotations` | Additional annotations to set on the PodMonitor resource (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.podMonitor.enabled` | Create a PodMonitor resource for this driver, so that the Prometheus Operator scrapes the CSI metrics. Requires the Prometheus Operator to be installed and requires liveness.metricsPort to be set. (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.podMonitor.interval` | Prometheus scrape interval for the metrics endpoint, e.g. "30s". If empty, the Prometheus global scrape interval is used. (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.podMonitor.labels` | Additional labels to set on the PodMonitor resource (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.snapshotPolicy` | Snapshot policy (options: none, volumeGroupSnapshot, volumeSnapshot) (default: "none") | `"none"` |
 | `operatorConfig.name` | Name of the operator config (default: "ceph-csi-operator-config") | `"ceph-csi-operator-config"` |
 | `operatorConfig.namespace` | Namespace for the operator configuration (default: "") | `""` |

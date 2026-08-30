@@ -7,6 +7,7 @@ require (
 	github.com/go-logr/logr v1.4.4
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.93.1
 	github.com/stretchr/testify v1.12.1
 	k8s.io/api v0.37.0
 	k8s.io/apimachinery v0.37.0

@@ -265,6 +265,39 @@ type LivenessSpec struct {
 	MetricsPort int `json:"metricsPort,omitempty"`
 }
 
+type PodMonitorSpec struct {
+	// Enabled specifies whether the operator should create a PodMonitor
+	// resource for the driver's pods, so that the Prometheus Operator can
+	// discover and scrape the CSI metrics endpoints.
+	//
+	// The PodMonitor scrapes the metrics port exposed by the liveness
+	// sidecar, which requires the driver's spec.liveness to be configured.
+	//
+	// Enabling this feature requires the Prometheus Operator (or any other
+	// controller serving the monitoring.coreos.com/v1 API) to be installed
+	// in the cluster.
+	//
+	// Disabled by default.
+	//+kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Additional labels to set on the created PodMonitor resource.
+	// They can be used by Prometheus and PrometheusAgent resources to select
+	// this PodMonitor.
+	//+kubebuilder:validation:Optional
+	Labels map[string]string `json:"labels,omitempty"`
+
+	// Additional annotations to set on the created PodMonitor resource.
+	//+kubebuilder:validation:Optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+
+	// Interval at which Prometheus scrapes the driver's metrics endpoint.
+	// If not set, the Prometheus Operator's global scrape interval is used.
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:Pattern:=`^(0|(([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?)$`
+	Interval string `json:"interval,omitempty"`
+}
+
 type LeaderElectionSpec struct {
 	// Duration in seconds that non-leader candidates will wait to force acquire leadership.
 	// Default to 137 seconds.
@@ -369,6 +402,15 @@ type DriverSpec struct {
 	// disabled by default.
 	//+kubebuilder:validation:Optional
 	Liveness *LivenessSpec `json:"liveness,omitempty"`
+
+	// PodMonitor configuration for the driver's pods. When enabled, the
+	// operator creates a PodMonitor resource, so that the Prometheus
+	// Operator can scrape the CSI metrics exposed by the driver's liveness
+	// sidecar.
+	// Requires spec.liveness to be configured and the Prometheus Operator to
+	// be installed in the cluster. Disabled by default.
+	//+kubebuilder:validation:Optional
+	PodMonitor *PodMonitorSpec `json:"podMonitor,omitempty"`
 
 	// Leader election setting
 	//+kubebuilder:validation:Optional

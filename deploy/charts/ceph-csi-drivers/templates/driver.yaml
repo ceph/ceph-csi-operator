@@ -48,6 +48,23 @@ spec:
   {{- end }}
   attachRequired: {{ $driver.attachRequired  }}
   deployCsiAddons: {{ $driver.deployCsiAddons  }}
+  {{- if and $driver.liveness $driver.liveness.metricsPort }}
+  liveness:
+    metricsPort: {{ $driver.liveness.metricsPort }}
+  {{- end }}
+  {{- if and $driver.podMonitor $driver.podMonitor.enabled }}
+  podMonitor:
+    enabled: {{ $driver.podMonitor.enabled }}
+    {{- if $driver.podMonitor.labels }}
+    labels: {{ $driver.podMonitor.labels | toYaml | nindent 6 }}
+    {{- end }}
+    {{- if $driver.podMonitor.annotations }}
+    annotations: {{ $driver.podMonitor.annotations | toYaml | nindent 6 }}
+    {{- end }}
+    {{- if $driver.podMonitor.interval }}
+    interval: {{ $driver.podMonitor.interval }}
+    {{- end }}
+  {{- end }}
   cephFsClientType: {{ $driver.cephFsClientType  }}
   kernelMountOptions:
     {{- if $driver.kernelMountOptions }}
