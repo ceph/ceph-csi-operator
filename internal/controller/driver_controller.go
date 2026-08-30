@@ -30,11 +30,13 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -64,6 +66,7 @@ import (
 //+kubebuilder:rbac:groups="",resources=nodes,verbs=list;watch
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=networking.k8s.io,resources=networkpolicies,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=podmonitors,verbs=get;list;watch;create;update;patch;delete
 
 type DriverType string
 
@@ -250,6 +253,7 @@ func (r *driverReconcile) reconcile() error {
 		r.reconcileControllerPluginNetworkPolicy,
 		r.reconcileNodePluginDaemonSet,
 		r.reconcileLivenessService,
+		r.reconcilePodMonitor,
 		r.reconcileNodePluginDaemonSetForCsiAddons,
 		r.reconcileNodePluginCsiAddonsNetworkPolicy,
 	}
@@ -937,6 +941,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 										utils.GetExtraArgsForContainer("liveness-prometheus", pluginSpec.ContainerExtraArgs)...,
 									),
 								),
+								Ports: []corev1.ContainerPort{
+									utils.LivenessMetricsContainerPort(r.driver.Spec.Liveness.MetricsPort),
+								},
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
 								},
@@ -1616,6 +1623,9 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 										utils.GetExtraArgsForContainer("liveness-prometheus", pluginSpec.ContainerExtraArgs)...,
 									),
 								),
+								Ports: []corev1.ContainerPort{
+									utils.LivenessMetricsContainerPort(r.driver.Spec.Liveness.MetricsPort),
+								},
 								Env: []corev1.EnvVar{
 									utils.PodIpEnvVar,
 								},
@@ -1761,6 +1771,92 @@ func (r *driverReconcile) reconcileLivenessService() error {
 		}
 		return nil
 	}
+}
+
+func (r *driverReconcile) reconcilePodMonitor() error {
+	podMonitor := &monitoringv1.PodMonitor{}
+	podMonitor.Name = r.generateName("podmonitor")
+	podMonitor.Namespace = r.driver.Namespace
+
+	log := r.log.WithValues("podMonitor", podMonitor.Name)
+
+	podMonitorSpec := r.driver.Spec.PodMonitor
+	podMonitorRequested := podMonitorSpec != nil && ptr.Deref(podMonitorSpec.Enabled, false)
+	// The PodMonitor discovers the metrics port exposed by the liveness
+	// sidecar. When liveness is not configured, the driver's pods do not
+	// serve any metrics endpoint to scrape.
+	podMonitorEnabled := podMonitorRequested && r.driver.Spec.Liveness != nil
+
+	if !podMonitorEnabled {
+		if podMonitorRequested && !podMonitorEnabled {
+			log.Info(
+				"Skipping PodMonitor reconciliation, driver's spec.liveness is not configured, " +
+					"there is no metrics endpoint for the PodMonitor to scrape",
+			)
+		}
+
+		// Remove the PodMonitor when the feature is disabled. The PodMonitor
+		// is queried first, as the monitoring.coreos.com/v1 API might not be
+		// served by the cluster at all (Prometheus Operator not installed).
+		existing := &monitoringv1.PodMonitor{}
+		err := r.Get(r.ctx, client.ObjectKeyFromObject(podMonitor), existing)
+		if err != nil {
+			// The PodMonitor does not exist, or its CRD is not registered in
+			// the cluster, in which case there is nothing to clean up.
+			if k8serrors.IsNotFound(err) || meta.IsNoMatchError(err) {
+				return nil
+			}
+			log.Error(err, "Failed to query the existence of the PodMonitor")
+			return err
+		}
+
+		if err := r.Delete(r.ctx, existing); client.IgnoreNotFound(err) != nil {
+			log.Error(err, "Unable to delete PodMonitor")
+			return err
+		}
+		log.Info("PodMonitor deleted successfully")
+
+		return nil
+	}
+
+	log.Info("Reconciling PodMonitor")
+
+	opResult, err := ctrlutil.CreateOrUpdate(r.ctx, r.Client, podMonitor, func() error {
+		if err := ctrlutil.SetControllerReference(&r.driver, podMonitor, r.Scheme); err != nil {
+			log.Error(err, "Failed setting an owner reference on the PodMonitor")
+			return err
+		}
+
+		podMonitor.Labels = maps.Clone(podMonitorSpec.Labels)
+		podMonitor.Annotations = maps.Clone(podMonitorSpec.Annotations)
+		podMonitor.Spec = monitoringv1.PodMonitorSpec{
+			// Select only the controller plugin and node plugin pods of this
+			// driver. The node plugin pods run with hostNetwork, Prometheus
+			// discovers them through their pod IP, which equals the node's IP.
+			Selector: metav1.LabelSelector{
+				MatchExpressions: []metav1.LabelSelectorRequirement{{
+					Key:      "app",
+					Operator: metav1.LabelSelectorOpIn,
+					Values: []string{
+						r.generateName("ctrlplugin"),
+						r.generateName("nodeplugin"),
+					},
+				}},
+			},
+			PodMetricsEndpoints: []monitoringv1.PodMetricsEndpoint{{
+				Port: ptr.To(utils.LivenessMetricsContainerPortName),
+				Path: utils.LivenessMetricsPath,
+				// An empty interval makes Prometheus use the global scrape
+				// interval configured on the Prometheus resource.
+				Interval: monitoringv1.Duration(podMonitorSpec.Interval),
+			}},
+		}
+
+		return nil
+	})
+
+	logCreateOrUpdateResult(log, "PodMonitor", podMonitor, opResult, err)
+	return err
 }
 
 func (r *driverReconcile) isRbdDriver() bool {
@@ -2036,6 +2132,9 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 	}
 	if dest.Liveness == nil {
 		dest.Liveness = src.Liveness
+	}
+	if dest.PodMonitor == nil {
+		dest.PodMonitor = src.PodMonitor
 	}
 	if dest.LeaderElection == nil {
 		dest.LeaderElection = src.LeaderElection

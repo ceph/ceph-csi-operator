@@ -125,6 +125,22 @@ operatorConfig:
     attachRequired: true
     # -- Flag to deploy CSI Addons (default: false)
     deployCsiAddons: false
+    liveness:
+      # -- Port served by the liveness sidecar, exposing the CSI metrics that
+      # Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0)
+      metricsPort: 0
+    podMonitor:
+      # -- Create a PodMonitor resource for this driver, so that the Prometheus
+      # Operator scrapes the CSI metrics. Requires the Prometheus Operator to be
+      # installed and requires liveness.metricsPort to be set. (default: false)
+      enabled: false
+      # -- Additional labels to set on the PodMonitor resource (default: {})
+      labels: {}
+      # -- Additional annotations to set on the PodMonitor resource (default: {})
+      annotations: {}
+      # -- Prometheus scrape interval for the metrics endpoint, e.g. "30s".
+      # If empty, the Prometheus global scrape interval is used. (default: "")
+      interval: ""
     # -- CephFS client type (options: autodetect, kernel) (default: "kernel")
     cephFsClientType: "kernel"
     # -- Kernel mount options (default: {})
@@ -218,6 +234,22 @@ drivers:
     attachRequired: true
     # -- Flag to deploy CSI Addons (default: false)
     deployCsiAddons: false
+    liveness:
+      # -- Port served by the liveness sidecar, exposing the CSI metrics that
+      # Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0)
+      metricsPort: 0
+    podMonitor:
+      # -- Create a PodMonitor resource for this driver, so that the Prometheus
+      # Operator scrapes the CSI metrics. Requires the Prometheus Operator to be
+      # installed and requires liveness.metricsPort to be set. (default: false)
+      enabled: false
+      # -- Additional labels to set on the PodMonitor resource (default: {})
+      labels: {}
+      # -- Additional annotations to set on the PodMonitor resource (default: {})
+      annotations: {}
+      # -- Prometheus scrape interval for the metrics endpoint, e.g. "30s".
+      # If empty, the Prometheus global scrape interval is used. (default: "")
+      interval: ""
     # -- CephFS client type (options: autodetect, kernel) (default: "kernel")
     cephFsClientType: "kernel"
     # -- Kernel mount options (default: {})
@@ -358,6 +390,22 @@ drivers:
     attachRequired: true
     # -- Flag to deploy CSI Addons (default: false)
     deployCsiAddons: false
+    liveness:
+      # -- Port served by the liveness sidecar, exposing the CSI metrics that
+      # Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0)
+      metricsPort: 0
+    podMonitor:
+      # -- Create a PodMonitor resource for this driver, so that the Prometheus
+      # Operator scrapes the CSI metrics. Requires the Prometheus Operator to be
+      # installed and requires liveness.metricsPort to be set. (default: false)
+      enabled: false
+      # -- Additional labels to set on the PodMonitor resource (default: {})
+      labels: {}
+      # -- Additional annotations to set on the PodMonitor resource (default: {})
+      annotations: {}
+      # -- Prometheus scrape interval for the metrics endpoint, e.g. "30s".
+      # If empty, the Prometheus global scrape interval is used. (default: "")
+      interval: ""
     # -- CephFS client type (options: autodetect, kernel) (default: "kernel")
     cephFsClientType: "kernel"
     # -- Kernel mount options (default: {})
@@ -498,6 +546,22 @@ drivers:
     attachRequired: true
     # -- Flag to deploy CSI Addons (default: false)
     deployCsiAddons: false
+    liveness:
+      # -- Port served by the liveness sidecar, exposing the CSI metrics that
+      # Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0)
+      metricsPort: 0
+    podMonitor:
+      # -- Create a PodMonitor resource for this driver, so that the Prometheus
+      # Operator scrapes the CSI metrics. Requires the Prometheus Operator to be
+      # installed and requires liveness.metricsPort to be set. (default: false)
+      enabled: false
+      # -- Additional labels to set on the PodMonitor resource (default: {})
+      labels: {}
+      # -- Additional annotations to set on the PodMonitor resource (default: {})
+      annotations: {}
+      # -- Prometheus scrape interval for the metrics endpoint, e.g. "30s".
+      # If empty, the Prometheus global scrape interval is used. (default: "")
+      interval: ""
     # -- CephFS client type (options: autodetect, kernel) (default: "kernel")
     cephFsClientType: "kernel"
     # -- Kernel mount options (default: {})
@@ -635,6 +699,22 @@ drivers:
     attachRequired: true
     # -- Flag to deploy CSI Addons (default: false)
     deployCsiAddons: false
+    liveness:
+      # -- Port served by the liveness sidecar, exposing the CSI metrics that
+      # Prometheus scrapes. Leave at 0 to not deploy the liveness sidecar (default: 0)
+      metricsPort: 0
+    podMonitor:
+      # -- Create a PodMonitor resource for this driver, so that the Prometheus
+      # Operator scrapes the CSI metrics. Requires the Prometheus Operator to be
+      # installed and requires liveness.metricsPort to be set. (default: false)
+      enabled: false
+      # -- Additional labels to set on the PodMonitor resource (default: {})
+      labels: {}
+      # -- Additional annotations to set on the PodMonitor resource (default: {})
+      annotations: {}
+      # -- Prometheus scrape interval for the metrics endpoint, e.g. "30s".
+      # If empty, the Prometheus global scrape interval is used. (default: "")
+      interval: ""
     # -- CephFS client type (options: autodetect, kernel) (default: "kernel")
     cephFsClientType: "kernel"
     # -- Kernel mount options (default: {})

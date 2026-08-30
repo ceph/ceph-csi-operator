@@ -371,6 +371,23 @@ var SnapshotMetadataGrpcPort = corev1.ContainerPort{
 	ContainerPort: int32(50051),
 }
 
+// LivenessMetricsContainerPortName is the name of the container port serving
+// the ceph-csi liveness metrics on the driver's pods. The name is referenced
+// by the PodMonitor resource created for the driver.
+const LivenessMetricsContainerPortName = "metrics"
+
+// LivenessMetricsContainerPort returns the container port definition serving
+// the ceph-csi liveness metrics on the given port number. The port is declared
+// with a fixed name, so that the Prometheus Operator can discover it through
+// the PodMonitor resource created for the driver.
+func LivenessMetricsContainerPort(port int) corev1.ContainerPort {
+	return corev1.ContainerPort{
+		Name:          LivenessMetricsContainerPortName,
+		ContainerPort: int32(port), //nolint:gosec // G115: the Driver CRD validates the port range (1024-65535)
+		Protocol:      corev1.ProtocolTCP,
+	}
+}
+
 func ContainerPortArg(port corev1.ContainerPort) string {
 
 	return fmt.Sprintf("--controller-port=%d", port.ContainerPort)
@@ -395,7 +412,13 @@ var PodUidContainerArg = fmt.Sprintf("--pod-uid=$(%s)", PodUidEnvVar.Name)
 var PodContainerArg = fmt.Sprintf("--pod=$(%s)", PodNameEnvVar.Name)
 var NamespaceContainerArg = fmt.Sprintf("--namespace=$(%s)", PodNamespaceEnvVar.Name)
 var DriverNamespaceContainerArg = fmt.Sprintf("--drivernamespace=$(%s)", DriverNamespaceEnvVar.Name)
-var MetricsPathContainerArg = "--metricspath=/metrics"
+
+// LivenessMetricsPath is the HTTP path serving the liveness sidecar's metrics
+// endpoint on the driver's pods. It is scraped by the PodMonitor resource
+// created for the driver.
+const LivenessMetricsPath = "/metrics"
+
+var MetricsPathContainerArg = "--metricspath=" + LivenessMetricsPath
 var PoolTimeContainerArg = "--polltime=60s"
 var ExtraCreateMetadataContainerArg = "--extra-create-metadata=true"
 var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=true"

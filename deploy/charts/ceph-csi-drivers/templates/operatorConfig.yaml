@@ -52,6 +52,23 @@ spec:
     {{- end }}
     attachRequired: {{ $config.driverSpecDefaults.attachRequired  }}
     deployCsiAddons: {{ $config.driverSpecDefaults.deployCsiAddons  }}
+    {{- if and $config.driverSpecDefaults.liveness $config.driverSpecDefaults.liveness.metricsPort }}
+    liveness:
+      metricsPort: {{ $config.driverSpecDefaults.liveness.metricsPort }}
+    {{- end }}
+    {{- if and $config.driverSpecDefaults.podMonitor $config.driverSpecDefaults.podMonitor.enabled }}
+    podMonitor:
+      enabled: {{ $config.driverSpecDefaults.podMonitor.enabled }}
+      {{- if $config.driverSpecDefaults.podMonitor.labels }}
+      labels: {{ $config.driverSpecDefaults.podMonitor.labels | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $config.driverSpecDefaults.podMonitor.annotations }}
+      annotations: {{ $config.driverSpecDefaults.podMonitor.annotations | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $config.driverSpecDefaults.podMonitor.interval }}
+      interval: {{ $config.driverSpecDefaults.podMonitor.interval }}
+      {{- end }}
+    {{- end }}
     cephFsClientType: {{ $config.driverSpecDefaults.cephFsClientType  }}
     kernelMountOptions:
       {{- if $config.driverSpecDefaults.kernelMountOptions }}
