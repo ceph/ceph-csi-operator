@@ -98,7 +98,7 @@ func MapSlice[T, K any](in []T, mapper func(item T) K) []K {
 // - If the key exists in destination, it replaces the item.
 // - If not, it appends the item to destination.
 // - Items with empty keys or transform=false are skipped.
-func MapMergeByKey[S comparable, D comparable](
+func MapMergeByKey[S any, D any](
 	dest []D,
 	src []S,
 	transform func(S) (D, bool),
