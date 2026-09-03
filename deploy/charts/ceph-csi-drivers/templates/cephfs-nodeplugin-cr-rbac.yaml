@@ -53,9 +53,15 @@ rules:
   - ""
   resources:
   - persistentvolumes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - persistentvolumeclaims
   verbs:
   - get
+  - patch
 - apiGroups:
   - authentication.k8s.io
   resources:

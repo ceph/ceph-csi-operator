@@ -33,4 +33,4 @@ rules:
     verbs: ["list", "watch", "create", "update", "patch"]
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
-    verbs: ["get"]
+    verbs: ["get", "patch"]
