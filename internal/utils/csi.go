@@ -398,6 +398,7 @@ var DriverNamespaceContainerArg = fmt.Sprintf("--drivernamespace=$(%s)", DriverN
 var MetricsPathContainerArg = "--metricspath=/metrics"
 var PoolTimeContainerArg = "--polltime=60s"
 var ExtraCreateMetadataContainerArg = "--extra-create-metadata=true"
+var ExtraSingleWorkerThreadContainerArg = "--worker-threads=1"
 var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=true"
 var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
 var EnableVolumeGroupSnapshotsContainerArg = "--feature-gates=CSIVolumeGroupSnapshot=true"
