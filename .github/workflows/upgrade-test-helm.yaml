@@ -32,6 +32,7 @@ jobs:
           - cephfs
           - rbd
           - nfs
+          - nvmeof
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -66,6 +67,11 @@ jobs:
 
       - name: Deploy storage resources on upgraded release
         run: |
+            if [ "${{ matrix.driver }}" = "nvmeof" ]; then
+              test/scripts/k8s-storage/patch-nvmeof-storageclass.sh helm \
+                ./test/scripts/k8s-storage/helm/values-${{ matrix.driver }}.yaml
+            fi
+
             MONITOR=$(kubectl -n rook-ceph get svc -l app=rook-ceph-mon \
             -o=jsonpath='{.items[0].spec.clusterIP}:{.items[0].spec.ports[0].port}')
 

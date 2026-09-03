@@ -1,0 +1,23 @@
+name: Deploy Rook Ceph Cluster
+description: >-
+  Deploy a Rook Ceph cluster (and, for nvmeof, the NVMe-oF gateway). The
+  ceph-csi-operator CRDs must already be installed, because Rook v1.20+ creates
+  a CephConnection CR (csi.ceph.io/v1) while bringing up the cluster.
+
+inputs:
+  driverType:
+    description: "CSI driver being tested. When 'nvmeof', also deploys the Rook NVMe-oF gateway."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create Ceph cluster
+      shell: bash
+      run: test/scripts/github-action-helper.sh deploy_rook
+
+    - name: Deploy NVMe-oF gateway
+      if: inputs.driverType == 'nvmeof'
+      shell: bash
+      run: test/scripts/github-action-helper.sh deploy_nvmeof

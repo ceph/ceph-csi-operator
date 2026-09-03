@@ -11,6 +11,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #############
 : "${FUNCTION:=${1}}"
 
+# Rook release used to deploy the Ceph cluster and the NVMe-oF gateway.
+# NVMe-oF requires Ceph v20 (Tentacle), which is the default image shipped
+# with this Rook release's cluster-test.yaml.
+ROOK_VERSION="v1.20.5"
+
+# Namespace where Rook and the Ceph cluster (including the NVMe-oF gateway)
+# are deployed.
+ROOK_NAMESPACE="rook-ceph"
+
+# Ceph pool holding the RBD images that back NVMe-oF volumes.
+NVMEOF_POOL="nvmeof"
+
 function create_extra_disk() {
   sudo apt install -y targetcli-fb open-iscsi
   truncate -s 75G ~/iscsi-disk.img
@@ -67,11 +79,16 @@ use_local_disk() {
 }
 
 deploy_rook() {
-  rook_version="v1.16.1"
+  rook_version="${ROOK_VERSION}"
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/common.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/crds.yaml
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/operator.yaml -o operator.yaml
-  sed -i 's|ROOK_CSI_DISABLE_DRIVER: "false"|ROOK_CSI_DISABLE_DRIVER: "true"|g' operator.yaml
+  # Rook v1.20+ dropped its in-tree CSI driver and instead ships ceph-csi-operator
+  # CRs (an ImageSet ConfigMap, an OperatorConfig, and per-driver Driver CRs) in
+  # operator.yaml. This test deploys its own ceph-csi-operator and CSI CRs, so
+  # strip Rook's copies to avoid duplicate/conflicting drivers. Rook then only
+  # provides the Ceph cluster (and, for NVMe-oF, the gateway).
+  yq eval --inplace 'select(.kind != "Driver" and .kind != "OperatorConfig" and .metadata.name != "rook-csi-operator-image-set-configmap")' operator.yaml
   kubectl_retry create -f operator.yaml
   wait_for_operator_pod_to_be_ready_state
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/cluster-test.yaml -o cluster-test.yaml
@@ -79,7 +96,6 @@ deploy_rook() {
   # pin the Ceph image to a specific patch release for reproducible CI runs
   sed -i "s|image: quay.io/ceph/ceph:v19|image: quay.io/ceph/ceph:v19.2.5|g" cluster-test.yaml
   cat cluster-test.yaml
-  kubectl create -f cluster-test.yaml
   kubectl_retry create -f cluster-test.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/pool-test.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/filesystem-test.yaml
@@ -87,6 +103,47 @@ deploy_rook() {
   wait_for_mon
   wait_for_osd_pod_to_be_ready_state
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/toolbox.yaml
+}
+
+# deploy_nvmeof deploys the Rook-managed NVMe-oF gateway (CephNVMeOFGateway CRD)
+# together with everything the ceph-csi NVMe-oF driver needs to provision volumes:
+#   * the gateway and its state pool (.nvmeof) via Rook's nvmeof-test.yaml
+#   * the "nvmeofpool" CephBlockPool that holds the RBD images backing volumes
+# NVMe-oF volumes are RBD-backed, so the StorageClass reuses the RBD CSI secrets
+# (rook-csi-rbd-provisioner / rook-csi-rbd-node) that Rook already creates.
+# The gateway address is discovered and injected into the StorageClass later, at
+# driver-deploy time, by test/scripts/k8s-storage/patch-nvmeof-storageclass.sh.
+deploy_nvmeof() {
+  # Gateway + its required ".nvmeof" state pool. Requires Ceph v20 (Tentacle).
+  kubectl_retry create -f "https://raw.githubusercontent.com/rook/rook/${ROOK_VERSION}/deploy/examples/nvmeof-test.yaml"
+
+  # Data pool that holds the RBD images backing NVMe-oF volumes. Write it to a
+  # file so kubectl_retry can safely re-run without a consumed stdin pipe.
+  cat <<-EOF > nvmeofpool.yaml
+	apiVersion: ceph.rook.io/v1
+	kind: CephBlockPool
+	metadata:
+	  name: ${NVMEOF_POOL}
+	  namespace: ${ROOK_NAMESPACE}
+	spec:
+	  failureDomain: osd
+	  replicated:
+	    size: 1
+	    requireSafeReplicaSize: false
+	EOF
+  kubectl_retry create -f nvmeofpool.yaml
+
+  wait_for_nvmeof_gateway
+}
+
+wait_for_nvmeof_gateway() {
+  timeout 300 bash <<-'EOF'
+    until [ $(kubectl -n rook-ceph get pod -l app=rook-ceph-nvmeof -o jsonpath='{.items[*].metadata.name}' -o custom-columns=READY:status.containerStatuses[*].ready | grep -c true) -ge 1 ]; do
+      echo "waiting for the nvmeof gateway pod to be in ready state"
+      sleep 5
+    done
+EOF
+  timeout_command_exit_code
 }
 
 wait_for_osd_pod_to_be_ready_state() {
@@ -120,11 +177,26 @@ EOF
 }
 
 timeout_command_exit_code() {
-  # timeout command return exit status 124 if command times out
-  if [ $? -eq 124 ]; then
-    echo "Timeout reached"
-    exit 1
+  # Capture the exit status of the preceding (timed) command before anything
+  # else runs. timeout returns 124 when the command times out.
+  local ret=$?
+  if [ "${ret}" -ne 124 ]; then
+    return 0
   fi
+
+  # On timeout, dump the Ceph cluster state so the failure cause is visible in
+  # the CI logs. Every command is best-effort; missing resources must not mask
+  # the original timeout.
+  echo "Timeout reached; dumping rook-ceph state for debugging" >&2
+  kubectl -n rook-ceph logs -l app=rook-ceph-operator --tail=200 || true
+  kubectl -n rook-ceph get pods -o wide || true
+  kubectl -n rook-ceph get deploy,daemonset -o wide || true
+  kubectl -n rook-ceph get cephcluster,cephblockpool,cephfilesystem -o wide || true
+  kubectl -n rook-ceph get cephcluster,cephblockpool,cephfilesystem -o yaml || true
+  kubectl -n rook-ceph get cephnvmeofgateway -o wide || true
+  kubectl -n rook-ceph get events --sort-by=.lastTimestamp || true
+  kubectl -n rook-ceph describe pods || true
+  exit 1
 }
 
 install_minikube_with_none_driver() {

@@ -32,29 +32,15 @@ jobs:
           - cephfs
           - rbd
           - nfs
+          - nvmeof
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
             fetch-depth: 0
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-
       - name: Setup Minikube
-        run: |
-            test/scripts/github-action-helper.sh install_minikube_with_none_driver
-
-      - name: print k8s cluster status
-        run: |
-            kubectl get nodes
-
-      - name: use local disk
-        run: test/scripts/github-action-helper.sh use_local_disk
-
-      - name: create ceph cluster
-        run: test/scripts/github-action-helper.sh deploy_rook
+        uses: ./.github/actions/setup-minikube
 
       - name: Get latest release version
         id: get_release
@@ -65,11 +51,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      # Installs the release operator (CRDs + controller) and upgrades it to the
+      # PR version. Rook is deployed afterwards so the csi.ceph.io CRDs exist
+      # before Rook creates its CephConnection CR.
       - name: run yaml upgrade test
         env:
           RELEASE_VERSION: ${{ steps.get_release.outputs.release_version }}
           SKIP_CLEANUP: "true"
         run: test/scripts/test-upgrade-yaml.sh
+
+      - name: Deploy Rook Ceph cluster
+        uses: ./.github/actions/deploy-rook
+        with:
+          driverType: ${{ matrix.driver }}
+
+      - name: Deploy CSI-Addons controller
+        uses: ./.github/actions/deploy-csi-addons
 
       - name: Deploy CSI driver via kubectl
         uses: ./.github/actions/deploy-kubectl-driver

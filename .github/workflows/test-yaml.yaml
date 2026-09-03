@@ -32,40 +32,37 @@ jobs:
           - cephfs
           - rbd
           - nfs
+          - nvmeof
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
             fetch-depth: 0
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-
       - name: Setup Minikube
-        run: |
-            test/scripts/github-action-helper.sh install_minikube_with_none_driver
+        uses: ./.github/actions/setup-minikube
 
-      - name: print k8s cluster status
-        run: |
-            kubectl get nodes
-
-      - name: use local disk
-        run: test/scripts/github-action-helper.sh use_local_disk
-
-      - name: create ceph cluster
-        run: test/scripts/github-action-helper.sh deploy_rook
-
+      # Install the ceph-csi-operator (CRDs + controller) before Rook: Rook
+      # v1.20+ creates a CephConnection CR while bringing up the cluster, so
+      # the csi.ceph.io CRDs must already exist.
       - name: Build and install operator
         run: |
             IMAGE_TAG=test make docker-build
-            make build-installer
+            IMAGE_TAG=test make build-installer
             kubectl create namespace csi-driver --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply --server-side --force-conflicts -f deploy/all-in-one/install.yaml
             kubectl set env deployment/ceph-csi-operator-controller-manager -n ceph-csi-operator-system WATCH_NAMESPACE=csi-driver
             kubectl rollout status deployment/ceph-csi-operator-controller-manager -n ceph-csi-operator-system --timeout=300s
             source test/scripts/utils.sh
             check_operator_health
+
+      - name: Deploy Rook Ceph cluster
+        uses: ./.github/actions/deploy-rook
+        with:
+          driverType: ${{ matrix.driver }}
+
+      - name: Deploy CSI-Addons controller
+        uses: ./.github/actions/deploy-csi-addons
 
       - name: Deploy CSI driver via kubectl
         uses: ./.github/actions/deploy-kubectl-driver

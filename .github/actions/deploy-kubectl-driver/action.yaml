@@ -3,7 +3,7 @@ description: Deploy CSI driver and storage resources via kubectl. Expects operat
 
 inputs:
   driverType:
-    description: "The CSI driver to deploy (cephfs, rbd, nfs)"
+    description: "The CSI driver to deploy (cephfs, rbd, nfs, nvmeof)"
     required: true
 
 runs:
@@ -23,7 +23,8 @@ runs:
           with_entries(
             .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
             .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
-            .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com"))
+            .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com")) |
+            .value.log.verbosity = 5
           )
           ' ./deploy/charts/ceph-csi-drivers/values.yaml
 
@@ -39,6 +40,11 @@ runs:
           source test/scripts/utils.sh
           check_operator_health
           check_driver_health "${{ inputs.driverType }}"
+
+    - name: Patch NVMe-oF StorageClass with gateway address
+      if: inputs.driverType == 'nvmeof'
+      shell: bash
+      run: test/scripts/k8s-storage/patch-nvmeof-storageclass.sh kubectl
 
     - name: Create CephConnection, ClientProfile, StorageClass, and VolumeSnapshotClass
       shell: bash

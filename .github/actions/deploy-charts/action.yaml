@@ -29,31 +29,9 @@ runs:
       if: inputs.skipSetup == 'false'
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - name: Setup Go
-      if: inputs.skipSetup == 'false'
-      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
-      with:
-        go-version-file: go.mod
-
     - name: Setup Minikube
       if: inputs.skipSetup == 'false'
-      shell: bash
-      run: test/scripts/github-action-helper.sh install_minikube_with_none_driver
-
-    - name: Print k8s cluster status
-      if: inputs.skipSetup == 'false'
-      shell: bash
-      run: kubectl get nodes
-
-    - name: Use local disk
-      if: inputs.skipSetup == 'false'
-      shell: bash
-      run: test/scripts/github-action-helper.sh use_local_disk
-
-    - name: Create ceph cluster
-      if: inputs.skipSetup == 'false'
-      shell: bash
-      run: test/scripts/github-action-helper.sh deploy_rook
+      uses: ./.github/actions/setup-minikube
 
     - name: Install snapshot controller
       if: inputs.skipSetup == 'false'
@@ -119,10 +97,27 @@ runs:
         source test/scripts/utils.sh
         check_operator_health
 
+    # Deploy Rook only after the ceph-csi-operator (and its CRDs) is installed:
+    # Rook v1.20+ creates a CephConnection CR while bringing up the cluster.
+    - name: Deploy Rook Ceph cluster
+      if: inputs.skipSetup == 'false'
+      uses: ./.github/actions/deploy-rook
+      with:
+        driverType: ${{ inputs.driverType }}
+
+    - name: Deploy CSI-Addons controller
+      if: inputs.skipSetup == 'false'
+      uses: ./.github/actions/deploy-csi-addons
+
     - name: Lint csi driver helm chart
       if: inputs.source == 'local'
       shell: bash
       run: helm lint ./deploy/charts/ceph-csi-drivers
+
+    - name: Patch NVMe-oF StorageClass with gateway address
+      if: inputs.driverType == 'nvmeof' && inputs.valuesFile != ''
+      shell: bash
+      run: test/scripts/k8s-storage/patch-nvmeof-storageclass.sh helm "${{ inputs.valuesFile }}"
 
     - name: Install csi driver helm chart
       shell: bash
@@ -135,7 +130,8 @@ runs:
             with_entries(
               .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
               .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
-              .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com"))
+              .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com")) |
+              .value.log.verbosity = 5
             )
             ' /tmp/driver-values.yaml
 
@@ -150,7 +146,8 @@ runs:
             with_entries(
               .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
               .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
-              .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com"))
+              .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com")) |
+              .value.log.verbosity = 5
             )
             ' ./deploy/charts/ceph-csi-drivers/values.yaml
 

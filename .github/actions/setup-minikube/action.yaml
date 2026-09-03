@@ -1,0 +1,28 @@
+name: Setup Minikube
+description: Setup Go, a Minikube cluster, NVMe/TCP kernel modules, and a local disk for Rook
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: go.mod
+
+    - name: Setup Minikube
+      shell: bash
+      run: test/scripts/github-action-helper.sh install_minikube_with_none_driver
+
+    - name: Print k8s cluster status
+      shell: bash
+      run: kubectl get nodes
+
+    - name: Install NVMe/TCP Kernel Modules
+      shell: bash
+      run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends linux-modules-extra-$(uname -r)
+
+    - name: Use local disk
+      shell: bash
+      run: test/scripts/github-action-helper.sh use_local_disk
