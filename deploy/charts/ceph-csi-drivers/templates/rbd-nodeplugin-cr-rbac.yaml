@@ -75,4 +75,5 @@ rules:
   - persistentvolumeclaims
   verbs:
   - get
+  - patch
 {{- end }}

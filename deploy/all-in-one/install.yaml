@@ -16096,9 +16096,15 @@ rules:
   - ""
   resources:
   - persistentvolumes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
   - persistentvolumeclaims
   verbs:
   - get
+  - patch
 - apiGroups:
   - authentication.k8s.io
   resources:
@@ -17297,6 +17303,7 @@ rules:
   - persistentvolumeclaims
   verbs:
   - get
+  - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
