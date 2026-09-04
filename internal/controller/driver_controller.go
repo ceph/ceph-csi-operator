@@ -702,6 +702,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 											utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
 											utils.TopologyContainerArg(topology),
 											utils.If(!r.isNfsDriver(), utils.ExtraCreateMetadataContainerArg, ""),
+											utils.If(r.isNvmeofDriver(), utils.ExtraSingleWorkerThreadContainerArg, ""),
 										),
 										utils.GetExtraArgsForContainer("csi-provisioner", pluginSpec.ContainerExtraArgs)...,
 									),
