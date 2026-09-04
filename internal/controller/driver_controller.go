@@ -553,10 +553,17 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 		snPolicy := cmp.Or(r.driver.Spec.SnapshotPolicy, csiv1.VolumeSnapshotSnapshotPolicy)
 		logRotationSpec := cmp.Or(r.driver.Spec.Log, &csiv1.LogSpec{}).Rotation
 		logRotationEnabled := logRotationSpec != nil
+		// When log rotation is enabled, log files are written to a hostPath
+		// volume. Kubernetes does not relabel hostPath volumes for SELinux,
+		// hence an unprivileged container cannot write to them on hosts with
+		// SELinux in enforcing mode. The node plugin containers are already
+		// running privileged for this reason, thus run the controller plugin
+		// containers privileged as well, irrespective of the value of the
+		// privileged field.
 		logRotateSecurityContext := utils.If(
-			pluginSpec.Privileged != nil && logRotationEnabled,
+			logRotationEnabled,
 			&corev1.SecurityContext{
-				Privileged: pluginSpec.Privileged,
+				Privileged: ptr.To(true),
 				Capabilities: &corev1.Capabilities{
 					Drop: []corev1.Capability{"All"},
 				},

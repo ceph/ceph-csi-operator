@@ -93,6 +93,9 @@ operatorConfig:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # When enabled, the operator runs the controller plugin containers privileged,
+        # since the rotated log files are written to a hostPath volume (see logHostPath)
+        # that unprivileged containers cannot access on hosts with SELinux in enforcing mode.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -100,7 +103,11 @@ operatorConfig:
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
-        # -- Default log directory path (default: "")
+        # -- HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi")
+        # The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath
+        # volume into the driver pods to store the rotated log files. Kubernetes does
+        # not relabel hostPath volumes for SELinux, hence log rotation requires the
+        # driver containers to run privileged (the operator takes care of this).
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -164,6 +171,10 @@ operatorConfig:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Deprecated: ignored by the operator. When log rotation is enabled, the
+      # controller plugin containers always run privileged, as the rotated log
+      # files are written to a hostPath volume that unprivileged containers
+      # cannot access on hosts with SELinux in enforcing mode.
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -186,6 +197,9 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # When enabled, the operator runs the controller plugin containers privileged,
+        # since the rotated log files are written to a hostPath volume (see logHostPath)
+        # that unprivileged containers cannot access on hosts with SELinux in enforcing mode.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -193,7 +207,11 @@ drivers:
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
-        # -- Default log directory path (default: "")
+        # -- HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi")
+        # The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath
+        # volume into the driver pods to store the rotated log files. Kubernetes does
+        # not relabel hostPath volumes for SELinux, hence log rotation requires the
+        # driver containers to run privileged (the operator takes care of this).
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -253,6 +271,10 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Deprecated: ignored by the operator. When log rotation is enabled, the
+      # controller plugin containers always run privileged, as the rotated log
+      # files are written to a hostPath volume that unprivileged containers
+      # cannot access on hosts with SELinux in enforcing mode.
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -326,6 +348,9 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # When enabled, the operator runs the controller plugin containers privileged,
+        # since the rotated log files are written to a hostPath volume (see logHostPath)
+        # that unprivileged containers cannot access on hosts with SELinux in enforcing mode.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -333,7 +358,11 @@ drivers:
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
-        # -- Default log directory path (default: "")
+        # -- HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi")
+        # The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath
+        # volume into the driver pods to store the rotated log files. Kubernetes does
+        # not relabel hostPath volumes for SELinux, hence log rotation requires the
+        # driver containers to run privileged (the operator takes care of this).
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -393,6 +422,10 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Deprecated: ignored by the operator. When log rotation is enabled, the
+      # controller plugin containers always run privileged, as the rotated log
+      # files are written to a hostPath volume that unprivileged containers
+      # cannot access on hosts with SELinux in enforcing mode.
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -466,6 +499,9 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # When enabled, the operator runs the controller plugin containers privileged,
+        # since the rotated log files are written to a hostPath volume (see logHostPath)
+        # that unprivileged containers cannot access on hosts with SELinux in enforcing mode.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -473,7 +509,11 @@ drivers:
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
-        # -- Default log directory path (default: "")
+        # -- HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi")
+        # The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath
+        # volume into the driver pods to store the rotated log files. Kubernetes does
+        # not relabel hostPath volumes for SELinux, hence log rotation requires the
+        # driver containers to run privileged (the operator takes care of this).
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -533,6 +573,10 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Deprecated: ignored by the operator. When log rotation is enabled, the
+      # controller plugin containers always run privileged, as the rotated log
+      # files are written to a hostPath volume that unprivileged containers
+      # cannot access on hosts with SELinux in enforcing mode.
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -603,6 +647,9 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # When enabled, the operator runs the controller plugin containers privileged,
+        # since the rotated log files are written to a hostPath volume (see logHostPath)
+        # that unprivileged containers cannot access on hosts with SELinux in enforcing mode.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -610,7 +657,11 @@ drivers:
         maxLogSize: "10G"
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
-        # -- Default log directory path (default: "")
+        # -- HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi")
+        # The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath
+        # volume into the driver pods to store the rotated log files. Kubernetes does
+        # not relabel hostPath volumes for SELinux, hence log rotation requires the
+        # driver containers to run privileged (the operator takes care of this).
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -672,6 +723,10 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Deprecated: ignored by the operator. When log rotation is enabled, the
+      # controller plugin containers always run privileged, as the rotated log
+      # files are written to a hostPath volume that unprivileged containers
+      # cannot access on hosts with SELinux in enforcing mode.
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []

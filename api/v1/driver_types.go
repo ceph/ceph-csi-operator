@@ -241,9 +241,13 @@ type ControllerPluginSpec struct {
 	//+kubebuilder:validation:Optional
 	Resources ControllerPluginResourcesSpec `json:"resources,omitempty"`
 
-	// To enable logrotation for csi pods,
-	// Some platforms require controller plugin to run privileged,
-	// For example, OpenShift with SELinux restrictions requires the pod to be privileged to write to hostPath.
+	// To enable logrotation for csi pods.
+	// Deprecated: when log rotation is enabled, the operator always runs the
+	// controller plugin containers privileged, as the log files are written
+	// to a hostPath volume and Kubernetes does not relabel hostPath volumes
+	// for SELinux, making them inaccessible for unprivileged containers on
+	// hosts with SELinux in enforcing mode. The field is kept for backward
+	// compatibility and its value is ignored.
 	//+kubebuilder:validation:Optional
 	Privileged *bool `json:"privileged,omitempty"`
 
