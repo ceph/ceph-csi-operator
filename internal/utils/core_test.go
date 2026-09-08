@@ -22,6 +22,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	testValueNew  = "new"
+	testValueKeep = "keep"
+)
+
 // Dummy source and destination structs for testing
 type sourceItem struct {
 	ID    string
@@ -58,25 +63,25 @@ func TestMapMergeByKey(t *testing.T) {
 				{ID: "a", Value: "old"},
 			},
 			src: []sourceItem{
-				{ID: "a", Value: "new"},
+				{ID: "a", Value: testValueNew},
 			},
 			expected: []destItem{
-				{ID: "a", Value: "new"},
+				{ID: "a", Value: testValueNew},
 			},
 		},
 		{
 			name: "append and replace mix",
 			dest: []destItem{
-				{ID: "x", Value: "keep"},
+				{ID: "x", Value: testValueKeep},
 				{ID: "a", Value: "old"},
 			},
 			src: []sourceItem{
-				{ID: "a", Value: "new"},
+				{ID: "a", Value: testValueNew},
 				{ID: "b", Value: "added"},
 			},
 			expected: []destItem{
-				{ID: "x", Value: "keep"},
-				{ID: "a", Value: "new"},
+				{ID: "x", Value: testValueKeep},
+				{ID: "a", Value: testValueNew},
 				{ID: "b", Value: "added"},
 			},
 		},
@@ -85,10 +90,10 @@ func TestMapMergeByKey(t *testing.T) {
 			dest: []destItem{},
 			src: []sourceItem{
 				{ID: "", Value: "skip"},
-				{ID: "b", Value: "keep"},
+				{ID: "b", Value: testValueKeep},
 			},
 			expected: []destItem{
-				{ID: "b", Value: "keep"},
+				{ID: "b", Value: testValueKeep},
 			},
 		},
 		{

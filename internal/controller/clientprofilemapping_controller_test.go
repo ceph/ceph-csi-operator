@@ -38,7 +38,7 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: defaultNamespace, // TODO(user):Modify as needed
 		}
 		clientprofilemapping := &csiv1.ClientProfileMapping{}
 
@@ -49,7 +49,7 @@ var _ = Describe("ClientProfileMapping Controller", func() {
 				resource := &csiv1.ClientProfileMapping{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
-						Namespace: "default",
+						Namespace: defaultNamespace,
 					},
 					Spec: csiv1.ClientProfileMappingSpec{
 						Mappings: []csiv1.MappingsSpec{

@@ -56,7 +56,7 @@ var _ = Describe("ClientProfileReplication Controller with Fake Client", func() 
 		testCephConnection = &csiv1.CephConnection{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-ceph-connection",
-				Namespace: "default",
+				Namespace: defaultNamespace,
 			},
 			Spec: csiv1.CephConnectionSpec{
 				Monitors: []string{"mon1:6789", "mon2:6789"},
@@ -66,7 +66,7 @@ var _ = Describe("ClientProfileReplication Controller with Fake Client", func() 
 		testClientProfile = &csiv1.ClientProfile{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-client-profile",
-				Namespace: "default",
+				Namespace: defaultNamespace,
 			},
 			Spec: csiv1.ClientProfileSpec{
 				CephConnectionRef: corev1.LocalObjectReference{
@@ -100,11 +100,11 @@ var _ = Describe("ClientProfileReplication Controller with Fake Client", func() 
 			cpr := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-cpr-no-profile",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  "nonexistent-profile",
-					RemoteClientProfile: "remote-profile",
+					RemoteClientProfile: remoteProfileName,
 				},
 			}
 			Expect(fakeClient.Create(ctx, cpr)).To(Succeed())
@@ -134,11 +134,11 @@ var _ = Describe("ClientProfileReplication Controller with Fake Client", func() 
 			cpr := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-cpr-single",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  testClientProfile.Name,
-					RemoteClientProfile: "remote-profile",
+					RemoteClientProfile: remoteProfileName,
 					RBD: &csiv1.RBDReplicationSpec{
 						PoolMapping: []csiv1.PoolMappingSpec{
 							{Name: "rbd", RemoteID: "5"},
@@ -177,7 +177,7 @@ var _ = Describe("ClientProfileReplication Controller with Fake Client", func() 
 			cpr1 := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:              "test-cpr-oldest",
-					Namespace:         "default",
+					Namespace:         defaultNamespace,
 					CreationTimestamp: oldTime,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
@@ -189,7 +189,7 @@ var _ = Describe("ClientProfileReplication Controller with Fake Client", func() 
 			cpr2 := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:              "test-cpr-newer",
-					Namespace:         "default",
+					Namespace:         defaultNamespace,
 					CreationTimestamp: newTime,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
