@@ -144,7 +144,7 @@ markdownlint-fix:
 
 .PHONY:	golangci-lint-fix
 golangci-lint-fix: $(GOLANGCI_LINT) ## Run the golangci-lint linter and perform fixes
-	@$(GOLANGCI_LINT) --config=.golangci.yml -verbose run --fix
+	@$(GOLANGCI_LINT) --config=.golangci.yml --verbose run --fix
 
 
 .PHONY: lint
@@ -305,7 +305,7 @@ HELM_DOCS ?= $(LOCALBIN)/helm-docs-$(HELM_DOCS_VERSION)
 KUSTOMIZE_VERSION ?= v5.3.0
 CONTROLLER_TOOLS_VERSION ?= v0.17.2
 ENVTEST_VERSION ?= v0.0.0-20250517180713-32e5e9e948a5
-GOLANGCI_LINT_VERSION ?= v1.63.4
+GOLANGCI_LINT_VERSION ?= v2.13.2
 HELMIFY_VERSION ?= v0.4.20
 HELM_DOCS_VERSION ?= v1.14.2
 
@@ -361,9 +361,9 @@ check-all-committed: ## Fail in case there are uncommitted changes
 
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT) ## Run the golangci-lint linter
-	@$(GOLANGCI_LINT) --config=.golangci.yml -verbose run
+	@$(GOLANGCI_LINT) --config=.golangci.yml --verbose run
 $(GOLANGCI_LINT): $(LOCALBIN) ## Download golangci-lint locally if necessary.
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,${GOLANGCI_LINT_VERSION})
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint,${GOLANGCI_LINT_VERSION})
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary (ideally with version)
