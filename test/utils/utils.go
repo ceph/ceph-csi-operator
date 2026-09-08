@@ -22,7 +22,7 @@ import (
 	"os/exec"
 	"strings"
 
-	. "github.com/onsi/ginkgo/v2" //nolint:golint,revive
+	"github.com/onsi/ginkgo/v2"
 )
 
 const (
@@ -35,7 +35,7 @@ const (
 )
 
 func warnError(err error) {
-	_, fErr := fmt.Fprintf(GinkgoWriter, "warning: %v\n", err)
+	_, fErr := fmt.Fprintf(ginkgo.GinkgoWriter, "warning: %v\n", err)
 	if fErr != nil {
 		panic(fErr)
 	}
@@ -56,7 +56,7 @@ func Run(cmd *exec.Cmd) ([]byte, error) {
 	cmd.Dir = dir
 
 	if err := os.Chdir(cmd.Dir); err != nil {
-		_, fErr := fmt.Fprintf(GinkgoWriter, "chdir dir: %s\n", err)
+		_, fErr := fmt.Fprintf(ginkgo.GinkgoWriter, "chdir dir: %s\n", err)
 		if fErr != nil {
 			panic(fErr)
 		}
@@ -64,7 +64,7 @@ func Run(cmd *exec.Cmd) ([]byte, error) {
 
 	cmd.Env = append(os.Environ(), "GO111MODULE=on")
 	command := strings.Join(cmd.Args, " ")
-	_, err := fmt.Fprintf(GinkgoWriter, "running: %s\n", command)
+	_, err := fmt.Fprintf(ginkgo.GinkgoWriter, "running: %s\n", command)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +150,6 @@ func GetProjectDir() (string, error) {
 	if err != nil {
 		return wd, err
 	}
-	wd = strings.Replace(wd, "/test/e2e", "", -1)
+	wd = strings.ReplaceAll(wd, "/test/e2e", "")
 	return wd, nil
 }

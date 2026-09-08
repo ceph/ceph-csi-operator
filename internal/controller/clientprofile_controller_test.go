@@ -33,6 +33,12 @@ import (
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
 )
 
+const (
+	defaultNamespace  = "default"
+	remoteProfileName = "remote-profile"
+	acceptedMessage   = "accepted"
+)
+
 var _ = Describe("ClientProfile Controller with Fake Client", func() {
 	var (
 		ctx                context.Context
@@ -55,7 +61,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 		testCephConnection = &csiv1.CephConnection{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-ceph-connection",
-				Namespace: "default",
+				Namespace: defaultNamespace,
 			},
 			Spec: csiv1.CephConnectionSpec{
 				Monitors: []string{"mon1:6789", "mon2:6789"},
@@ -65,7 +71,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 		testClientProfile = &csiv1.ClientProfile{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-client-profile",
-				Namespace: "default",
+				Namespace: defaultNamespace,
 			},
 			Spec: csiv1.ClientProfileSpec{
 				CephConnectionRef: corev1.LocalObjectReference{
@@ -117,11 +123,11 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			cpr := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-replication",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  testClientProfile.Name,
-					RemoteClientProfile: "remote-profile",
+					RemoteClientProfile: remoteProfileName,
 					RBD: &csiv1.RBDReplicationSpec{
 						PoolMapping: []csiv1.PoolMappingSpec{
 							{Name: "rbd", RemoteID: "5"},
@@ -130,7 +136,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 				},
 				Status: csiv1.ClientProfileReplicationStatus{
 					Phase:   csiv1.ClientProfileReplicationPhaseReady,
-					Message: "accepted",
+					Message: acceptedMessage,
 				},
 			}
 			Expect(fakeClient.Create(ctx, cpr)).To(Succeed())
@@ -156,7 +162,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			cpr1 := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-replication-1",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  testClientProfile.Name,
@@ -164,7 +170,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 				},
 				Status: csiv1.ClientProfileReplicationStatus{
 					Phase:   csiv1.ClientProfileReplicationPhaseReady,
-					Message: "accepted",
+					Message: acceptedMessage,
 				},
 			}
 			Expect(fakeClient.Create(ctx, cpr1)).To(Succeed())
@@ -172,7 +178,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			cpr2 := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-replication-2",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  testClientProfile.Name,
@@ -180,7 +186,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 				},
 				Status: csiv1.ClientProfileReplicationStatus{
 					Phase:   csiv1.ClientProfileReplicationPhaseReady,
-					Message: "accepted",
+					Message: acceptedMessage,
 				},
 			}
 			Expect(fakeClient.Create(ctx, cpr2)).To(Succeed())
@@ -203,7 +209,7 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			deletingProfile := &csiv1.ClientProfile{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:              "deleting-profile",
-					Namespace:         "default",
+					Namespace:         defaultNamespace,
 					DeletionTimestamp: &now,
 					Finalizers:        []string{cleanupFinalizer},
 				},
@@ -217,11 +223,11 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			cpr := &csiv1.ClientProfileReplication{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test-replication",
-					Namespace: "default",
+					Namespace: defaultNamespace,
 				},
 				Spec: csiv1.ClientProfileReplicationSpec{
 					LocalClientProfile:  deletingProfile.Name,
-					RemoteClientProfile: "remote-profile",
+					RemoteClientProfile: remoteProfileName,
 				},
 			}
 

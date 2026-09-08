@@ -42,7 +42,7 @@ var _ = Describe("Driver Controller", func() {
 
 		typeNamespacedName := types.NamespacedName{
 			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+			Namespace: defaultNamespace, // TODO(user):Modify as needed
 		}
 		driver := &csiv1.Driver{}
 

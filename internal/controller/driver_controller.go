@@ -81,6 +81,15 @@ const (
 	driverCSIAddonsFeatureVolumeCondition = "addons.csi.ceph.io/volume-condition"
 
 	logRotateCmd = `while true; do logrotate --verbose /logrotate-config/csi; sleep 15m; done`
+
+	// Label and container names
+	appLabelKey         = "app"
+	csiAddonsContainer  = "csi-addons"
+	logRotatorContainer = "log-rotator"
+	bashShell           = "/bin/bash"
+
+	// Capability constants
+	capabilityAll = "All"
 )
 
 // A regexp used to parse driver's prefix and type from the full name
@@ -537,7 +546,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 
 		appName := deploy.Name
 		appSelector := metav1.LabelSelector{
-			MatchLabels: map[string]string{"app": appName},
+			MatchLabels: map[string]string{appLabelKey: appName},
 		}
 
 		leaderElectionSpec := cmp.Or(r.driver.Spec.LeaderElection, &defaultLeaderElection)
@@ -558,7 +567,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 			&corev1.SecurityContext{
 				Privileged: pluginSpec.Privileged,
 				Capabilities: &corev1.Capabilities{
-					Drop: []corev1.Capability{"All"},
+					Drop: []corev1.Capability{capabilityAll},
 				},
 			},
 			nil,
@@ -586,7 +595,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 					Labels: utils.Call(func() map[string]string {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
-						podLabels["app"] = appName
+						podLabels[appLabelKey] = appName
 						return podLabels
 					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
@@ -814,7 +823,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 								},
 								Args: utils.DeleteZeroValues(
@@ -844,7 +853,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						if r.withCsiAddons() {
 							port := r.controllerPluginCsiAddonsContainerPort()
 							containers = append(containers, corev1.Container{
-								Name:            "csi-addons",
+								Name:            csiAddonsContainer,
 								Image:           r.images["addons"],
 								ImagePullPolicy: imagePullPolicy,
 								SecurityContext: logRotateSecurityContext,
@@ -859,9 +868,9 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 											utils.CsiAddonsAddressContainerArg,
 											utils.ContainerPortArg(port),
 											utils.NamespaceContainerArg,
-											utils.If(logRotationEnabled, utils.LogFileContainerArg("csi-addons"), ""),
+											utils.If(logRotationEnabled, utils.LogFileContainerArg(csiAddonsContainer), ""),
 										),
-										utils.GetExtraArgsForContainer("csi-addons", pluginSpec.ContainerExtraArgs)...,
+										utils.GetExtraArgsForContainer(csiAddonsContainer, pluginSpec.ContainerExtraArgs)...,
 									),
 								),
 								Ports: []corev1.ContainerPort{
@@ -954,12 +963,12 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 						if logRotationEnabled {
 							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
 							containers = append(containers, corev1.Container{
-								Name:            "log-rotator",
+								Name:            logRotatorContainer,
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
 								Resources:       resources,
 								SecurityContext: logRotateSecurityContext,
-								Command:         []string{"/bin/bash", "-c", logRotateCmd},
+								Command:         []string{bashShell, "-c", logRotateCmd},
 								VolumeMounts: []corev1.VolumeMount{
 									utils.LogsDirVolumeMount,
 									utils.LogRotateDirVolumeMount,
@@ -1076,7 +1085,7 @@ func (r *driverReconcile) reconcileControllerPluginNetworkPolicy() error {
 				NamespaceSelector: &metav1.LabelSelector{},
 				PodSelector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{
-						"app.kubernetes.io/name": "csi-addons",
+						"app.kubernetes.io/name": csiAddonsContainer,
 						"control-plane":          "controller-manager",
 					},
 				},
@@ -1109,7 +1118,7 @@ func (r *driverReconcile) reconcileControllerPluginNetworkPolicy() error {
 		}
 		np.Spec = networkingv1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{
-				MatchLabels: map[string]string{"app": np.Name},
+				MatchLabels: map[string]string{appLabelKey: np.Name},
 			},
 			Ingress:     ingress,
 			Egress:      []networkingv1.NetworkPolicyEgressRule{{}},
@@ -1193,7 +1202,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 
 		daemonSet.Spec = appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"app": appName},
+				MatchLabels: map[string]string{appLabelKey: appName},
 			},
 			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defaultDaemonSetUpdateStrategy),
 			Template: corev1.PodTemplateSpec{
@@ -1201,7 +1210,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 					Labels: utils.Call(func() map[string]string {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
-						podLabels["app"] = appName
+						podLabels[appLabelKey] = appName
 						return podLabels
 					}),
 					Annotations: maps.Clone(pluginSpec.Annotations),
@@ -1217,7 +1226,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 					Containers: utils.Call(func() []corev1.Container {
 						containers := []corev1.Container{
 							{
-								Name:            "csi-addons",
+								Name:            csiAddonsContainer,
 								Image:           r.images["addons"],
 								ImagePullPolicy: imagePullPolicy,
 								// We need this in order for this container to be able to access
@@ -1226,7 +1235,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 								},
 								Args: utils.DeleteZeroValues(
@@ -1280,17 +1289,17 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 						if logRotationEnabled {
 							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
 							containers = append(containers, corev1.Container{
-								Name:            "log-rotator",
+								Name:            logRotatorContainer,
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
 								Resources:       resources,
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 								},
-								Command: []string{"/bin/bash", "-c", logRotateCmd},
+								Command: []string{bashShell, "-c", logRotateCmd},
 								VolumeMounts: []corev1.VolumeMount{
 									utils.LogsDirVolumeMount,
 									utils.LogRotateDirVolumeMount,
@@ -1359,7 +1368,7 @@ func (r *driverReconcile) reconcileNodePluginCsiAddonsNetworkPolicy() error {
 		}
 		np.Spec = networkingv1.NetworkPolicySpec{
 			PodSelector: metav1.LabelSelector{
-				MatchLabels: map[string]string{"app": np.Name},
+				MatchLabels: map[string]string{appLabelKey: np.Name},
 			},
 			Ingress: []networkingv1.NetworkPolicyIngressRule{{
 				From: []networkingv1.NetworkPolicyPeer{{
@@ -1417,7 +1426,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 
 		daemonSet.Spec = appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"app": appName},
+				MatchLabels: map[string]string{appLabelKey: appName},
 			},
 			UpdateStrategy: ptr.Deref(pluginSpec.UpdateStrategy, defaultDaemonSetUpdateStrategy),
 			Template: corev1.PodTemplateSpec{
@@ -1425,7 +1434,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 					Labels: utils.Call(func() map[string]string {
 						podLabels := map[string]string{}
 						maps.Copy(podLabels, pluginSpec.Labels)
-						podLabels["app"] = appName
+						podLabels[appLabelKey] = appName
 						if r.driver.Spec.Liveness != nil {
 							podLabels["contains"] = fmt.Sprintf("%s-metrics", appName)
 						}
@@ -1454,7 +1463,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
 										Add:  []corev1.Capability{"SYS_ADMIN"},
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 									AllowPrivilegeEscalation: ptr.To(true),
 								},
@@ -1569,7 +1578,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 								},
 								Args: utils.DeleteZeroValues(
@@ -1601,7 +1610,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 								},
 								Args: utils.DeleteZeroValues(
@@ -1633,17 +1642,17 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 						if logRotationEnabled {
 							resources := ptr.Deref(pluginSpec.Resources.LogRotator, corev1.ResourceRequirements{})
 							containers = append(containers, corev1.Container{
-								Name:            "log-rotator",
+								Name:            logRotatorContainer,
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
 								Resources:       resources,
 								SecurityContext: &corev1.SecurityContext{
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
-										Drop: []corev1.Capability{"All"},
+										Drop: []corev1.Capability{capabilityAll},
 									},
 								},
-								Command: []string{"/bin/bash", "-c", logRotateCmd},
+								Command: []string{bashShell, "-c", logRotateCmd},
 								VolumeMounts: []corev1.VolumeMount{
 									utils.LogsDirVolumeMount,
 									utils.LogRotateDirVolumeMount,
@@ -1816,7 +1825,7 @@ func (r *driverReconcile) getControllerPluginReplicas(
 		return specReplicas
 	}
 
-	var replicas int32 = defaultControllerPluginReplicas
+	var replicas = defaultControllerPluginReplicas
 	nodeList := &corev1.NodeList{}
 	if err := r.List(r.ctx, nodeList); err != nil {
 		log.Error(err, "Failed to list nodes for replica calculation")
