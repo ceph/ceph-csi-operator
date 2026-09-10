@@ -11,7 +11,7 @@ SCRIPT_DIR="$(dirname "${0}")"
 # shellcheck disable=SC1091
 [ ! -e "${SCRIPT_DIR}"/utils.sh ] || source "${SCRIPT_DIR}"/utils.sh
 
-CSI_ADDONS_VERSION=${CSI_ADDONS_VERSION:-"v0.14.0"}
+CSI_ADDONS_VERSION=${CSI_ADDONS_VERSION:-"v0.15.0"}
 CSI_ADDONS_NAMESPACE=${CSI_ADDONS_NAMESPACE:-"csi-addons-system"}
 
 CSI_ADDONS_URL="https://raw.githubusercontent.com/csi-addons/kubernetes-csi-addons/${CSI_ADDONS_VERSION}/deploy/controller"
