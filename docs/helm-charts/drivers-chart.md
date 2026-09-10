@@ -19,6 +19,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 * VolumeAttributesClass for volume attributes (QoS, MDS pinning, etc.)
 * Secret for Ceph authentication credentials
 
+
 ## Prerequisites
 
 * Kubernetes 1.32+
@@ -37,6 +38,7 @@ The `helm install` command deploys ceph-csi-drivers on the Kubernetes cluster in
 ceph-csi-drivers currently publishes artifacts of the ceph-csi drivers to tagged versions.
 
 ### **Released version**
+
 
 ```console
 helm repo add ceph-csi-operator https://ceph.github.io/ceph-csi-operator/
@@ -106,7 +108,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
-| `drivers.cephfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.cephfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Deprecated: ignored by the operator. When log rotation is enabled, the controller plugin containers always run privileged, as the rotated log files are written to a hostPath volume that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `false` |
 | `drivers.cephfs.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.cephfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
@@ -120,8 +122,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.cephfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.cephfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
-| `drivers.cephfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
-| `drivers.cephfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.cephfs.log.rotation.enabled` | Enable log rotation (default: true) When enabled, the operator runs the controller plugin containers privileged, since the rotated log files are written to a hostPath volume (see logHostPath) that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `true` |
+| `drivers.cephfs.log.rotation.logHostPath` | HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi") The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath volume into the driver pods to store the rotated log files. Kubernetes does not relabel hostPath volumes for SELinux, hence log rotation requires the driver containers to run privileged (the operator takes care of this). | `""` |
 | `drivers.cephfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.cephfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.cephfs.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
@@ -146,7 +148,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
-| `drivers.nfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.nfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Deprecated: ignored by the operator. When log rotation is enabled, the controller plugin containers always run privileged, as the rotated log files are written to a hostPath volume that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `false` |
 | `drivers.nfs.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.nfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
@@ -160,8 +162,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nfs.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nfs.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
-| `drivers.nfs.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
-| `drivers.nfs.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.nfs.log.rotation.enabled` | Enable log rotation (default: true) When enabled, the operator runs the controller plugin containers privileged, since the rotated log files are written to a hostPath volume (see logHostPath) that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `true` |
+| `drivers.nfs.log.rotation.logHostPath` | HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi") The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath volume into the driver pods to store the rotated log files. Kubernetes does not relabel hostPath volumes for SELinux, hence log rotation requires the driver containers to run privileged (the operator takes care of this). | `""` |
 | `drivers.nfs.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.nfs.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.nfs.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
@@ -187,7 +189,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
-| `drivers.nvmeof.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.nvmeof.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Deprecated: ignored by the operator. When log rotation is enabled, the controller plugin containers always run privileged, as the rotated log files are written to a hostPath volume that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `false` |
 | `drivers.nvmeof.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.nvmeof.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
@@ -201,8 +203,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.nvmeof.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.nvmeof.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
-| `drivers.nvmeof.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
-| `drivers.nvmeof.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.nvmeof.log.rotation.enabled` | Enable log rotation (default: true) When enabled, the operator runs the controller plugin containers privileged, since the rotated log files are written to a hostPath volume (see logHostPath) that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `true` |
+| `drivers.nvmeof.log.rotation.logHostPath` | HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi") The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath volume into the driver pods to store the rotated log files. Kubernetes does not relabel hostPath volumes for SELinux, hence log rotation requires the driver containers to run privileged (the operator takes care of this). | `""` |
 | `drivers.nvmeof.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.nvmeof.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.nvmeof.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
@@ -227,7 +229,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
-| `drivers.rbd.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `drivers.rbd.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Deprecated: ignored by the operator. When log rotation is enabled, the controller plugin containers always run privileged, as the rotated log files are written to a hostPath volume that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `false` |
 | `drivers.rbd.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.rbd.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
@@ -241,8 +243,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `drivers.rbd.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `drivers.rbd.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
-| `drivers.rbd.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
-| `drivers.rbd.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `drivers.rbd.log.rotation.enabled` | Enable log rotation (default: true) When enabled, the operator runs the controller plugin containers privileged, since the rotated log files are written to a hostPath volume (see logHostPath) that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `true` |
+| `drivers.rbd.log.rotation.logHostPath` | HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi") The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath volume into the driver pods to store the rotated log files. Kubernetes does not relabel hostPath volumes for SELinux, hence log rotation requires the driver containers to run privileged (the operator takes care of this). | `""` |
 | `drivers.rbd.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `drivers.rbd.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `drivers.rbd.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
@@ -274,7 +276,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
-| `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) | `false` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Deprecated: ignored by the operator. When log rotation is enabled, the controller plugin containers always run privileged, as the rotated log files are written to a hostPath volume that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.tolerations` | List of tolerations for the controller plugin (default: []) | `[]` |
@@ -287,8 +289,8 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.grpcTimeout` | gRPC timeout in seconds (default: 30) | `30` |
 | `operatorConfig.driverSpecDefaults.imageSet.name` | ConfigMap reference to the image set for the driver (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.kernelMountOptions` | Kernel mount options (default: {}) | `{}` |
-| `operatorConfig.driverSpecDefaults.log.rotation.enabled` | Enable log rotation (default: true) | `true` |
-| `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | Default log directory path (default: "") | `""` |
+| `operatorConfig.driverSpecDefaults.log.rotation.enabled` | Enable log rotation (default: true) When enabled, the operator runs the controller plugin containers privileged, since the rotated log files are written to a hostPath volume (see logHostPath) that unprivileged containers cannot access on hosts with SELinux in enforcing mode. | `true` |
+| `operatorConfig.driverSpecDefaults.log.rotation.logHostPath` | HostPath prefix directory for the csi log files (default: "/var/lib/cephcsi") The operator mounts a "logHostPath/plugin-name" subdirectory as a hostPath volume into the driver pods to store the rotated log files. Kubernetes does not relabel hostPath volumes for SELinux, hence log rotation requires the driver containers to run privileged (the operator takes care of this). | `""` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxFiles` | Maximum number of log files to keep (default: 7) | `7` |
 | `operatorConfig.driverSpecDefaults.log.rotation.maxLogSize` | Maximum size of each log file (default: "10G") | `"10G"` |
 | `operatorConfig.driverSpecDefaults.log.rotation.periodicity` | Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily") | `"daily"` |
