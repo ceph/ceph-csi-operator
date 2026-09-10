@@ -229,7 +229,11 @@ install_minikube_with_none_driver() {
   rm "$CNI_PLUGIN_TAR"
 
   export MINIKUBE_HOME=$HOME CHANGE_MINIKUBE_NONE_USER=true KUBECONFIG=$HOME/.kube/config
-  minikube start --kubernetes-version="$kubernetes_version" --driver=none --memory 6g --cpus=2 --addons ingress --cni=calico
+  # Pin the runtime to docker (via the cri-dockerd installed above) instead of
+  # relying on minikube's auto-detection. This keeps the kubelet reading from the
+  # same Docker daemon that `make docker-build` writes to, so the locally built
+  # ":test" image is found without a separate image-load step.
+  minikube start --kubernetes-version="$kubernetes_version" --driver=none --container-runtime=docker --memory 6g --cpus=2 --addons ingress --cni=calico
   minikube logs
 }
 
