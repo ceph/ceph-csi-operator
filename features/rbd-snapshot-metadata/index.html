@@ -1426,9 +1426,9 @@ of the RBD controller plugin with the <code>external-snapshot-metadata</code> si
 <h2 id="admin-responsibilities">Admin Responsibilities<a class="headerlink" href="#admin-responsibilities" title="Permanent link">&para;</a></h2>
 <p>Users need to perform the following manual setup:</p>
 <ol>
-<li>Install the <a href="https://github.com/kubernetes-csi/external-snapshot-metadata/blob/v1.0.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml">SnapshotMetadataService CRD</a></li>
+<li>Install the <a href="https://github.com/kubernetes-csi/external-snapshot-metadata/blob/v1.1.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml">SnapshotMetadataService CRD</a></li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/kubernetes-csi/external-snapshot-metadata/refs/tags/v1.0.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/kubernetes-csi/external-snapshot-metadata/refs/tags/v1.1.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml
 </code></pre></div>
 <ol>
 <li>Create a Service to expose the RBD driver pod</li>
