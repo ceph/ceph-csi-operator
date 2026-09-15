@@ -331,7 +331,8 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 	// Load the current desired state in the form of a ceph csi driver resource
 	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.driver), &r.driver); err != nil {
 		r.log.Error(err, "Unable to load driver.csi.ceph.io", "name", client.ObjectKeyFromObject(&r.driver))
-		return err
+		//return nil if the driver is not present or else return err
+		return client.IgnoreNotFound(err)
 	}
 
 	// Cloning default images as the base images before
