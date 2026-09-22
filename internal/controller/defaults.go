@@ -29,13 +29,13 @@ import (
 
 var imageDefaults = map[string]string{
 	"provisioner":       "registry.k8s.io/sig-storage/csi-provisioner:v6.3.0",
-	"attacher":          "registry.k8s.io/sig-storage/csi-attacher:v4.12.0",
+	"attacher":          "registry.k8s.io/sig-storage/csi-attacher:v4.13.0",
 	"resizer":           "registry.k8s.io/sig-storage/csi-resizer:v2.2.1",
 	"snapshotter":       "registry.k8s.io/sig-storage/csi-snapshotter:v8.6.0",
-	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.17.0",
+	"registrar":         "registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.18.0",
 	"snapshot-metadata": "registry.k8s.io/sig-storage/csi-snapshot-metadata:v1.1.0",
 	"plugin":            "quay.io/cephcsi/cephcsi:v3.17.1",
-	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.15.0",
+	"addons":            "quay.io/csiaddons/k8s-sidecar:v0.15.1",
 }
 
 const (
