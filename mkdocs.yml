@@ -47,6 +47,7 @@ nav:
       - Host Network: design/hostNetwork.md
       - Log Rotation: design/logrotate.md
       - Network Policy: design/network-policy.md
+      - PodMonitor: design/podmonitor.md
       - Replication: design/replication.md
   - Features:
       - RBD Snapshot Metadata: features/rbd-snapshot-metadata.md

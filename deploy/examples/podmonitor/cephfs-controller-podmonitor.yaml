@@ -1,0 +1,63 @@
+# Example PodMonitor for the CephFS controller plugin.
+#
+# Scrapes CSI operation metrics from the upstream Kubernetes CSI sidecars
+# (csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter) running in
+# the controller plugin Deployment.
+#
+# No liveness sidecar is required. The liveness-prometheus container is
+# deprecated and must not be used for new monitoring setups.
+#
+# Prerequisites:
+# - Prometheus Operator installed (serves monitoring.coreos.com/v1).
+# - A Prometheus/PrometheusAgent object selecting this PodMonitor, e.g.
+#   via `podMonitorSelector` matching `monitoring: ceph-csi`.
+# - Metrics endpoints enabled on the sidecars through the Driver CR, e.g.:
+#
+#     spec:
+#       controllerPlugin:
+#         containerExtraArgs:
+#           csi-provisioner: ["--http-endpoint=:8090"]
+#           csi-attacher: ["--http-endpoint=:8091"]
+#           csi-resizer: ["--http-endpoint=:8092"]
+#           csi-snapshotter: ["--http-endpoint=:8093"]
+#
+#   The ports below must match the `--http-endpoint` values above.
+#   `targetPort` is used so no named container ports are required.
+#
+# Host network note:
+# If the controller plugin runs with `hostNetwork: true`, these ports bind
+# on the node itself. These ports intentionally differ from the RBD example
+# (8080-8083) so RBD and CephFS controller pods on the same node do not
+# conflict. Pick distinct ports for every driver (RBD, CephFS, NFS, NVMe-oF).
+#
+# Apply with:
+#   kubectl apply -f deploy/examples/podmonitor/cephfs-controller-podmonitor.yaml
+# Adjust `namespace` and the `app` selector if your Driver name/namespace differ.
+# Controller pods carry the label `app: <driver-name>-ctrlplugin`.
+#
+# Node plugin monitoring is out of scope here: the node driver registrar
+# HTTP endpoint serves only `/healthz`, not equivalent CSI operation metrics.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cephfs-csi-controller
+  namespace: ceph-csi-driver
+  labels:
+    monitoring: ceph-csi
+spec:
+  selector:
+    matchLabels:
+      app: cephfs.csi.ceph.com-ctrlplugin
+  podMetricsEndpoints:
+    - targetPort: 8090
+      path: /metrics
+      interval: 30s
+    - targetPort: 8091
+      path: /metrics
+      interval: 30s
+    - targetPort: 8092
+      path: /metrics
+      interval: 30s
+    - targetPort: 8093
+      path: /metrics
+      interval: 30s
