@@ -69,6 +69,23 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 
 {{ template "chart.valuesTable" . }}
 
+### Troubleshooting log rotation on SELinux-enforcing hosts
+
+If log rotation (`log.rotation.enabled`) uses a hostPath volume (`log.rotation.logHostPath`)
+on hosts with SELinux in enforcing mode (for example, OpenShift), the controller plugin
+containers need `controllerPlugin.privileged:true` to write the rotated log files, as
+Kubernetes does not relabel hostPath volumes for SELinux. See [docs/design/logrotate.md](https://github.com/ceph/ceph-csi-operator/blob/main/docs/design/logrotate.md).
+
+The operator does not automatically make the controller plugin privileged; set the field
+explicitly per driver or via `operatorConfig.driverSpecDefaults`. The default
+`controllerPlugin.privileged:false` is unchanged for non-SELinux clusters.
+
+In mixed clusters with both SELinux-enforcing and non-SELinux nodes, note that
+`controllerPlugin.privileged:true` applies to the controller plugin Deployment as a whole.
+Use node affinity and tolerations (`controllerPlugin.affinity`,
+`controllerPlugin.tolerations`) to place controller plugin pods on the intended nodes
+if you need to restrict where privileged pods run.
+
 ### **Development Build**
 
 To deploy from a local build from your development environment:
