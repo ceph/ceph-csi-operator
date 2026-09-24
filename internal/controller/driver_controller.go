@@ -357,7 +357,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 				)
 				return err
 			}
-			maps.Copy(r.images, imageSetCM.Data)
+			utils.CopyNonEmptyValues(r.images, imageSetCM.Data)
 		}
 	}
 
@@ -376,7 +376,7 @@ func (r *driverReconcile) LoadAndValidateDesiredState() error {
 			)
 			return err
 		}
-		maps.Copy(r.images, imageSetCM.Data)
+		utils.CopyNonEmptyValues(r.images, imageSetCM.Data)
 	}
 
 	return nil

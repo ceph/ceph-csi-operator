@@ -32,6 +32,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	csiv1 "github.com/ceph/ceph-csi-operator/api/v1"
+	"github.com/ceph/ceph-csi-operator/internal/utils"
 )
 
 var _ = Describe("Driver Controller", func() {
@@ -165,5 +166,36 @@ var _ = Describe("Driver Controller", func() {
 			Expect(result).To(Equal(specReplicas))
 			Expect(*result).To(Equal(int32(3)))
 		})
+	})
+})
+
+var _ = Describe("copyNonEmptyValues", func() {
+	It("should copy non-empty values and preserve defaults for empty ones", func() {
+		const (
+			pluginKey      = "plugin"
+			provisionerKey = "provisioner"
+			attacherKey    = "attacher"
+			resizerKey     = "resizer"
+		)
+
+		dst := map[string]string{
+			pluginKey:      "default-plugin:v1",
+			provisionerKey: "default-provisioner:v1",
+			attacherKey:    "default-attacher:v1",
+		}
+		src := map[string]string{
+			pluginKey:      "custom-plugin:v2",
+			provisionerKey: "",
+			resizerKey:     "custom-resizer:v2",
+		}
+
+		utils.CopyNonEmptyValues(dst, src)
+
+		Expect(dst).To(Equal(map[string]string{
+			pluginKey:      "custom-plugin:v2",
+			provisionerKey: "default-provisioner:v1",
+			attacherKey:    "default-attacher:v1",
+			resizerKey:     "custom-resizer:v2",
+		}))
 	})
 })
