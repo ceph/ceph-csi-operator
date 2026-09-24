@@ -17769,8 +17769,8 @@ seLinuxContext:
 supplementalGroups:
   type: RunAsAny
 volumes:
-- hostPath
 - configMap
 - emptyDir
+- hostPath
 - projected
 - secret
