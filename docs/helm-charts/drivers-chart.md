@@ -86,6 +86,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `clientProfiles[0].cephFs.cephCsiSecrets.nodePublishSecret.namespace` | Namespace of the node publish secret (default: "") | `""` |
 | `clientProfiles[0].cephFs.fuseMountOptions` | Mount options for CephFS with FUSE (default: {}) | `{}` |
 | `clientProfiles[0].cephFs.kernelMountOptions` | Mount options for CephFS with the kernel (default: {}) | `{}` |
+| `clientProfiles[0].cephFs.radosNamespace` | RADOS namespace in the CephFS metadata pool for the CSI journal objects; immutable once set (default: "") | `""` |
 | `clientProfiles[0].cephFs.subVolumeGroup` | Sub-volume group for the CephFS client (default: "") | `""` |
 | `clientProfiles[0].name` | Name of the client profile (default: "") | `""` |
 | `clientProfiles[0].nvmeof.cephCsiSecrets` | Ceph CSI secret references for NVMe-oF (default: {}) | `{"controllerPublishSecret":{"name":"","namespace":""},"nodePublishSecret":{"name":"","namespace":""}}` |

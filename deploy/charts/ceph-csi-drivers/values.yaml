@@ -23,6 +23,8 @@ clientProfiles:
       kernelMountOptions: {}
       # -- Sub-volume group for the CephFS client (default: "")
       subVolumeGroup: ""
+      # -- RADOS namespace in the CephFS metadata pool for the CSI journal objects; immutable once set (default: "")
+      radosNamespace: ""
       # -- Ceph CSI secret references for CephFS (default: {})
       cephCsiSecrets:
         controllerPublishSecret:
