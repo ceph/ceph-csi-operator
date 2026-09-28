@@ -93,6 +93,8 @@ operatorConfig:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true
+        # when using hostPath log storage; the operator does not auto-escalate.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -101,6 +103,9 @@ operatorConfig:
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
+        # HostPath prefix for rotated CSI log files. Kubernetes does not relabel
+        # hostPath volumes for SELinux, so unprivileged containers cannot write
+        # there on SELinux-enforcing hosts.
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -164,6 +169,8 @@ operatorConfig:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation
+      # writes to a hostPath volume (see log.rotation.enabled/logHostPath).
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -186,6 +193,8 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true
+        # when using hostPath log storage; the operator does not auto-escalate.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -194,6 +203,9 @@ drivers:
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
+        # HostPath prefix for rotated CSI log files. Kubernetes does not relabel
+        # hostPath volumes for SELinux, so unprivileged containers cannot write
+        # there on SELinux-enforcing hosts.
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -253,6 +265,8 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation
+      # writes to a hostPath volume (see log.rotation.enabled/logHostPath).
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -326,6 +340,8 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true
+        # when using hostPath log storage; the operator does not auto-escalate.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -334,6 +350,9 @@ drivers:
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
+        # HostPath prefix for rotated CSI log files. Kubernetes does not relabel
+        # hostPath volumes for SELinux, so unprivileged containers cannot write
+        # there on SELinux-enforcing hosts.
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -393,6 +412,8 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation
+      # writes to a hostPath volume (see log.rotation.enabled/logHostPath).
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -466,6 +487,8 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true
+        # when using hostPath log storage; the operator does not auto-escalate.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -474,6 +497,9 @@ drivers:
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
+        # HostPath prefix for rotated CSI log files. Kubernetes does not relabel
+        # hostPath volumes for SELinux, so unprivileged containers cannot write
+        # there on SELinux-enforcing hosts.
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -533,6 +559,8 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation
+      # writes to a hostPath volume (see log.rotation.enabled/logHostPath).
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
@@ -603,6 +631,8 @@ drivers:
       verbosity: 0
       rotation:
         # -- Enable log rotation (default: true)
+        # On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true
+        # when using hostPath log storage; the operator does not auto-escalate.
         enabled: true
         # -- Maximum number of log files to keep (default: 7)
         maxFiles: 7
@@ -611,6 +641,9 @@ drivers:
         # -- Periodicity for log rotation (options: hourly, daily, weekly, monthly) (default: "daily")
         periodicity: "daily"
         # -- Default log directory path (default: "")
+        # HostPath prefix for rotated CSI log files. Kubernetes does not relabel
+        # hostPath volumes for SELinux, so unprivileged containers cannot write
+        # there on SELinux-enforcing hosts.
         logHostPath: ""
     imageSet:
       # -- ConfigMap reference to the image set for the driver (default: "")
@@ -672,6 +705,8 @@ drivers:
       # -- Deployment strategy for the controller plugin (default: {})
       deploymentStrategy: {}
       # -- Flag to indicate if the container should be privileged (default: false)
+      # Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation
+      # writes to a hostPath volume (see log.rotation.enabled/logHostPath).
       privileged: false
       # -- List of tolerations for the controller plugin (default: [])
       tolerations: []
