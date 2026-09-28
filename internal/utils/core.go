@@ -193,3 +193,14 @@ func GetOperatorNamespace() (string, error) {
 	}
 	return ns, nil
 }
+
+// CopyNonEmptyValues copies only non-empty string values from src to dst.
+// Empty values are skipped so that code defaults are preserved when the
+// configmap contains empty strings.
+func CopyNonEmptyValues(dst, src map[string]string) {
+	for k, v := range src {
+		if v != "" {
+			dst[k] = v
+		}
+	}
+}
