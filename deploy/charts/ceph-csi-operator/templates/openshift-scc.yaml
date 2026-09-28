@@ -41,9 +41,9 @@ supplementalGroups:
 readOnlyRootFilesystem: false
 # Allowed volume types
 volumes:
-  - hostPath
   - configMap
   - emptyDir
+  - hostPath
   - projected
   - secret
 ---
