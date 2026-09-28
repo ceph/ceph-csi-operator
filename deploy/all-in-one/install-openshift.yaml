@@ -15943,6 +15943,7 @@ rules:
   - get
   - list
   - watch
+  - update
 - apiGroups:
   - snapshot.storage.k8s.io
   resources:
@@ -16609,6 +16610,7 @@ rules:
   - get
   - list
   - watch
+  - update
 - apiGroups:
   - ""
   resources:
@@ -16773,6 +16775,7 @@ rules:
   - get
   - list
   - watch
+  - update
 - apiGroups:
   - snapshot.storage.k8s.io
   resources:
@@ -17107,6 +17110,7 @@ rules:
   - get
   - list
   - watch
+  - update
 - apiGroups:
   - snapshot.storage.k8s.io
   resources:
