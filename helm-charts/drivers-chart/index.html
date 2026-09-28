@@ -1071,6 +1071,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#troubleshooting-log-rotation-on-selinux-enforcing-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting log rotation on SELinux-enforcing hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#development-build" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1490,6 +1501,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#troubleshooting-log-rotation-on-selinux-enforcing-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting log rotation on SELinux-enforcing hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#development-build" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1780,7 +1802,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.cephfs.controllerPlugin.privileged</code></td>
-<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td>Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath).</td>
 <td><code>false</code></td>
 </tr>
 <tr>
@@ -1850,12 +1872,12 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.cephfs.log.rotation.enabled</code></td>
-<td>Enable log rotation (default: true)</td>
+<td>Enable log rotation (default: true) On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true when using hostPath log storage; the operator does not auto-escalate.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><code>drivers.cephfs.log.rotation.logHostPath</code></td>
-<td>Default log directory path (default: "")</td>
+<td>Default log directory path (default: "") HostPath prefix for rotated CSI log files. Kubernetes does not relabel hostPath volumes for SELinux, so unprivileged containers cannot write there on SELinux-enforcing hosts.</td>
 <td><code>""</code></td>
 </tr>
 <tr>
@@ -1980,7 +2002,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.nfs.controllerPlugin.privileged</code></td>
-<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td>Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath).</td>
 <td><code>false</code></td>
 </tr>
 <tr>
@@ -2050,12 +2072,12 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.nfs.log.rotation.enabled</code></td>
-<td>Enable log rotation (default: true)</td>
+<td>Enable log rotation (default: true) On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true when using hostPath log storage; the operator does not auto-escalate.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><code>drivers.nfs.log.rotation.logHostPath</code></td>
-<td>Default log directory path (default: "")</td>
+<td>Default log directory path (default: "") HostPath prefix for rotated CSI log files. Kubernetes does not relabel hostPath volumes for SELinux, so unprivileged containers cannot write there on SELinux-enforcing hosts.</td>
 <td><code>""</code></td>
 </tr>
 <tr>
@@ -2185,7 +2207,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.nvmeof.controllerPlugin.privileged</code></td>
-<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td>Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath).</td>
 <td><code>false</code></td>
 </tr>
 <tr>
@@ -2255,12 +2277,12 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.nvmeof.log.rotation.enabled</code></td>
-<td>Enable log rotation (default: true)</td>
+<td>Enable log rotation (default: true) On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true when using hostPath log storage; the operator does not auto-escalate.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><code>drivers.nvmeof.log.rotation.logHostPath</code></td>
-<td>Default log directory path (default: "")</td>
+<td>Default log directory path (default: "") HostPath prefix for rotated CSI log files. Kubernetes does not relabel hostPath volumes for SELinux, so unprivileged containers cannot write there on SELinux-enforcing hosts.</td>
 <td><code>""</code></td>
 </tr>
 <tr>
@@ -2385,7 +2407,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.rbd.controllerPlugin.privileged</code></td>
-<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td>Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath).</td>
 <td><code>false</code></td>
 </tr>
 <tr>
@@ -2455,12 +2477,12 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>drivers.rbd.log.rotation.enabled</code></td>
-<td>Enable log rotation (default: true)</td>
+<td>Enable log rotation (default: true) On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true when using hostPath log storage; the operator does not auto-escalate.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><code>drivers.rbd.log.rotation.logHostPath</code></td>
-<td>Default log directory path (default: "")</td>
+<td>Default log directory path (default: "") HostPath prefix for rotated CSI log files. Kubernetes does not relabel hostPath volumes for SELinux, so unprivileged containers cannot write there on SELinux-enforcing hosts.</td>
 <td><code>""</code></td>
 </tr>
 <tr>
@@ -2620,7 +2642,7 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>operatorConfig.driverSpecDefaults.controllerPlugin.privileged</code></td>
-<td>Flag to indicate if the container should be privileged (default: false)</td>
+<td>Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath).</td>
 <td><code>false</code></td>
 </tr>
 <tr>
@@ -2685,12 +2707,12 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 <tr>
 <td><code>operatorConfig.driverSpecDefaults.log.rotation.enabled</code></td>
-<td>Enable log rotation (default: true)</td>
+<td>Enable log rotation (default: true) On SELinux-enforcing hosts, combine with controllerPlugin.privileged:true when using hostPath log storage; the operator does not auto-escalate.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><code>operatorConfig.driverSpecDefaults.log.rotation.logHostPath</code></td>
-<td>Default log directory path (default: "")</td>
+<td>Default log directory path (default: "") HostPath prefix for rotated CSI log files. Kubernetes does not relabel hostPath volumes for SELinux, so unprivileged containers cannot write there on SELinux-enforcing hosts.</td>
 <td><code>""</code></td>
 </tr>
 <tr>
@@ -2785,6 +2807,19 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 </tr>
 </tbody>
 </table>
+<h3 id="troubleshooting-log-rotation-on-selinux-enforcing-hosts">Troubleshooting log rotation on SELinux-enforcing hosts<a class="headerlink" href="#troubleshooting-log-rotation-on-selinux-enforcing-hosts" title="Permanent link">&para;</a></h3>
+<p>If log rotation (<code>log.rotation.enabled</code>) uses a hostPath volume (<code>log.rotation.logHostPath</code>)
+on hosts with SELinux in enforcing mode (for example, OpenShift), the controller plugin
+containers need <code>controllerPlugin.privileged:true</code> to write the rotated log files, as
+Kubernetes does not relabel hostPath volumes for SELinux. See <a href="https://github.com/ceph/ceph-csi-operator/blob/main/docs/design/logrotate.md">docs/design/logrotate.md</a>.</p>
+<p>The operator does not automatically make the controller plugin privileged; set the field
+explicitly per driver or via <code>operatorConfig.driverSpecDefaults</code>. The default
+<code>controllerPlugin.privileged:false</code> is unchanged for non-SELinux clusters.</p>
+<p>In mixed clusters with both SELinux-enforcing and non-SELinux nodes, note that
+<code>controllerPlugin.privileged:true</code> applies to the controller plugin Deployment as a whole.
+Use node affinity and tolerations (<code>controllerPlugin.affinity</code>,
+<code>controllerPlugin.tolerations</code>) to place controller plugin pods on the intended nodes
+if you need to restrict where privileged pods run.</p>
 <h3 id="development-build"><strong>Development Build</strong><a class="headerlink" href="#development-build" title="Permanent link">&para;</a></h3>
 <p>To deploy from a local build from your development environment:</p>
 <ol>

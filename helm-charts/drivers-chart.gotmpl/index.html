@@ -1349,6 +1349,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#troubleshooting-log-rotation-on-selinux-enforcing-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting log rotation on SELinux-enforcing hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#development-build" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1445,6 +1456,19 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
 <p>The following table lists the configurable parameters of the ceph-csi-drivers chart and their default values.</p>
 <p>{{ template "chart.valuesTable" . }}</p>
+<h3 id="troubleshooting-log-rotation-on-selinux-enforcing-hosts">Troubleshooting log rotation on SELinux-enforcing hosts<a class="headerlink" href="#troubleshooting-log-rotation-on-selinux-enforcing-hosts" title="Permanent link">&para;</a></h3>
+<p>If log rotation (<code>log.rotation.enabled</code>) uses a hostPath volume (<code>log.rotation.logHostPath</code>)
+on hosts with SELinux in enforcing mode (for example, OpenShift), the controller plugin
+containers need <code>controllerPlugin.privileged:true</code> to write the rotated log files, as
+Kubernetes does not relabel hostPath volumes for SELinux. See <a href="https://github.com/ceph/ceph-csi-operator/blob/main/docs/design/logrotate.md">docs/design/logrotate.md</a>.</p>
+<p>The operator does not automatically make the controller plugin privileged; set the field
+explicitly per driver or via <code>operatorConfig.driverSpecDefaults</code>. The default
+<code>controllerPlugin.privileged:false</code> is unchanged for non-SELinux clusters.</p>
+<p>In mixed clusters with both SELinux-enforcing and non-SELinux nodes, note that
+<code>controllerPlugin.privileged:true</code> applies to the controller plugin Deployment as a whole.
+Use node affinity and tolerations (<code>controllerPlugin.affinity</code>,
+<code>controllerPlugin.tolerations</code>) to place controller plugin pods on the intended nodes
+if you need to restrict where privileged pods run.</p>
 <h3 id="development-build"><strong>Development Build</strong><a class="headerlink" href="#development-build" title="Permanent link">&para;</a></h3>
 <p>To deploy from a local build from your development environment:</p>
 <ol>
