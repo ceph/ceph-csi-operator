@@ -1,0 +1,50 @@
+# Example PodMonitor scraping CSI metrics from the Ceph-CSI controller
+# plugin pods.
+#
+# Prerequisites:
+#   1. The Prometheus Operator is installed (the monitoring.coreos.com/v1
+#      API with the PodMonitor kind is served by the cluster).
+#   2. A Prometheus/PrometheusAgent resource selects PodMonitors labeled
+#      `monitoring: ceph-csi`. Adjust the labels below to match your own
+#      podMonitorSelector.
+#   3. The CSI sidecar metrics endpoints are enabled on the Driver CR
+#      through controllerPlugin.containerExtraArgs, see
+#      docs/features/podmonitor.md.
+#
+# The liveness-prometheus sidecar is deprecated and is not used here.
+# Node plugin pods are out of scope (their sidecars expose no metrics).
+# Apply with kubectl, or ship it with the ceph-csi-drivers Helm chart
+# through the extraDeploy value.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: rbd-controller-podmonitor
+  namespace: ceph-csi-driver
+  labels:
+    monitoring: ceph-csi
+spec:
+  selector:
+    matchLabels:
+      # Matches the controller plugin pods of the rbd.csi.ceph.com driver
+      # (the operator labels them app=<driver-name>-ctrlplugin).
+      app: rbd.csi.ceph.com-ctrlplugin
+  namespaceSelector:
+    matchNames:
+      - ceph-csi-driver
+  podMetricsEndpoints:
+    # One endpoint per CSI sidecar. The sidecars serve metrics through the
+    # --http-endpoint argument and do not declare a named container port,
+    # so the endpoints are scraped by port number. Keep the ports distinct
+    # across drivers when controller plugins share a node.
+    - targetPort: 8080 # csi-provisioner
+      path: /metrics
+      interval: 30s
+    - targetPort: 8081 # csi-attacher
+      path: /metrics
+      interval: 30s
+    - targetPort: 8082 # csi-resizer
+      path: /metrics
+      interval: 30s
+    - targetPort: 8083 # csi-snapshotter
+      path: /metrics
+      interval: 30s
