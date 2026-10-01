@@ -25,6 +25,9 @@ spec:
       {{ end }}
     {{- end }}
     subVolumeGroup: {{ $clientProfile.cephFs.subVolumeGroup }}
+    {{- if $clientProfile.cephFs.radosNamespace }}
+    radosNamespace: {{ $clientProfile.cephFs.radosNamespace }}
+    {{- end }}
     {{- if and $clientProfile.cephFs.cephCsiSecrets (or (and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.name)) }}
     cephCsiSecrets:
       {{- if and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name }}
