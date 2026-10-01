@@ -1701,6 +1701,11 @@ This chart is a simple packaging of templates that will optionally create ceph-c
 <td><code>{}</code></td>
 </tr>
 <tr>
+<td><code>clientProfiles[0].cephFs.radosNamespace</code></td>
+<td>RADOS namespace in the CephFS metadata pool for the CSI journal objects; immutable once set (default: "")</td>
+<td><code>""</code></td>
+</tr>
+<tr>
 <td><code>clientProfiles[0].cephFs.subVolumeGroup</code></td>
 <td>Sub-volume group for the CephFS client (default: "")</td>
 <td><code>""</code></td>
