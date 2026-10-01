@@ -32,4 +32,4 @@ patches:
 images:
 - name: controller
   newName: quay.io/cephcsi/ceph-csi-operator
-  newTag: latest
+  newTag: v1.1.0
