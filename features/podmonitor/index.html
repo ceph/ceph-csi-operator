@@ -12,13 +12,13 @@
         <meta name="author" content="Ceph-CSI Operator Contributors">
       
       
-        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/design/network-policy/">
+        <link rel="canonical" href="https://ceph.github.io/ceph-csi-operator/features/podmonitor/">
       
       
-        <link rel="prev" href="../logrotate/">
+        <link rel="prev" href="../../design/replication/">
       
       
-        <link rel="next" href="../replication/">
+        <link rel="next" href="../rbd-snapshot-metadata/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Network Policy - Ceph-CSI Operator Documentation</title>
+        <title>PodMonitor - Ceph-CSI Operator Documentation</title>
       
     
     
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#networkpolicy-for-ceph-csi-operator-and-driver-pods" class="md-skip">
+        <a href="#monitoring-ceph-csi-metrics-with-prometheus-operator" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Network Policy
+              PodMonitor
             
           </span>
         </div>
@@ -228,13 +228,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../operator/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../design/operator/" class="md-tabs__link">
           
   
   
@@ -250,11 +248,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../features/podmonitor/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -547,31 +547,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -589,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -607,7 +604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../operator/" class="md-nav__link">
+      <a href="../../design/operator/" class="md-nav__link">
         
   
   
@@ -635,7 +632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../hostNetwork/" class="md-nav__link">
+      <a href="../../design/hostNetwork/" class="md-nav__link">
         
   
   
@@ -663,7 +660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../logrotate/" class="md-nav__link">
+      <a href="../../design/logrotate/" class="md-nav__link">
         
   
   
@@ -688,37 +685,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Network Policy
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../design/network-policy/" class="md-nav__link">
         
   
   
@@ -734,159 +704,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#component-inventory" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Component Inventory
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Policies
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Policies">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#operator-pod" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Operator Pod
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#controller-plugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Controller-Plugin
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#csi-addons-nodeplugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        csi-addons Nodeplugin
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#node-plugin-daemonset" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Node-Plugin DaemonSet
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Inclusion
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Inclusion">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#static-manifest-operator-pod" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Static Manifest (Operator Pod)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#code-generated-nps-driver-pods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code-Generated NPs (Driver Pods)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-server-egress-rationale" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API Server Egress Rationale
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        References
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -899,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../replication/" class="md-nav__link">
+      <a href="../../design/replication/" class="md-nav__link">
         
   
   
@@ -931,28 +748,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -970,7 +790,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -985,10 +805,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../features/podmonitor/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PodMonitor
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1004,6 +851,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#admin-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Admin Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ceph-csi-operator-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ceph-CSI Operator Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1016,7 +916,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/rbd-snapshot-metadata/" class="md-nav__link">
+      <a href="../rbd-snapshot-metadata/" class="md-nav__link">
         
   
   
@@ -1506,10 +1406,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#component-inventory" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Component Inventory
+        Prerequisites
       
     </span>
   </a>
@@ -1517,110 +1417,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#policies" class="md-nav__link">
+  <a href="#admin-responsibilities" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Policies
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Policies">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#operator-pod" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Operator Pod
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#controller-plugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Controller-Plugin
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#csi-addons-nodeplugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        csi-addons Nodeplugin
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#node-plugin-daemonset" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Node-Plugin DaemonSet
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Inclusion
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Inclusion">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#static-manifest-operator-pod" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Static Manifest (Operator Pod)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#code-generated-nps-driver-pods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code-Generated NPs (Driver Pods)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-server-egress-rationale" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API Server Egress Rationale
+        Admin Responsibilities
       
     </span>
   </a>
@@ -1628,10 +1428,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
+  <a href="#ceph-csi-operator-responsibilities" class="md-nav__link">
     <span class="md-ellipsis">
       
-        References
+        Ceph-CSI Operator Responsibilities
       
     </span>
   </a>
@@ -1658,111 +1458,128 @@
   
 
 
-<h1 id="networkpolicy-for-ceph-csi-operator-and-driver-pods">NetworkPolicy for Ceph-CSI Operator and Driver Pods<a class="headerlink" href="#networkpolicy-for-ceph-csi-operator-and-driver-pods" title="Permanent link">&para;</a></h1>
-<p>This document describes the NetworkPolicy implementation for the
-ceph-csi-operator and the CSI driver pods it manages.</p>
-<h2 id="component-inventory">Component Inventory<a class="headerlink" href="#component-inventory" title="Permanent link">&para;</a></h2>
+<h1 id="monitoring-ceph-csi-metrics-with-prometheus-operator">Monitoring Ceph-CSI metrics with Prometheus Operator<a class="headerlink" href="#monitoring-ceph-csi-metrics-with-prometheus-operator" title="Permanent link">&para;</a></h1>
+<p>The CSI sidecar containers (<code>csi-provisioner</code>, <code>csi-attacher</code>, <code>csi-resizer</code>
+and <code>csi-snapshotter</code>) deployed with the Ceph-CSI controller plugin pods can
+expose Prometheus metrics through an HTTP endpoint. A <code>PodMonitor</code> resource
+tells the <a href="https://prometheus-operator.dev/">Prometheus Operator</a> how to
+discover and scrape those metrics.</p>
+<blockquote>
+<p><strong>Note:</strong> the <code>liveness-prometheus</code> sidecar is deprecated and is not used
+by the approach documented here. Node plugin pods expose no CSI metrics
+endpoints, so node plugin monitoring is out of scope.</p>
+</blockquote>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The Prometheus Operator is installed in the cluster, so that the
+  <code>monitoring.coreos.com/v1</code> API (with the <code>PodMonitor</code> kind) is served.</li>
+<li>A <code>Prometheus</code> (or <code>PrometheusAgent</code>) resource that selects the
+  <code>PodMonitor</code> objects, e.g.:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">podMonitorSelector</span><span class="p">:</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">monitoring</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi</span>
+</code></pre></div>
+<p>Adjust the <code>PodMonitor</code> labels in the example to match the selector of
+  your Prometheus deployment.</p>
+<h2 id="admin-responsibilities">Admin Responsibilities<a class="headerlink" href="#admin-responsibilities" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Enable the metrics endpoint of the CSI sidecars on the <code>Driver</code> CR,
+   through <code>controllerPlugin.containerExtraArgs</code> (one port per sidecar;
+   the <code>--http-endpoint</code> argument must carry a value, otherwise no metrics
+   server is started):</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">controllerPlugin</span><span class="p">:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">containerExtraArgs</span><span class="p">:</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="nt">csi-provisioner</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"--http-endpoint=:8080"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">csi-attacher</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"--http-endpoint=:8081"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">csi-resizer</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"--http-endpoint=:8082"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="nt">csi-snapshotter</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"--http-endpoint=:8083"</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<ol>
+<li>Apply the example <code>PodMonitor</code>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">kubectl apply -f deploy/examples/podmonitor/controller-podmonitor.yaml</span>
+</code></pre></div>
+<p>The <a href="https://github.com/ceph/ceph-csi-operator/blob/main/deploy/examples/podmonitor/controller-podmonitor.yaml">example</a>
+   scrapes the controller plugin pods of the <code>rbd.csi.ceph.com</code> driver in the
+   <code>ceph-csi-driver</code> namespace. Adjust <code>metadata.namespace</code>, the <code>app</code> label
+   in <code>spec.selector</code> and the port numbers to your deployment.</p>
+<ol>
+<li>Deploy as many <code>PodMonitor</code> resources as you have drivers. The manifest is
+   the same for every driver, so create one more copy of the example for each
+   additional driver and adjust only these driver-specific fields:</li>
+</ol>
 <table>
 <thead>
 <tr>
-<th>Component</th>
-<th>Pod Labels</th>
-<th>hostNetwork</th>
-<th>NP Coverage</th>
+<th>Field</th>
+<th>RBD (the example)</th>
+<th>CephFS</th>
+<th>NFS</th>
+<th>NVMe-oF</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Operator pod</td>
-<td><code>control-plane: ceph-csi-op-controller-manager</code></td>
-<td>No</td>
-<td>Static manifest</td>
+<td><code>metadata.name</code></td>
+<td><code>rbd-controller-podmonitor</code></td>
+<td><code>cephfs-controller-podmonitor</code></td>
+<td><code>nfs-controller-podmonitor</code></td>
+<td><code>nvmeof-controller-podmonitor</code></td>
 </tr>
 <tr>
-<td>Controller-plugin (per driver)</td>
-<td><code>app: {driver}-ctrlplugin</code></td>
-<td>Configurable</td>
-<td>Code-generated</td>
+<td><code>spec.selector.matchLabels.app</code></td>
+<td><code>rbd.csi.ceph.com-ctrlplugin</code></td>
+<td><code>cephfs.csi.ceph.com-ctrlplugin</code></td>
+<td><code>nfs.csi.ceph.com-ctrlplugin</code></td>
+<td><code>nvmeof.csi.ceph.com-ctrlplugin</code></td>
 </tr>
 <tr>
-<td>csi-addons node agent (per driver)</td>
-<td><code>app: {driver}-nodeplugin-csi-addons</code></td>
-<td>No</td>
-<td>Code-generated</td>
-</tr>
-<tr>
-<td>Node-plugin DaemonSet</td>
-<td><code>app: {driver}-nodeplugin</code></td>
-<td>Yes (hardcoded)</td>
-<td>Exempt</td>
+<td><code>podMetricsEndpoints[].targetPort</code></td>
+<td><code>8080</code>-<code>8083</code></td>
+<td><code>8090</code>-<code>8093</code></td>
+<td><code>8100</code>-<code>8103</code></td>
+<td><code>8110</code>-<code>8113</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h2>
-<h3 id="operator-pod">Operator Pod<a class="headerlink" href="#operator-pod" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Ingress:</strong> Deny all. No exposed ports (metrics disabled by default,
-  kubelet health probes bypass NetworkPolicy).</li>
-<li><strong>Egress:</strong> Open (<code>- {}</code>). Required for API server access. The API server
-  ClusterIP varies per cluster (10.96.0.1 on kubeadm, 172.30.0.1 on OpenShift)
-  and CNI ipBlock behavior is inconsistent across implementations, so
-  restricting egress to a specific IP is not portable.</li>
-</ul>
-<h3 id="controller-plugin">Controller-Plugin<a class="headerlink" href="#controller-plugin" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Skipped</strong> when <code>hostNetwork: true</code> (NP is exempt).</li>
-<li><strong>Ingress</strong> rules are conditional:</li>
-<li>(When <code>DeployCsiAddons: true</code>) csi-addons controller-manager →
-     csi-addons gRPC port (9070 for RBD, 9080 for CephFS). Source
-     restricted to pods with labels <code>app.kubernetes.io/name: csi-addons</code>
-     and <code>control-plane: controller-manager</code> in any namespace.</li>
-<li>(RBD only, when TLS volume <code>tls-key</code> is configured) Any pod →
-     snapshot-metadata gRPC port 50051. Open source because backup
-     applications (Velero, etc.) can run in any namespace with any labels.
-     See <a href="https://kubernetes-csi.github.io/docs/external-snapshot-metadata.html">CSI snapshot-metadata</a>.</li>
-<li><strong>Egress:</strong> Open. Required for API server and Ceph cluster access.</li>
-<li>When no ingress rules apply, the NP is kept with an empty ingress
-  list (deny-all ingress) for defense-in-depth.</li>
-</ul>
-<h3 id="csi-addons-nodeplugin">csi-addons Nodeplugin<a class="headerlink" href="#csi-addons-nodeplugin" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Ingress:</strong> csi-addons controller-manager → port 9071 only.</li>
-<li><strong>Egress:</strong> Open.</li>
-<li><strong>Lifecycle:</strong> Created when <code>DeployCsiAddons</code> is true. Not created for
-  NFS drivers. Explicitly deleted when <code>DeployCsiAddons</code> is toggled
-  false. The Driver CR is the controller owner reference for watch
-  triggers and garbage collection on Driver deletion.</li>
-</ul>
-<h3 id="node-plugin-daemonset">Node-Plugin DaemonSet<a class="headerlink" href="#node-plugin-daemonset" title="Permanent link">&para;</a></h3>
-<p>No NetworkPolicy. Runs with <code>hostNetwork: true</code>, which makes it exempt
-from NetworkPolicy enforcement.</p>
-<h2 id="inclusion">Inclusion<a class="headerlink" href="#inclusion" title="Permanent link">&para;</a></h2>
-<h3 id="static-manifest-operator-pod">Static Manifest (Operator Pod)<a class="headerlink" href="#static-manifest-operator-pod" title="Permanent link">&para;</a></h3>
-<p>The operator pod NP is in <code>config/network-policy/</code> and referenced from
-<code>config/default/kustomization.yaml</code>. It is included in all generated
-manifests by default.</p>
-<h3 id="code-generated-nps-driver-pods">Code-Generated NPs (Driver Pods)<a class="headerlink" href="#code-generated-nps-driver-pods" title="Permanent link">&para;</a></h3>
-<p>Driver pod NPs are created unconditionally by the operator at runtime.
-The <code>networking.k8s.io/v1</code> API group has been stable since Kubernetes 1.7
-and is available on every supported cluster version.</p>
-<h2 id="api-server-egress-rationale">API Server Egress Rationale<a class="headerlink" href="#api-server-egress-rationale" title="Permanent link">&para;</a></h2>
-<p>Open egress (<code>- {}</code>) is used instead of restricting to a specific API server
-IP because:</p>
+<p>Each driver needs its own set of ports: with <code>hostNetwork: true</code>, the
+   ports bind on the node itself, so two controller plugin pods scheduled on
+   the same node cannot bind the same port. Enable the matching
+   <code>--http-endpoint</code> ports in that driver's <code>containerExtraArgs</code>.</p>
 <ol>
-<li>The API server ClusterIP varies per cluster and is unknown at manifest
-   authoring time.</li>
-<li>CNI implementations handle <code>ipBlock</code> inconsistently with DNAT (OVN-K8s
-   timing, Cilium quirks).</li>
-<li>HyperShift clusters may use non-standard API server ports.</li>
+<li>Alternatively, ship the <code>PodMonitor</code> resources with your Helm release
+   through the <code>ceph-csi-drivers</code> chart <code>extraDeploy</code> value, which renders
+   arbitrary resources through <code>tpl</code>:</li>
 </ol>
-<p>This follows the precedent set by
-<a href="https://github.com/operator-framework/operator-marketplace/pull/723">operator-marketplace PR #723</a>.</p>
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="https://kubernetes-csi.github.io/docs/external-snapshot-metadata.html">CSI snapshot-metadata sidecar</a></li>
-<li><a href="https://github.com/kubernetes-csi/external-snapshot-metadata">kubernetes-csi/external-snapshot-metadata</a></li>
-<li><a href="https://github.com/operator-framework/operator-marketplace/pull/723">operator-marketplace NP precedent</a></li>
-</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">extraDeploy</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PodMonitor</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd-controller-podmonitor</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">.Release.Namespace</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="nt">monitoring</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ceph-csi</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">selector</span><span class="p">:</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">          </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbd.csi.ceph.com-ctrlplugin</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">namespaceSelector</span><span class="p">:</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">        </span><span class="nt">matchNames</span><span class="p">:</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">.Release.Namespace</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">      </span><span class="nt">podMetricsEndpoints</span><span class="p">:</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/metrics</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">          </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+</code></pre></div>
+<h2 id="ceph-csi-operator-responsibilities">Ceph-CSI Operator Responsibilities<a class="headerlink" href="#ceph-csi-operator-responsibilities" title="Permanent link">&para;</a></h2>
+<p>The operator does not create or manage <code>PodMonitor</code> resources. It renders the
+<code>controllerPlugin.containerExtraArgs</code> configured on the <code>Driver</code> CR into the
+sidecar container arguments, which is what makes the metrics endpoints (the
+targets of the <code>PodMonitor</code> above) available.</p>
 
 
 
