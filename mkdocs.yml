@@ -49,6 +49,7 @@ nav:
       - Network Policy: design/network-policy.md
       - Replication: design/replication.md
   - Features:
+      - PodMonitor: features/podmonitor.md
       - RBD Snapshot Metadata: features/rbd-snapshot-metadata.md
   - Helm Charts:
       - Overview: helm-charts/helm-charts.md
