@@ -18,9 +18,12 @@ package utils
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/component-base/featuregate"
 	"k8s.io/utils/ptr"
 )
 
@@ -42,6 +45,9 @@ const (
 	logsDirVolumeName      = "logs-dir"
 	logRotateDirVolumeName = "log-rotate-dir"
 )
+
+var featureGate = featuregate.NewFeatureGate()
+var knownFeatures = slices.Collect(maps.Keys(featureGate.GetAll()))
 
 // Ceph CSI common volumes
 var SocketDirVolume = corev1.Volume{
@@ -400,8 +406,8 @@ var PoolTimeContainerArg = "--polltime=60s"
 var ExtraCreateMetadataContainerArg = "--extra-create-metadata=true"
 var ExtraSingleWorkerThreadContainerArg = "--worker-threads=1"
 var PreventVolumeModeConversionContainerArg = "--prevent-volume-mode-conversion=true"
-var RecoverVolumeExpansionFailureContainerArg = "--feature-gates=RecoverVolumeExpansionFailure=true"
-var EnableVolumeGroupSnapshotsContainerArg = "--feature-gates=CSIVolumeGroupSnapshot=true"
+var RecoverVolumeExpansionFailureContainerArg = getFeatureGate("RecoverVolumeExpansionFailure", "true")
+var EnableVolumeGroupSnapshotsContainerArg = getFeatureGate("CSIVolumeGroupSnapshot", "true")
 var ForceCephKernelClientContainerArg = "--forcecephkernelclient=true"
 var LogToStdErrContainerArg = "--logtostderr=false"
 var AlsoLogToStdErrContainerArg = "--alsologtostderr=true"
@@ -497,4 +503,16 @@ func GetExtraArgsForContainer(containerName string, extraArgs map[string][]strin
 		return nil
 	}
 	return extraArgs[containerName]
+}
+
+func getFeatureGate(name, value string) string {
+	supportedFeatureGate := slices.ContainsFunc(knownFeatures, func(f featuregate.Feature) bool {
+		return string(f) == name
+	})
+
+	if supportedFeatureGate {
+		return fmt.Sprintf("--feature-gates=%s=%s", name, value)
+	}
+
+	return ""
 }
