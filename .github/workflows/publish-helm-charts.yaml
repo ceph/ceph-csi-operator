@@ -57,6 +57,12 @@ jobs:
         run: |
           gh release upload "${{ github.event.release.tag_name }}" .csi-op-release-packages/* --clobber
 
+      - name: Push Helm charts to GHCR as OCI packages
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          helm push .csi-op-release-packages/ceph-csi-operator-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/ceph-csi-operator/charts
+          helm push .csi-op-release-packages/ceph-csi-drivers-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/ceph-csi-operator/charts
+
       - name: Update Helm repo index and push to gh-pages
         run: |
           git remote set-url origin https://github.com/${{ github.repository }}.git
