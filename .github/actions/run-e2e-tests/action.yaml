@@ -43,7 +43,7 @@ runs:
     - name: Download kubernetes e2e binary
       shell: bash
       env:
-        KUBE_VERSION: v1.33.0
+        KUBE_VERSION: v1.37.0
       run: |
           if [ ! -f ./kubernetes/test/bin/e2e.test ]; then
             curl -LO "https://dl.k8s.io/${KUBE_VERSION}/kubernetes-test-linux-amd64.tar.gz"
