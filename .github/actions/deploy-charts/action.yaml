@@ -131,7 +131,8 @@ runs:
               .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
               .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
               .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com")) |
-              .value.log.verbosity = 5
+              .value.log.verbosity = 5 |
+              .value.snapshotPolicy = "volumeGroupSnapshot"
             )
             ' /tmp/driver-values.yaml
 
@@ -147,7 +148,8 @@ runs:
               .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
               .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
               .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com")) |
-              .value.log.verbosity = 5
+              .value.log.verbosity = 5 |
+              .value.snapshotPolicy = "volumeGroupSnapshot"
             )
             ' ./deploy/charts/ceph-csi-drivers/values.yaml
 

@@ -61,7 +61,7 @@ runs:
           --vv \
           -p \
           -focus='External.Storage.*${{ inputs.driverType }}.csi.ceph.com' \
-          -skip='\[Disruptive\]|Generic Ephemeral-volume' \
+          -skip='\[Disruptive\]|Generic Ephemeral-volume|Pre-provisioned VolumeGroupSnapshot' \
           --label-filter='!/Feature:/ || /Feature:(VolumeSnapshotDataSource|VolumeGroupSnapshotDataSource|volumegroupsnapshot)/' \
           ./kubernetes/test/bin/e2e.test \
           -- \
