@@ -60,8 +60,9 @@ runs:
           ./kubernetes/test/bin/ginkgo \
           --vv \
           -p \
-          -focus="External.Storage.*${{ inputs.driverType }}.csi.ceph.com" \
-          -skip='\[Feature:|\[Disruptive\]|Generic Ephemeral-volume' \
+          -focus='External.Storage.*${{ inputs.driverType }}.csi.ceph.com' \
+          -skip='\[Disruptive\]|Generic Ephemeral-volume' \
+          --label-filter='!/Feature:/ || /Feature:(VolumeSnapshotDataSource|VolumeGroupSnapshotDataSource|volumegroupsnapshot)/' \
           ./kubernetes/test/bin/e2e.test \
           -- \
           -storage.testdriver="$(pwd)/test/scripts/k8s-storage/driver-${{ inputs.driverType }}.yaml"
