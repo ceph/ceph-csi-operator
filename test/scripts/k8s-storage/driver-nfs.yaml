@@ -12,6 +12,10 @@ SnapshotClass:
   # Must be set to enable snapshotting tests
   FromExistingClassName: k8s-storage-e2e-nfs
 
+GroupSnapshotClass:
+  # Must be set to enable group snapshotting tests
+  FromExistingClassName: k8s-storage-e2e-nfs
+
 DriverInfo:
   # Internal name of the driver, display name in the test case and test objects
   Name: nfs.csi.ceph.com
@@ -81,3 +85,6 @@ DriverInfo:
 
     # Support populated data from PVC
     pvcDataSource: true
+
+    # Support group snapshot
+    groupSnapshot: true

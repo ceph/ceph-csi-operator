@@ -13,6 +13,10 @@ SnapshotClass:
   # Must be set to enable snapshotting tests
   FromExistingClassName: k8s-storage-e2e-rbd
 
+GroupSnapshotClass:
+  # Must be set to enable group snapshotting tests
+  FromExistingClassName: k8s-storage-e2e-rbd
+
 DriverInfo:
   # Internal name of the driver, display name in the test case and test objects
   Name: rbd.csi.ceph.com
@@ -87,3 +91,6 @@ DriverInfo:
 
     # supports ROX AccessMode in PVC for PVC with Snapshot DataSource
     capReadOnlyMany: true
+
+    # Support group snapshot
+    groupSnapshot: true
