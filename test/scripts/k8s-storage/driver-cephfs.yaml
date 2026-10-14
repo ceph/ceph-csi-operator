@@ -39,7 +39,7 @@ DriverInfo:
     persistence: true
 
     # Volume ownership via fsGroup
-    fsGroup: false
+    fsGroup: true
 
     # multiple pods on a node can use the same volume concurrently
     multipods: true
