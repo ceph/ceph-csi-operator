@@ -43,10 +43,19 @@ runs:
     - name: Download kubernetes e2e binary
       shell: bash
       env:
-        KUBE_VERSION: v1.37.0
+        KUBE_VERSION: master
       run: |
           if [ ! -f ./kubernetes/test/bin/e2e.test ]; then
-            curl -LO "https://dl.k8s.io/${KUBE_VERSION}/kubernetes-test-linux-amd64.tar.gz"
+            version="${KUBE_VERSION}"
+            base_url="https://dl.k8s.io"
+            # Released versions live under dl.k8s.io/<version>; the master line is
+            # only published as CI builds under dl.k8s.io/ci, so resolve the latest
+            # one (currently v1.38) from ci/latest.txt.
+            if [ "${version}" = "master" ]; then
+              version="$(curl -fsSL "${base_url}/ci/latest.txt")"
+              base_url="${base_url}/ci"
+            fi
+            curl -fLO "${base_url}/${version}/kubernetes-test-linux-amd64.tar.gz"
             tar xzf kubernetes-test-linux-amd64.tar.gz kubernetes/test/bin/ginkgo kubernetes/test/bin/e2e.test
           fi
 
