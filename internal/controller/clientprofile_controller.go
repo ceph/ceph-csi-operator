@@ -25,6 +25,7 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
@@ -188,13 +189,24 @@ func (r *ClientProfileReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 }
 
 func (r *ClientProfileReconcile) reconcile() error {
+	// Load the ClientProfile
+	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.clientProfile), &r.clientProfile); err != nil {
+		if k8serrors.IsNotFound(err) {
+			r.log.Info("ClientProfile not found, ignoring")
+			return nil
+		}
+		r.log.Error(err, "Failed loading ClientProfile")
+		return err
+	}
+
 	if err := r.loadAndValidate(); err != nil {
 		return err
 	}
 
 	reconcileErr := r.reconcilePhases()
 
-	statusErr := r.Status().Update(r.ctx, &r.clientProfile)
+	// Removing the cleanup finalizer lets the ClientProfile be deleted, so there may be no status to update
+	statusErr := client.IgnoreNotFound(r.Status().Update(r.ctx, &r.clientProfile))
 	if statusErr != nil {
 		r.log.Error(statusErr, "Failed to update ClientProfile status.")
 	}
@@ -252,11 +264,6 @@ func (r *ClientProfileReconcile) reconcilePhases() error {
 }
 
 func (r *ClientProfileReconcile) loadAndValidate() error {
-	// Load the ClientProfile
-	if err := r.Get(r.ctx, client.ObjectKeyFromObject(&r.clientProfile), &r.clientProfile); err != nil {
-		r.log.Error(err, "Failed loading ClientProfile")
-		return err
-	}
 	r.cleanUp = r.clientProfile.DeletionTimestamp != nil
 
 	// Validate a pointer to a ceph cluster resource
