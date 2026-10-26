@@ -77,10 +77,16 @@ With the `ceph-csi-drivers` Helm chart, set
 
 ## Applying the change to existing volumes
 
-Changing the setting rolls out the node plugin DaemonSet. Volumes that are
-already mounted keep their current mount options. They are mounted with the
-`context=` option the next time they are staged on a node, for example after
-all pods using the volume on that node have been deleted and recreated.
+Changing the setting updates the node plugin DaemonSet template. With the
+default `RollingUpdate` strategy, the node plugin pods are replaced
+automatically. If `nodePlugin.updateStrategy.type` is `OnDelete`, the
+existing node plugin pods keep running without `/etc/selinux`; delete them so
+they are recreated with the host mount before you restage any volumes.
+
+Volumes that are already mounted keep their current mount options. Once the
+node plugin pod on a node has the host mount, volumes are mounted with the
+`context=` option the next time they are staged on that node, for example
+after all pods using the volume on that node have been deleted and recreated.
 
 To verify, check the mount options from inside an application pod:
 
