@@ -51,6 +51,7 @@ nav:
   - Features:
       - PodMonitor: features/podmonitor.md
       - RBD Snapshot Metadata: features/rbd-snapshot-metadata.md
+      - SELinux Host Mount: features/selinux-host-mount.md
   - Helm Charts:
       - Overview: helm-charts/helm-charts.md
       - Operator Chart: helm-charts/operator-chart.md
