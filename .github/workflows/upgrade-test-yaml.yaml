@@ -39,9 +39,8 @@ jobs:
         with:
             fetch-depth: 0
 
-      - name: Setup Minikube
-        uses: ./.github/actions/setup-minikube
-
+      # Query the latest release before minikube starts: once the ingress addon is
+      # up, api.github.com is served a local ingress certificate and gh fails TLS.
       - name: Get latest release version
         id: get_release
         run: |
@@ -50,6 +49,9 @@ jobs:
           echo "Latest release version: ${RELEASE_VERSION}"
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Setup Minikube
+        uses: ./.github/actions/setup-minikube
 
       # Installs the release operator (CRDs + controller) and upgrades it to the
       # PR version. Rook is deployed afterwards so the csi.ceph.io CRDs exist
