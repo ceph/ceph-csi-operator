@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -199,6 +200,48 @@ var _ = Describe("ClientProfile Controller with Fake Client", func() {
 			})
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("multiple Ready ClientProfileReplication CRs found"))
+		})
+	})
+
+	Context("When the ClientProfile does not exist", func() {
+		It("should reconcile successfully", func() {
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      "missing-profile",
+					Namespace: defaultNamespace,
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	Context("When ClientProfile is being deleted without referencing ClientProfileReplication", func() {
+		It("should remove the finalizer and reconcile successfully", func() {
+			deletingProfile := &csiv1.ClientProfile{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:       "deleting-profile",
+					Namespace:  defaultNamespace,
+					Finalizers: []string{cleanupFinalizer},
+				},
+				Spec: csiv1.ClientProfileSpec{
+					CephConnectionRef: corev1.LocalObjectReference{
+						Name: testCephConnection.Name,
+					},
+				},
+			}
+			Expect(fakeClient.Create(ctx, deletingProfile)).To(Succeed())
+			Expect(fakeClient.Delete(ctx, deletingProfile)).To(Succeed())
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      deletingProfile.Name,
+					Namespace: deletingProfile.Namespace,
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			err = fakeClient.Get(ctx, client.ObjectKeyFromObject(deletingProfile), &csiv1.ClientProfile{})
+			Expect(errors.IsNotFound(err)).To(BeTrue())
 		})
 	})
 
