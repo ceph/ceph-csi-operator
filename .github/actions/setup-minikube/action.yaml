@@ -20,8 +20,19 @@ runs:
     - name: Install NVMe/TCP Kernel Modules
       shell: bash
       run: |
-          sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends linux-modules-extra-$(uname -r)
+          # Installing the tooling and extra kernel modules is best-effort: package
+          # availability varies across runner kernels and must not fail the job. The
+          # only hard requirement is that nvme_tcp can be loaded, verified at the end.
+          sudo apt-get update -y || true
+          sudo apt-get install -y "linux-modules-extra-$(uname -r)" \
+            || sudo apt-get install -y linux-modules-extra-azure \
+            || true
+          sudo modprobe nvme_fabrics || true
+          sudo modprobe nvme_tcp || true
+          if [[ ! -d /sys/module/nvme_tcp ]]; then
+            echo "nvme_tcp kernel module is unavailable on this runner kernel: $(uname -r)"
+            exit 1
+          fi
 
     - name: Use local disk
       shell: bash
