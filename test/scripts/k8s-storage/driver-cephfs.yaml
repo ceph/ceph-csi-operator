@@ -13,6 +13,10 @@ SnapshotClass:
   # Must be set to enable snapshotting tests
   FromExistingClassName: k8s-storage-e2e-cephfs
 
+GroupSnapshotClass:
+  # Must be set to enable group snapshotting tests
+  FromExistingClassName: k8s-storage-e2e-cephfs
+
 DriverInfo:
   # Internal name of the driver, display name in the test case and test objects
   Name: cephfs.csi.ceph.com
@@ -39,7 +43,7 @@ DriverInfo:
     persistence: true
 
     # Volume ownership via fsGroup
-    fsGroup: false
+    fsGroup: true
 
     # multiple pods on a node can use the same volume concurrently
     multipods: true
@@ -82,3 +86,6 @@ DriverInfo:
 
     # Support populated data from PVC
     pvcDataSource: true
+
+    # Support group snapshot
+    groupSnapshot: true

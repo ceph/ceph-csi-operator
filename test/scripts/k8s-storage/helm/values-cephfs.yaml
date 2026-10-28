@@ -27,3 +27,11 @@ drivers:
         snapshotterSecretNamespace: rook-ceph
         parameters:
           clusterID: rook-ceph
+    volumeGroupSnapshotClasses:
+      - name: k8s-storage-e2e-cephfs
+        deletionPolicy: Delete
+        groupSnapshotterSecretName: rook-csi-cephfs-provisioner
+        groupSnapshotterSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
+          fsName: myfs
