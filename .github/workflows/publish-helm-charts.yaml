@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write # Required for cosign keyless signing via OIDC
 
     steps:
       - name: Checkout code
@@ -26,10 +27,12 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
 
-
       - name: Install helm
         run: |
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
       - name: Install chart-releaser
         run: |
@@ -56,6 +59,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CSI_GITHUB_TOKEN }}
         run: |
           gh release upload "${{ github.event.release.tag_name }}" .csi-op-release-packages/* --clobber
+
+      - name: Login to GHCR
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Helm charts to GHCR as OCI packages
+        run: |
+          helm push .csi-op-release-packages/ceph-csi-operator-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/ceph-csi-operator/charts
+          helm push .csi-op-release-packages/ceph-csi-drivers-${VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/ceph-csi-operator/charts
+
+      - name: Sign Helm charts with cosign
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/ceph-csi-operator/charts/ceph-csi-operator:${VERSION}
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/ceph-csi-operator/charts/ceph-csi-drivers:${VERSION}
 
       - name: Update Helm repo index and push to gh-pages
         run: |
