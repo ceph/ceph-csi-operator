@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- range $clientProfile := .Values.clientProfiles -}}
-{{- if $clientProfile.name -}}
+{{- if $clientProfile.name }}
 ---
 apiVersion: csi.ceph.io/v1
 kind: ClientProfile
