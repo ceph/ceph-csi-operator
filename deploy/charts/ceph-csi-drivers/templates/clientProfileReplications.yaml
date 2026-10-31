@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- range $clientProfileReplication := .Values.clientProfileReplications -}}
-{{- if $clientProfileReplication.name -}}
+{{- if $clientProfileReplication.name }}
 ---
 apiVersion: csi.ceph.io/v1
 kind: ClientProfileReplication
