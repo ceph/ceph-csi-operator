@@ -90,6 +90,9 @@ const (
 
 	// Capability constants
 	capabilityAll = "All"
+
+	// Field index for the lookup of the drivers that reference an image set ConfigMap
+	driverImageSetIndexKey = "index:spec.imageSet.name"
 )
 
 // A regexp used to parse driver's prefix and type from the full name
@@ -120,6 +123,16 @@ type driverReconcile struct {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Create field index for efficient lookup of the drivers by image set
+	if err := mgr.GetFieldIndexer().IndexField(
+		context.Background(),
+		&csiv1.Driver{},
+		driverImageSetIndexKey,
+		driverImageSetIndexFunc,
+	); err != nil {
+		return err
+	}
+
 	// Define conditions for an OperatorConfig change that the require queuing of reconciliation
 	// Filter update events based on metadata.generation changes, will filter events
 	// for non-spec changes on most resource types.
@@ -149,17 +162,18 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Enqueue a reconcile request for all existing drivers, used to trigger a reconcile
 	// for all drivers whenever the driver default configuration changes
 	enqueueAllDrivers := handler.EnqueueRequestsFromMapFunc(
-		func(ctx context.Context, obj client.Object) []reconcile.Request {
-			driverList := csiv1.DriverList{}
-			if err := r.List(ctx, &driverList); err != nil {
-				return []reconcile.Request{}
-			}
+		func(ctx context.Context, _ client.Object) []reconcile.Request {
+			return driverRequests(ctx, r.Client)
+		},
+	)
 
-			requests := make([]reconcile.Request, len(driverList.Items))
-			for i := range driverList.Items {
-				requests[i].NamespacedName = client.ObjectKeyFromObject(&driverList.Items[i])
-			}
-			return requests
+	// Enqueue a reconcile request for the drivers that use an image set ConfigMap.
+	// The images are only read during a reconcile, so a change in the ConfigMap has
+	// to enqueue the drivers that reference it, or the new images are not applied
+	// until the next operator restart.
+	enqueueDriversForImageSet := handler.EnqueueRequestsFromMapFunc(
+		func(ctx context.Context, obj client.Object) []reconcile.Request {
+			return imageSetConfigMapRequests(ctx, r.Client, obj.GetNamespace(), obj.GetName())
 		},
 	)
 
@@ -214,10 +228,101 @@ func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			builder.WithPredicates(driverDefaultsPredicate),
 		).
 		Watches(
+			&corev1.ConfigMap{},
+			enqueueDriversForImageSet,
+			builder.WithPredicates(imageSetConfigMapPredicate()),
+		).
+		Watches(
 			&storagev1.CSIDriver{},
 			enqueueFromOwnerRefAnnotation,
 		).
 		Complete(r)
+}
+
+// imageSetConfigMapPredicate filters the image set ConfigMap events down to the ones that
+// can change the images in use. ConfigMaps do not have a generation, so updates have to be
+// compared by their data.
+func imageSetConfigMapPredicate() predicate.Predicate {
+	return predicate.Funcs{
+		CreateFunc: func(_ event.CreateEvent) bool {
+			return true
+		},
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldConfigMap, oldOk := e.ObjectOld.(*corev1.ConfigMap)
+			newConfigMap, newOk := e.ObjectNew.(*corev1.ConfigMap)
+			if !oldOk || !newOk {
+				return false
+			}
+			return !maps.Equal(oldConfigMap.Data, newConfigMap.Data)
+		},
+		DeleteFunc: func(_ event.DeleteEvent) bool {
+			return true
+		},
+		GenericFunc: func(_ event.GenericEvent) bool {
+			return false
+		},
+	}
+}
+
+// imageSetConfigMapRequests returns the reconcile requests for the drivers that use the
+// ConfigMap in the given namespace and name as their image set. The image set defined in
+// the OperatorConfig applies to every driver and is overridden by the per-driver one, so a
+// change in the operator level ConfigMap requires a reconcile of all the drivers.
+func imageSetConfigMapRequests(
+	ctx context.Context,
+	c client.Client,
+	namespace, name string,
+) []reconcile.Request {
+	opConfig := csiv1.OperatorConfig{}
+	opConfig.Name = operatorConfigName
+	opConfig.Namespace = operatorNamespace
+	if err := c.Get(ctx, client.ObjectKeyFromObject(&opConfig), &opConfig); client.IgnoreNotFound(err) != nil {
+		ctrllog.FromContext(ctx).Error(
+			err,
+			"Unable to load operatorconfig.csi.ceph.io",
+			"name", client.ObjectKeyFromObject(&opConfig),
+		)
+		return []reconcile.Request{}
+	}
+
+	if namespace == operatorNamespace &&
+		opConfig.Spec.DriverSpecDefaults != nil &&
+		opConfig.Spec.DriverSpecDefaults.ImageSet != nil &&
+		opConfig.Spec.DriverSpecDefaults.ImageSet.Name == name {
+		return driverRequests(ctx, c)
+	}
+
+	return driverRequests(
+		ctx,
+		c,
+		client.InNamespace(namespace),
+		client.MatchingFields{driverImageSetIndexKey: name},
+	)
+}
+
+// driverImageSetIndexFunc indexes a driver by the name of the image set ConfigMap it references
+func driverImageSetIndexFunc(obj client.Object) []string {
+	driver := obj.(*csiv1.Driver)
+	if driver.Spec.ImageSet != nil && driver.Spec.ImageSet.Name != "" {
+		return []string{driver.Spec.ImageSet.Name}
+	}
+	return nil
+}
+
+// driverRequests returns a reconcile request for every driver that matches the list options.
+// A map function cannot return an error, so a failure to list the drivers is logged here.
+func driverRequests(ctx context.Context, c client.Client, opts ...client.ListOption) []reconcile.Request {
+	driverList := csiv1.DriverList{}
+	if err := c.List(ctx, &driverList, opts...); err != nil {
+		ctrllog.FromContext(ctx).Error(err, "Unable to list driver.csi.ceph.io")
+		return []reconcile.Request{}
+	}
+
+	requests := make([]reconcile.Request, len(driverList.Items))
+	for i := range driverList.Items {
+		requests[i].NamespacedName = client.ObjectKeyFromObject(&driverList.Items[i])
+	}
+	return requests
 }
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
