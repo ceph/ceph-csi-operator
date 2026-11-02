@@ -8,7 +8,7 @@ SCRIPT_DIR="$(dirname "${0}")"
 # shellcheck disable=SC1091
 [ ! -e "${SCRIPT_DIR}"/utils.sh ] || source "${SCRIPT_DIR}"/utils.sh
 
-SNAPSHOT_VERSION=${SNAPSHOT_VERSION:-"v8.2.0"}
+SNAPSHOT_VERSION=${SNAPSHOT_VERSION:-"v8.6.0"}
 
 TEMP_DIR="$(mktemp -d)"
 SNAPSHOTTER_URL="https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/${SNAPSHOT_VERSION}"
