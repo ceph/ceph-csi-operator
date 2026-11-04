@@ -121,6 +121,15 @@ type driverReconcile struct {
 	images     map[string]string
 }
 
+var nodePluginSecurityContext = &corev1.SecurityContext{
+	Privileged: ptr.To(true),
+	Capabilities: &corev1.Capabilities{
+		Drop: []corev1.Capability{capabilityAll},
+		Add:  []corev1.Capability{"SYS_ADMIN", "IPC_LOCK"},
+	},
+	AllowPrivilegeEscalation: ptr.To(true),
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *DriverReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Create field index for efficient lookup of the drivers by image set
@@ -725,7 +734,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 								Name:            fmt.Sprintf("csi-%splugin", r.driverType),
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
-								SecurityContext: logRotateSecurityContext,
+								SecurityContext: nodePluginSecurityContext,
 								Args: utils.DeleteZeroValues(
 									append(
 										[]string{
@@ -1565,14 +1574,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 								Name:            fmt.Sprintf("csi-%splugin", r.driverType),
 								Image:           r.images["plugin"],
 								ImagePullPolicy: imagePullPolicy,
-								SecurityContext: &corev1.SecurityContext{
-									Privileged: ptr.To(true),
-									Capabilities: &corev1.Capabilities{
-										Add:  []corev1.Capability{"SYS_ADMIN"},
-										Drop: []corev1.Capability{capabilityAll},
-									},
-									AllowPrivilegeEscalation: ptr.To(true),
-								},
+								SecurityContext: nodePluginSecurityContext,
 								Args: utils.DeleteZeroValues(
 									append(
 										[]string{
@@ -1685,6 +1687,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 									Privileged: ptr.To(true),
 									Capabilities: &corev1.Capabilities{
 										Drop: []corev1.Capability{capabilityAll},
+										Add:  []corev1.Capability{"IPC_LOCK"},
 									},
 								},
 								Args: utils.DeleteZeroValues(
