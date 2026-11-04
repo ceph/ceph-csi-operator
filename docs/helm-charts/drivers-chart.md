@@ -107,6 +107,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.cephfs.controllerPlugin.podResources` | Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.cephfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath). | `false` |
 | `drivers.cephfs.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.cephfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
@@ -133,6 +134,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.cephfs.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.cephfs.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.cephfs.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.cephfs.nodePlugin.podResources` | Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.cephfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.cephfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.cephfs.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
@@ -147,6 +149,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.nfs.controllerPlugin.podResources` | Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.nfs.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath). | `false` |
 | `drivers.nfs.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.nfs.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
@@ -173,6 +176,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nfs.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.nfs.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.nfs.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.nfs.nodePlugin.podResources` | Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.nfs.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.nfs.nodePlugin.serviceAccountName` | Service account name for the pod (default: "") | `""` |
 | `drivers.nfs.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
@@ -188,6 +192,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.nvmeof.controllerPlugin.podResources` | Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.nvmeof.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath). | `false` |
 | `drivers.nvmeof.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.nvmeof.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
@@ -214,6 +219,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.nvmeof.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.nvmeof.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.nvmeof.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.nvmeof.nodePlugin.podResources` | Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.nvmeof.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.nvmeof.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.nvmeof.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
@@ -228,6 +234,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.controllerPlugin.containerExtraArgs` | Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
+| `drivers.rbd.controllerPlugin.podResources` | Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.rbd.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath). | `false` |
 | `drivers.rbd.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `drivers.rbd.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
@@ -254,6 +261,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `drivers.rbd.nodePlugin.containerExtraArgs` | Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {}) | `{}` |
 | `drivers.rbd.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `drivers.rbd.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `drivers.rbd.nodePlugin.podResources` | Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `drivers.rbd.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `drivers.rbd.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `drivers.rbd.nodePlugin.volumes` | List of volumes attached to the pod (default: []) | `[]` |
@@ -275,6 +283,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.controllerPlugin.deploymentStrategy` | Deployment strategy for the controller plugin (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.hostNetwork` | Flag to use host network for the controller plugin (default: false) | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
+| `operatorConfig.driverSpecDefaults.controllerPlugin.podResources` | Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.privileged` | Flag to indicate if the container should be privileged (default: false) Set to true on SELinux-enforcing hosts (e.g. OpenShift) when log rotation writes to a hostPath volume (see log.rotation.enabled/logHostPath). | `false` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.replicas` | Number of replicas for the controller plugin (default: 1) | `1` |
 | `operatorConfig.driverSpecDefaults.controllerPlugin.resources` | Resource requirements for controller plugin containers (default: {}) | `{}` |
@@ -300,6 +309,7 @@ The following table lists the configurable parameters of the ceph-csi-drivers ch
 | `operatorConfig.driverSpecDefaults.nodePlugin.imagePullPolicy` | Image pull policy (default: "IfNotPresent") | `"IfNotPresent"` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.kubeletDirPath` | kubelet directory path (default: "/var/lib/kubelet") | `"/var/lib/kubelet"` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.labels` | Custom labels for the pod (default: {}) | `{}` |
+| `operatorConfig.driverSpecDefaults.nodePlugin.podResources` | Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {}) | `{}` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.priorityClassName` | Pod's priority class name (default: "") | `""` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.tolerations` | List of tolerations for the pod (default: []) | `[]` |
 | `operatorConfig.driverSpecDefaults.nodePlugin.updateStrategy` | Daemonset update strategy (default: {}) | `{}` |

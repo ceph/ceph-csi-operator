@@ -130,6 +130,17 @@ type PodCommonSpec struct {
 	// To indicate the image pull policy to be applied to all the containers in the csi driver pods.
 	//+kubebuilder:validation:Optional
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy"`
+
+	// PodResources defines the resource requests and limits for the pod as a whole.
+	// When set, Kubernetes gives pod-level resources precedence over the aggregate
+	// of the container-level resources. Only cpu, memory and hugepages resources are
+	// supported at pod level. The aggregate of container requests must not exceed the
+	// pod-level request, and each container limit must not exceed the pod-level limit.
+	// This requires the PodLevelResources feature gate, which is enabled by default
+	// starting with Kubernetes 1.34.
+	//+kubebuilder:validation:Optional
+	//+kubebuilder:validation:XValidation:rule="!has(self.claims)",message="claims may not be set for pod-level resources"
+	PodResources *corev1.ResourceRequirements `json:"podResources,omitempty"`
 }
 
 type NodePluginResourcesSpec struct {

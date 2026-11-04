@@ -231,6 +231,13 @@ spec:
           requests:
             cpu: '100'
             memory: '250'
+      podResources:
+        limits:
+          cpu: '2'
+          memory: '1Gi'
+        requests:
+          cpu: '1'
+          memory: '512Mi'
     liveness:
       metricsPort: 8000
     leaderElection:

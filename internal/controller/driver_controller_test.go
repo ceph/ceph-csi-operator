@@ -22,8 +22,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
@@ -328,5 +330,150 @@ var _ = Describe("copyNonEmptyValues", func() {
 			attacherKey:    "default-attacher:v1",
 			resizerKey:     "custom-resizer:v2",
 		}))
+	})
+})
+
+var _ = Describe("Pod resources", func() {
+	nodePodResources := &corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("250m"),
+			corev1.ResourceMemory: resource.MustParse("256Mi"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1"),
+			corev1.ResourceMemory: resource.MustParse("512Mi"),
+		},
+	}
+	controllerPodResources := &corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("500m"),
+			corev1.ResourceMemory: resource.MustParse("512Mi"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("2"),
+			corev1.ResourceMemory: resource.MustParse("1Gi"),
+		},
+	}
+
+	It("should merge pod resources from driver spec defaults", func() {
+		defaults := &csiv1.DriverSpec{
+			NodePlugin: &csiv1.NodePluginSpec{
+				PodCommonSpec: csiv1.PodCommonSpec{PodResources: nodePodResources},
+			},
+			ControllerPlugin: &csiv1.ControllerPluginSpec{
+				PodCommonSpec: csiv1.PodCommonSpec{PodResources: controllerPodResources},
+			},
+		}
+		dest := &csiv1.DriverSpec{}
+
+		mergeDriverSpecs(dest, defaults)
+
+		Expect(dest.NodePlugin).NotTo(BeNil())
+		Expect(dest.NodePlugin.PodResources).To(Equal(nodePodResources))
+		Expect(dest.ControllerPlugin).NotTo(BeNil())
+		Expect(dest.ControllerPlugin.PodResources).To(Equal(controllerPodResources))
+	})
+
+	It("should keep driver-specific pod resources over defaults", func() {
+		driverNodeResources := &corev1.ResourceRequirements{
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU: resource.MustParse("100m"),
+			},
+		}
+		driverControllerResources := &corev1.ResourceRequirements{
+			Requests: corev1.ResourceList{
+				corev1.ResourceMemory: resource.MustParse("128Mi"),
+			},
+		}
+		defaults := &csiv1.DriverSpec{
+			NodePlugin: &csiv1.NodePluginSpec{
+				PodCommonSpec: csiv1.PodCommonSpec{PodResources: nodePodResources},
+			},
+			ControllerPlugin: &csiv1.ControllerPluginSpec{
+				PodCommonSpec: csiv1.PodCommonSpec{PodResources: controllerPodResources},
+			},
+		}
+		dest := &csiv1.DriverSpec{
+			NodePlugin: &csiv1.NodePluginSpec{
+				PodCommonSpec: csiv1.PodCommonSpec{PodResources: driverNodeResources},
+			},
+			ControllerPlugin: &csiv1.ControllerPluginSpec{
+				PodCommonSpec: csiv1.PodCommonSpec{PodResources: driverControllerResources},
+			},
+		}
+
+		mergeDriverSpecs(dest, defaults)
+
+		Expect(dest.NodePlugin.PodResources).To(Equal(driverNodeResources))
+		Expect(dest.ControllerPlugin.PodResources).To(Equal(driverControllerResources))
+	})
+
+	It("should apply pod resources to the generated workloads", func() {
+		const (
+			driverName = "test.rbd.csi.ceph.com"
+			namespace  = "default"
+		)
+
+		scheme := runtime.NewScheme()
+		Expect(appsv1.AddToScheme(scheme)).To(Succeed())
+		Expect(corev1.AddToScheme(scheme)).To(Succeed())
+		Expect(csiv1.AddToScheme(scheme)).To(Succeed())
+
+		driver := &csiv1.Driver{
+			ObjectMeta: metav1.ObjectMeta{Name: driverName, Namespace: namespace},
+			Spec: csiv1.DriverSpec{
+				DeployCsiAddons: ptr.To(true),
+				NodePlugin: &csiv1.NodePluginSpec{
+					PodCommonSpec: csiv1.PodCommonSpec{PodResources: nodePodResources},
+				},
+				ControllerPlugin: &csiv1.ControllerPluginSpec{
+					PodCommonSpec: csiv1.PodCommonSpec{PodResources: controllerPodResources},
+				},
+			},
+		}
+
+		fakeClient := fake.NewClientBuilder().
+			WithScheme(scheme).
+			WithObjects(driver).
+			Build()
+		reconciler := driverReconcile{
+			DriverReconciler: DriverReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			},
+			ctx:        context.Background(),
+			log:        zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)),
+			driver:     *driver,
+			driverType: RbdDriverType,
+			images:     imageDefaults,
+		}
+
+		Expect(reconciler.reconcileControllerPluginDeployment()).To(Succeed())
+		Expect(reconciler.reconcileNodePluginDaemonSet()).To(Succeed())
+		Expect(reconciler.reconcileNodePluginDaemonSetForCsiAddons()).To(Succeed())
+
+		deployment := &appsv1.Deployment{}
+		Expect(fakeClient.Get(
+			reconciler.ctx,
+			types.NamespacedName{Name: driverName + "-ctrlplugin", Namespace: namespace},
+			deployment,
+		)).To(Succeed())
+		Expect(deployment.Spec.Template.Spec.Resources).To(Equal(controllerPodResources))
+
+		nodePluginDaemonSet := &appsv1.DaemonSet{}
+		Expect(fakeClient.Get(
+			reconciler.ctx,
+			types.NamespacedName{Name: driverName + "-nodeplugin", Namespace: namespace},
+			nodePluginDaemonSet,
+		)).To(Succeed())
+		Expect(nodePluginDaemonSet.Spec.Template.Spec.Resources).To(Equal(nodePodResources))
+
+		csiAddonsDaemonSet := &appsv1.DaemonSet{}
+		Expect(fakeClient.Get(
+			reconciler.ctx,
+			types.NamespacedName{Name: driverName + "-nodeplugin-csi-addons", Namespace: namespace},
+			csiAddonsDaemonSet,
+		)).To(Succeed())
+		Expect(csiAddonsDaemonSet.Spec.Template.Spec.Resources).To(Equal(nodePodResources))
 	})
 })
