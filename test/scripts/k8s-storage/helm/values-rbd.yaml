@@ -31,3 +31,11 @@ drivers:
         snapshotterSecretNamespace: rook-ceph
         parameters:
           clusterID: rook-ceph
+    volumeGroupSnapshotClasses:
+      - name: k8s-storage-e2e-rbd
+        deletionPolicy: Delete
+        groupSnapshotterSecretName: rook-csi-rbd-provisioner
+        groupSnapshotterSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
+          pool: replicapool

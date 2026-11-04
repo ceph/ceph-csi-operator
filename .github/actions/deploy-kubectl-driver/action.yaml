@@ -24,7 +24,8 @@ runs:
             .value.enabled = (.value.name == strenv(DRIVER_NAME)) |
             .value.deployCsiAddons = (.value.name == "rbd.csi.ceph.com") |
             .value.generateOMapInfo = ((.value.name == "cephfs.csi.ceph.com") or (.value.name == "rbd.csi.ceph.com")) |
-            .value.log.verbosity = 5
+            .value.log.verbosity = 5 |
+            .value.snapshotPolicy = "volumeGroupSnapshot"
           )
           ' ./deploy/charts/ceph-csi-drivers/values.yaml
 
@@ -58,5 +59,6 @@ runs:
           kubectl apply -f ./test/scripts/k8s-storage/kubectl/client-profile.yaml
           kubectl apply -f ./test/scripts/k8s-storage/kubectl/sc-${{ inputs.driverType }}.yaml || echo "No StorageClass file for ${{ inputs.driverType }}"
           kubectl apply -f ./test/scripts/k8s-storage/kubectl/vsclass-${{ inputs.driverType }}.yaml || echo "No VolumeSnapshotClass file for ${{ inputs.driverType }}"
+          kubectl create -f ./test/scripts/k8s-storage/kubectl/vgsclass-${{ inputs.driverType }}.yaml || echo "No VolumeGroupSnapshotClass file for ${{ inputs.driverType }}"
 
           git checkout ./test/scripts/k8s-storage/kubectl/ceph-connection.yaml || true

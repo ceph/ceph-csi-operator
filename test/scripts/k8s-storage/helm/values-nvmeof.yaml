@@ -31,3 +31,18 @@ drivers:
           # injected at test time by test/scripts/k8s-storage/patch-nvmeof-storageclass.sh
           # once the Rook gateway Pod IP is known.
           nvmeofGatewayPort: "5500"
+    volumeSnapshotClasses:
+      - name: k8s-storage-e2e-nvmeof
+        deletionPolicy: Delete
+        snapshotterSecretName: rook-csi-rbd-provisioner
+        snapshotterSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
+    volumeGroupSnapshotClasses:
+      - name: k8s-storage-e2e-nvmeof
+        deletionPolicy: Delete
+        groupSnapshotterSecretName: rook-csi-rbd-provisioner
+        groupSnapshotterSecretNamespace: rook-ceph
+        parameters:
+          clusterID: rook-ceph
+          pool: replicapool
