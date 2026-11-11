@@ -76,6 +76,9 @@ spec:
       logRotator: {{ $driver.nodePlugin.resources.logRotator | default dict | toYaml | nindent 8 }}
       plugin: {{ $driver.nodePlugin.resources.plugin | default dict | toYaml | nindent 8 }}
     {{- end }}
+    {{- if $driver.nodePlugin.podResources }}
+    podResources: {{ $driver.nodePlugin.podResources | toYaml | nindent 6 }}
+    {{- end }}
     {{- if $driver.nodePlugin.kubeletDirPath }}
     kubeletDirPath: {{ $driver.nodePlugin.kubeletDirPath }}
     {{- end }}
@@ -134,6 +137,9 @@ spec:
       addons: {{ $driver.controllerPlugin.resources.addons | default dict | toYaml | nindent 8 }}
       logRotator: {{ $driver.controllerPlugin.resources.logRotator | default dict | toYaml | nindent 8 }}
       plugin: {{ $driver.controllerPlugin.resources.plugin | default dict | toYaml | nindent 8 }}
+    {{- end }}
+    {{- if $driver.controllerPlugin.podResources }}
+    podResources: {{ $driver.controllerPlugin.podResources | toYaml | nindent 6 }}
     {{- end }}
     privileged: {{ $driver.controllerPlugin.privileged | default false }}
     {{- if $driver.controllerPlugin.priorityClassName }}
