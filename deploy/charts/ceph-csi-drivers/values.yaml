@@ -160,6 +160,8 @@ operatorConfig:
       imagePullPolicy: "IfNotPresent"
       # -- Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # Controller Plugin Configuration
     controllerPlugin:
       # -- Flag to use host network for the controller plugin (default: false)
@@ -178,6 +180,8 @@ operatorConfig:
       tolerations: []
       # -- Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
       # -- Affinity settings for the pod (default: {})
       affinity: {}
       # -- Image pull policy (default: "IfNotPresent")
@@ -256,6 +260,8 @@ drivers:
       imagePullPolicy: "IfNotPresent"
       # -- Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # Controller Plugin Configuration
     controllerPlugin:
       # -- Flag to use host network for the controller plugin (default: false)
@@ -274,6 +280,8 @@ drivers:
       tolerations: []
       # -- Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # -- List of StorageClass resources to create for this driver (default: [])
     # For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml>
     storageClasses: []
@@ -403,6 +411,8 @@ drivers:
       imagePullPolicy: "IfNotPresent"
       # -- Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # Controller Plugin Configuration
     controllerPlugin:
       # -- Flag to use host network for the controller plugin (default: false)
@@ -421,6 +431,8 @@ drivers:
       tolerations: []
       # -- Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # -- List of StorageClass resources to create for this driver (default: [])
     # NVMe-oF is backed by RBD; for all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/rbd/storageclass.yaml>
     storageClasses: []
@@ -550,6 +562,8 @@ drivers:
       imagePullPolicy: "IfNotPresent"
       # -- Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # Controller Plugin Configuration
     controllerPlugin:
       # -- Flag to use host network for the controller plugin (default: false)
@@ -568,6 +582,8 @@ drivers:
       tolerations: []
       # -- Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # -- List of StorageClass resources to create for this driver (default: [])
     # For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/cephfs/storageclass.yaml>
     storageClasses: []
@@ -696,6 +712,8 @@ drivers:
       imagePullPolicy: "IfNotPresent"
       # -- Extra arguments for node plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-rbdplugin, driver-registrar, csi-addons (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the node plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # Controller Plugin Configuration
     controllerPlugin:
       # -- Flag to use host network for the controller plugin (default: false)
@@ -714,6 +732,8 @@ drivers:
       tolerations: []
       # -- Extra arguments for controller plugin containers. Key: container name, Value: list of CLI arguments. Examples: csi-provisioner, csi-attacher, csi-resizer, csi-snapshotter (default: {})
       containerExtraArgs: {}
+      # -- Pod-level resource requests and limits for the controller plugin pod (requires Kubernetes 1.34+). Pod-level resources take precedence over container-level resources. (default: {})
+      podResources: {}
     # -- List of StorageClass resources to create for this driver (default: [])
     # For all available parameters, see <https://github.com/ceph/ceph-csi/blob/devel/examples/nfs/storageclass.yaml>
     storageClasses: []

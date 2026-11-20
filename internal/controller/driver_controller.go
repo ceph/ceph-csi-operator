@@ -709,6 +709,7 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					Resources:          pluginSpec.PodResources,
 					HostNetwork:        ptr.Deref(pluginSpec.HostNetwork, false),
 					DNSPolicy: utils.Call(func() corev1.DNSPolicy {
 						if ptr.Deref(pluginSpec.HostNetwork, false) {
@@ -1323,6 +1324,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSetForCsiAddons() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					Resources:          pluginSpec.PodResources,
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
 					// resolved through k8s service, set dns policy to cluster first
 					DNSPolicy:   corev1.DNSClusterFirstWithHostNet,
@@ -1550,6 +1552,7 @@ func (r *driverReconcile) reconcileNodePluginDaemonSet() error {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: serviceAccountName,
 					PriorityClassName:  ptr.Deref(pluginSpec.PrioritylClassName, ""),
+					Resources:          pluginSpec.PodResources,
 					HostNetwork:        true,
 					HostPID:            r.isRbdOrNvemofDriver(),
 					// to use e.g. Rook orchestrated cluster, and mons' FQDN is
@@ -2050,6 +2053,9 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 			if dest.ImagePullPolicy == "" {
 				dest.ImagePullPolicy = src.ImagePullPolicy
 			}
+			if dest.PodResources == nil {
+				dest.PodResources = src.PodResources
+			}
 			if dest.UpdateStrategy == nil {
 				dest.UpdateStrategy = src.UpdateStrategy
 			}
@@ -2107,6 +2113,9 @@ func mergeDriverSpecs(dest, src *csiv1.DriverSpec) {
 			}
 			if dest.ImagePullPolicy == "" {
 				dest.ImagePullPolicy = src.ImagePullPolicy
+			}
+			if dest.PodResources == nil {
+				dest.PodResources = src.PodResources
 			}
 			if dest.Replicas == nil {
 				dest.Replicas = src.Replicas
