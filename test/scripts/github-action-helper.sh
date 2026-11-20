@@ -94,7 +94,7 @@ deploy_rook() {
   curl https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/cluster-test.yaml -o cluster-test.yaml
   sed -i "s|#deviceFilter:|deviceFilter: ${BLOCK/\/dev\//}|g" cluster-test.yaml
   # pin the Ceph image to a specific patch release for reproducible CI runs
-  sed -i "s|image: quay.io/ceph/ceph:v19|image: quay.io/ceph/ceph:v19.2.5|g" cluster-test.yaml
+  sed -i "s|image: quay.io/ceph/ceph:v19|image: quay.io/ceph/ceph:v21.2.0|g" cluster-test.yaml
   cat cluster-test.yaml
   kubectl_retry create -f cluster-test.yaml
   kubectl_retry create -f https://raw.githubusercontent.com/rook/rook/$rook_version/deploy/examples/pool-test.yaml
