@@ -7,6 +7,8 @@ clientProfiles:
       name: cephcluster
     cephFs:
       subVolumeGroup: csi
+    nvmeof:
+      radosNamespace: ""
 drivers:
   nvmeof:
     storageClasses:
