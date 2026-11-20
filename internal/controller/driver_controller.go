@@ -812,7 +812,6 @@ func (r *driverReconcile) reconcileControllerPluginDeployment() error {
 											utils.CsiAddressContainerArg,
 											utils.TimeoutContainerArg(grpcTimeout),
 											utils.RetryIntervalStartContainerArg,
-											utils.DefaultFsTypeContainerArg,
 											utils.PreventVolumeModeConversionContainerArg,
 											utils.If(r.isRbdOrNvemofDriver(), utils.DefaultFsTypeContainerArg, ""),
 											utils.TopologyContainerArg(topology),
