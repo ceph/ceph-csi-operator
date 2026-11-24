@@ -40,22 +40,45 @@ function create_extra_disk() {
 
 # source https://github.com/rook/rook
 function find_extra_block_dev() {
-  # shellcheck disable=SC2005 # redirect doesn't work with sudo, so use echo
-  echo "$(sudo lsblk)" >/dev/stderr # print lsblk output to stderr for debugging in case of future errors
-  # relevant lsblk --pairs example: (MOUNTPOINT identifies boot partition)(PKNAME is Parent dev ID)
-  # NAME="sda15" SIZE="106M" TYPE="part" MOUNTPOINT="/boot/efi" PKNAME="sda"
-  # NAME="sdb"   SIZE="75G"  TYPE="disk" MOUNTPOINT=""          PKNAME=""
-  # NAME="sdb1"  SIZE="75G"  TYPE="part" MOUNTPOINT="/mnt"      PKNAME="sdb"
-  boot_dev="$(sudo lsblk --noheading --list --output MOUNTPOINT,PKNAME | grep boot | awk '{print $2}'| sort -u)"
-  echo "  == find_extra_block_dev(): boot_dev='$boot_dev'" >/dev/stderr # debug in case of future errors
-  # --nodeps ignores partitions
-  extra_dev="$(sudo lsblk --noheading --list --nodeps --output KNAME | grep -v loop | grep -v "$boot_dev" | head -1)"
+  sudo lsblk >&2
+  local extra_dev
+  extra_dev="$(find_unused_disk)"
   if [ -z "$extra_dev" ]; then
     create_extra_disk >/dev/stderr
-    extra_dev="$(sudo lsblk --noheading --list --nodeps --output KNAME | grep -Ev "($boot_dev|loop|nbd)" | head -1)"
+    extra_dev="$(find_unused_disk)"
   fi
   echo "  == find_extra_block_dev(): extra_dev='$extra_dev'" >/dev/stderr # debug in case of future errors
   echo "$extra_dev"                                                       # output of function
+}
+
+# find_unused_disk prints the first disk that can hold an OSD, or nothing when
+# no usable disk is present.
+#
+# Only disks without a mounted partition or device-mapper layer are considered:
+# the runner can expose the root filesystem on an extra disk (for example a
+# dm-linear mapping on top of one), which must never be wiped. Memory-backed
+# devices are skipped because ceph-volume rejects devices smaller than 5 GiB,
+# which a zram swap device usually is.
+find_unused_disk() {
+  local min_size=$((5 * 1024 * 1024 * 1024))
+  local kname size
+  while read -r kname; do
+    case "${kname}" in
+      loop*|ram*|zram*) continue ;;
+    esac
+    size="$(sudo lsblk --noheading --nodeps --bytes --output SIZE "/dev/${kname}")"
+    if [ -z "${size}" ] || [ "${size}" -lt "${min_size}" ]; then
+      continue
+    fi
+    # a non-empty mountpoint anywhere below the disk means it is in use
+    if sudo lsblk --noheading --list --output MOUNTPOINTS "/dev/${kname}" | grep -q .; then
+      continue
+    fi
+    echo "${kname}"
+
+    return 0
+  done < <(sudo lsblk --noheading --list --nodeps --output KNAME,TYPE |
+    awk '$2=="disk" {print $1}')
 }
 
 : "${BLOCK:=$(find_extra_block_dev)}"
