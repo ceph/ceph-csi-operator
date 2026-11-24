@@ -46,7 +46,7 @@ spec:
     {{- if $config.driverSpecDefaults.encryption }}
       {{- if $config.driverSpecDefaults.encryption.configMapRef.name }}
     encryption:
-      configMapRef:
+      configMapName:
         name: {{ $config.driverSpecDefaults.encryption.configMapRef.name }}
       {{- end }}
     {{- end }}
