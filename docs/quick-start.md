@@ -55,7 +55,12 @@ ceph-csi-operator-controller-manager-67d45fd9ff-zgst7   2/2     Running   0     
 
 ### 3. Deploy Ceph-CSI Drivers
 
-Once the operator is installed, deploy the Ceph-CSI drivers:
+Once the operator is installed, deploy the Ceph-CSI drivers.
+
+> [!TIP]
+> Instead of creating each resource inline as shown below, you can apply
+> the ready-to-use example custom resources from [docs/examples/](examples/)
+> and continue at [step 5](#5-create-cephconnection).
 
 #### 3.1 Deploy the RBD Driver
 

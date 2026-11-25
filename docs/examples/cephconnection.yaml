@@ -1,0 +1,16 @@
+# Connection to a Ceph cluster.
+#
+# Replace REPLACE_WITH_MONITOR_IP with a monitor address of your Ceph
+# cluster before applying. To find monitor addresses:
+#   - external Ceph: `ceph mon dump` on the cluster
+#   - Rook in-cluster: kubectl -n rook-ceph get cm rook-ceph-mon-endpoints \
+#       -o jsonpath='{.data.data}'
+# One monitor is enough; two or three is recommended for fault tolerance.
+apiVersion: csi.ceph.io/v1
+kind: CephConnection
+metadata:
+  name: ceph-connection
+  namespace: ceph-csi-operator-system
+spec:
+  monitors:
+    - REPLACE_WITH_MONITOR_IP:6789
