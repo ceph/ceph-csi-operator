@@ -108,7 +108,7 @@ spec:
       {{- end }}
       volumes:
         {{- if $config.driverSpecDefaults.nodePlugin.volumes }}
-        {{- toYaml $config.driverSpecDefaults.nodePlugin.volumes | nindent 4 }}
+        {{- toYaml $config.driverSpecDefaults.nodePlugin.volumes | nindent 8 }}
         {{- else }}
         []  # Empty list if no volumes are defined
         {{- end }}
@@ -148,7 +148,7 @@ spec:
       {{- toYaml $config.driverSpecDefaults.controllerPlugin.tolerations | nindent 8 }}
       volumes:
         {{- if $config.driverSpecDefaults.controllerPlugin.volumes }}
-        {{- toYaml $config.driverSpecDefaults.controllerPlugin.volumes | nindent 4 }}
+        {{- toYaml $config.driverSpecDefaults.controllerPlugin.volumes | nindent 8 }}
         {{- else }}
         []
         {{- end }}
