@@ -1482,9 +1482,9 @@ of the RBD controller plugin with the <code>external-snapshot-metadata</code> si
 <h2 id="admin-responsibilities">Admin Responsibilities<a class="headerlink" href="#admin-responsibilities" title="Permanent link">&para;</a></h2>
 <p>Users need to perform the following manual setup:</p>
 <ol>
-<li>Install the <a href="https://github.com/kubernetes-csi/external-snapshot-metadata/blob/v1.1.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml">SnapshotMetadataService CRD</a></li>
+<li>Install the <a href="https://github.com/kubernetes-csi/external-snapshot-metadata/blob/v1.2.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml">SnapshotMetadataService CRD</a></li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/kubernetes-csi/external-snapshot-metadata/refs/tags/v1.1.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/kubernetes-csi/external-snapshot-metadata/refs/tags/v1.2.0/client/config/crd/cbt.storage.k8s.io_snapshotmetadataservices.yaml
 </code></pre></div>
 <ol>
 <li>Create a Service to expose the RBD driver pod</li>
@@ -1573,6 +1573,7 @@ of the RBD controller plugin with the <code>external-snapshot-metadata</code> si
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;service-name&gt;.&lt;driver-namespace&gt;:&lt;service-port&gt;</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">audience</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;driver-name&gt;</span>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">caCert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;ca-bundle&gt;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nt">requireBaseSnapshotForDelta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 <blockquote>
 <p><strong>Note:</strong>
