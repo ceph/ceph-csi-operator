@@ -1,0 +1,16 @@
+# Client configuration pointing at the CephConnection above.
+#
+# IMPORTANT: the name of this resource ("storage") is used as the
+# `clusterID` parameter in StorageClass and VolumeSnapshotClass resources.
+# If you rename it, update your StorageClasses accordingly.
+apiVersion: csi.ceph.io/v1
+kind: ClientProfile
+metadata:
+  name: storage
+  namespace: ceph-csi-operator-system
+spec:
+  cephConnectionRef:
+    name: ceph-connection
+  cephFs:
+    subVolumeGroup: csi
+  rbd: {}

@@ -148,6 +148,11 @@ NAME                                                    READY   STATUS    RESTAR
 ceph-csi-operator-controller-manager-67d45fd9ff-zgst7   2/2     Running   0          40s
 ```
 
+Once the operator is running, you can deploy the CSI drivers and configure
+the Ceph connection by applying the ready-to-use example custom resources
+from [docs/examples/](examples/), or follow the
+[quick-start guide](quick-start.md) step by step.
+
 ---
 
 ## 3. OpenShift Installation

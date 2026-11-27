@@ -1,0 +1,8 @@
+# Deploy the NVMe-oF CSI driver.
+# An empty spec is valid: the operator fills in defaults from the
+# OperatorConfig (see ../operatorconfig.yaml) and its built-in defaults.
+apiVersion: csi.ceph.io/v1
+kind: Driver
+metadata:
+  name: nvmeof.csi.ceph.com
+  namespace: ceph-csi-operator-system

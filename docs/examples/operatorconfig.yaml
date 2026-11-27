@@ -1,0 +1,18 @@
+# Cluster-wide defaults for all CSI drivers managed by the operator.
+#
+# This resource is optional: without it, drivers run with the operator's
+# built-in defaults. Individual Driver CRs can override any of these values.
+#
+# The name must be "ceph-csi-operator-config" unless the operator was
+# installed with a custom OPERATOR_CONFIG_NAME environment variable.
+apiVersion: csi.ceph.io/v1
+kind: OperatorConfig
+metadata:
+  name: ceph-csi-operator-config
+  namespace: ceph-csi-operator-system
+spec:
+  driverSpecDefaults:
+    fsGroupPolicy: File
+    cephFsClientType: kernel
+    nodePlugin:
+      kubeletDirPath: /var/lib/kubelet
