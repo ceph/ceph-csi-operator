@@ -18,7 +18,7 @@ The operator uses the following image keys in the ConfigMap. Each key correspond
 | `resizer` | CSI external-resizer sidecar | `registry.k8s.io/sig-storage/csi-resizer:v2.1.0` |
 | `snapshotter` | CSI external-snapshotter sidecar | `registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0` |
 | `registrar` | CSI node-driver-registrar sidecar | `registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.17.0` |
-| `snapshot-metadata` | CSI snapshot-metadata sidecar (RBD only) | `registry.k8s.io/sig-storage/csi-snapshot-metadata:v1.0.0` |
+| `snapshot-metadata` | CSI snapshot-metadata sidecar (RBD only) | `registry.k8s.io/sig-storage/csi-snapshot-metadata:v1.2.0` |
 | `plugin` | Ceph-CSI driver plugin | `quay.io/cephcsi/cephcsi:v3.17.0` |
 | `addons` | CSI-Addons sidecar | `quay.io/csiaddons/k8s-sidecar:v0.14.0` |
 | `ex-snapshotter` | Extended snapshotter for CephFS volume groups (optional) | Not set by default |
@@ -124,8 +124,8 @@ skopeo copy docker://registry.k8s.io/sig-storage/csi-snapshotter:v8.5.0 \
 skopeo copy docker://registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.17.0 \
   docker://${PRIVATE_REGISTRY}/sig-storage/csi-node-driver-registrar:v2.17.0
 
-skopeo copy docker://registry.k8s.io/sig-storage/csi-snapshot-metadata:v1.0.0 \
-  docker://${PRIVATE_REGISTRY}/sig-storage/csi-snapshot-metadata:v1.0.0
+skopeo copy docker://registry.k8s.io/sig-storage/csi-snapshot-metadata:v1.2.0 \
+  docker://${PRIVATE_REGISTRY}/sig-storage/csi-snapshot-metadata:v1.2.0
 
 skopeo copy docker://quay.io/cephcsi/cephcsi:v3.17.0 \
   docker://${PRIVATE_REGISTRY}/cephcsi/cephcsi:v3.17.0
@@ -148,7 +148,7 @@ data:
   resizer: "registry.internal.example.com/sig-storage/csi-resizer:v2.1.0"
   snapshotter: "registry.internal.example.com/sig-storage/csi-snapshotter:v8.5.0"
   registrar: "registry.internal.example.com/sig-storage/csi-node-driver-registrar:v2.17.0"
-  snapshot-metadata: "registry.internal.example.com/sig-storage/csi-snapshot-metadata:v1.0.0"
+  snapshot-metadata: "registry.internal.example.com/sig-storage/csi-snapshot-metadata:v1.2.0"
   plugin: "registry.internal.example.com/cephcsi/cephcsi:v3.17.0"
   addons: "registry.internal.example.com/csiaddons/k8s-sidecar:v0.14.0"
 ```
