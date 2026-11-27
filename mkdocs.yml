@@ -50,6 +50,7 @@ nav:
       - Replication: design/replication.md
   - Features:
       - PodMonitor: features/podmonitor.md
+      - Pod-level Resources: features/pod-resources.md
       - RBD Snapshot Metadata: features/rbd-snapshot-metadata.md
       - SELinux Host Mount: features/selinux-host-mount.md
   - Helm Charts:
