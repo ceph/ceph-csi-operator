@@ -11,6 +11,8 @@ spec:
   cephConnectionRef:
     name: {{  $clientProfile.cephConnection.name  }}
   {{- if $clientProfile.cephFs }}
+  {{- $cephFsHasSecrets := and $clientProfile.cephFs.cephCsiSecrets (or (and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.name)) }}
+  {{- if or $clientProfile.cephFs.subVolumeGroup $clientProfile.cephFs.radosNamespace $clientProfile.cephFs.fuseMountOptions $clientProfile.cephFs.kernelMountOptions $cephFsHasSecrets }}
   cephFs:
     {{- if $clientProfile.cephFs.fuseMountOptions }}
     fuseMountOptions:
@@ -24,11 +26,13 @@ spec:
          {{ $key }}: {{ $value }}
       {{ end }}
     {{- end }}
+    {{- if $clientProfile.cephFs.subVolumeGroup }}
     subVolumeGroup: {{ $clientProfile.cephFs.subVolumeGroup }}
+    {{- end }}
     {{- if $clientProfile.cephFs.radosNamespace }}
     radosNamespace: {{ $clientProfile.cephFs.radosNamespace }}
     {{- end }}
-    {{- if and $clientProfile.cephFs.cephCsiSecrets (or (and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret $clientProfile.cephFs.cephCsiSecrets.nodePublishSecret.name)) }}
+    {{- if $cephFsHasSecrets }}
     cephCsiSecrets:
       {{- if and $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret $clientProfile.cephFs.cephCsiSecrets.controllerPublishSecret.name }}
       controllerPublishSecret:
@@ -45,13 +49,18 @@ spec:
         {{- end }}
       {{- end }}
     {{- end }}
+  {{- else }}
+  cephFs: {}
+  {{- end }}
   {{- end }}
   {{- if $clientProfile.rbd }}
+  {{- $rbdHasSecrets := and $clientProfile.rbd.cephCsiSecrets (or (and $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.rbd.cephCsiSecrets.nodePublishSecret $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.name)) }}
+  {{- if or $clientProfile.rbd.radosNamespace $rbdHasSecrets }}
   rbd:
     {{- if $clientProfile.rbd.radosNamespace }}
     radosNamespace: {{ $clientProfile.rbd.radosNamespace }}
     {{- end }}
-    {{- if and $clientProfile.rbd.cephCsiSecrets (or (and $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.rbd.cephCsiSecrets.nodePublishSecret $clientProfile.rbd.cephCsiSecrets.nodePublishSecret.name)) }}
+    {{- if $rbdHasSecrets }}
     cephCsiSecrets:
       {{- if and $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret $clientProfile.rbd.cephCsiSecrets.controllerPublishSecret.name }}
       controllerPublishSecret:
@@ -68,13 +77,18 @@ spec:
         {{- end }}
       {{- end }}
     {{- end }}
+  {{- else }}
+  rbd: {}
+  {{- end }}
   {{- end }}
   {{- if $clientProfile.nvmeof }}
+  {{- $nvmeofHasSecrets := and $clientProfile.nvmeof.cephCsiSecrets (or (and $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.name)) }}
+  {{- if or $clientProfile.nvmeof.radosNamespace $nvmeofHasSecrets }}
   nvmeof:
     {{- if $clientProfile.nvmeof.radosNamespace }}
     radosNamespace: {{ $clientProfile.nvmeof.radosNamespace }}
     {{- end }}
-    {{- if and $clientProfile.nvmeof.cephCsiSecrets (or (and $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.name) (and $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret $clientProfile.nvmeof.cephCsiSecrets.nodePublishSecret.name)) }}
+    {{- if $nvmeofHasSecrets }}
     cephCsiSecrets:
       {{- if and $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret $clientProfile.nvmeof.cephCsiSecrets.controllerPublishSecret.name }}
       controllerPublishSecret:
@@ -91,6 +105,9 @@ spec:
         {{- end }}
       {{- end }}
     {{- end }}
+  {{- else }}
+  nvmeof: {}
+  {{- end }}
   {{- end }}
 {{- end }}
 {{- end }}
