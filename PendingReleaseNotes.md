@@ -5,3 +5,5 @@
 ## Features
 
 ## NOTE
+
+The default `csi-snapshot-metadata` sidecar image is updated to `v1.2.0`.
